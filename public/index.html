@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TOP 1 GROUP MALAYSIA</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="theme-dark">
+    <div class="universe-background" aria-hidden="true">
+      <canvas id="spaceParticles"></canvas>
+      <div class="nebula-layer"></div>
+      <div class="light-ray-layer"></div>
+    </div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div>
+            <p class="eyebrow">TOP 1 GROUP MALAYSIA</p>
+            <h1 id="modeTitle">Today Command Center</h1>
+          </div>
+          <div class="mode-switch" aria-label="Business workspace switch">
+            <button class="mode-button active" data-mode="driver">Grab</button>
+            <button class="mode-button" data-mode="solar">Solar</button>
+          </div>
+        </div>
+        <div class="month-controls">
+          <button class="icon-button" id="prevMonth" aria-label="Previous month">&lsaquo;</button>
+          <strong id="monthLabel"></strong>
+          <button class="icon-button" id="nextMonth" aria-label="Next month">&rsaquo;</button>
+          <button class="today-button" id="todayButton">Today</button>
+          <button class="theme-button" id="themeButton" type="button" aria-label="Switch color theme">Light</button>
+        </div>
+      </header>
+
+      <main class="grab-tracker">
+        <section class="achievement-strip" id="weeklyAchievements" aria-label="Weekly achievements"></section>
+
+        <section class="grab-layout">
+          <section class="planning-panel grab-calendar-panel" aria-label="Grab monthly calendar">
+            <div class="planning-head">
+              <div>
+                <p class="eyebrow">Grab Profit Calendar</p>
+                <h2>Monthly Operations</h2>
+              </div>
+              <div id="peopleToMoveToday"></div>
+            </div>
+            <div class="weekday-row">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </section>
+
+          <section class="workspace-panel grab-entry-panel">
+            <div class="workspace-head">
+              <div>
+                <p class="eyebrow">Selected Day</p>
+                <h2 id="sidebarTitle">Grab Entry</h2>
+              </div>
+              <p id="selectedDateLabel"></p>
+            </div>
+            <div id="sidebarBody"></div>
+          </section>
+        </section>
+
+        <section class="grab-stats-panel" id="grabStats"></section>
+
+        <section hidden id="nextActionHero"></section>
+        <section hidden id="todaySchedule"></section>
+        <section hidden id="todayTasks"></section>
+        <section hidden id="todayPulse"></section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
