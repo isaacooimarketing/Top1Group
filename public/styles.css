@@ -1,22 +1,33 @@
 :root {
   color-scheme: dark;
-  --bg: #050505;
-  --bg-2: #0a0a0a;
-  --panel: rgba(15, 15, 15, 0.88);
-  --panel-strong: rgba(17, 17, 17, 0.97);
-  --panel-soft: rgba(255, 255, 255, 0.045);
-  --ink: #f8f2df;
-  --muted: #9b927f;
-  --line: rgba(255, 255, 255, 0.095);
-  --line-strong: rgba(255, 255, 255, 0.18);
-  --green: #d4af37;
-  --orange: #e6c77a;
-  --white-glow: #f5e6b3;
-  --deep-gold: #c9a24a;
-  --red: #d67a5c;
+  --bg: #090b0f;
+  --bg-2: #11141a;
+  --panel: rgba(19, 22, 29, 0.88);
+  --panel-strong: rgba(14, 16, 21, 0.97);
+  --panel-soft: rgba(255, 255, 255, 0.06);
+  --ink: #f4f0e7;
+  --muted: #b1aa9d;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --green: #43d17d;
+  --orange: #f2a23a;
+  --white-glow: #fff7dd;
+  --deep-gold: #c99736;
+  --red: #ff6f61;
   --gold: #d4af37;
   --champagne: #e6c77a;
   --starlight: #f5e6b3;
+  --graphite: #171b22;
+  --graphite-2: #202631;
+  --emerald: #35d07f;
+  --emerald-soft: rgba(53, 208, 127, 0.16);
+  --amber: #f2a23a;
+  --amber-soft: rgba(242, 162, 58, 0.16);
+  --loss: #ff6f61;
+  --loss-soft: rgba(255, 111, 97, 0.14);
+  --bolt: #ff9f43;
+  --grab: #33d17a;
+  --cash-blue: #90a9c9;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.42);
   --mode: var(--gold);
   --mouse-x: 50vw;
@@ -51,8 +62,14 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   color: var(--ink);
-  background: radial-gradient(circle at 50% 0%, #111111 0%, #0a0a0a 34%, #050505 76%);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(212, 175, 55, 0.13), transparent 28%),
+    radial-gradient(circle at 90% 18%, rgba(53, 208, 127, 0.08), transparent 30%),
+    radial-gradient(circle at 52% 105%, rgba(144, 169, 201, 0.08), transparent 36%),
+    linear-gradient(180deg, #12161d 0%, #090b0f 48%, #050608 100%);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0;
 }
 
 body::before {
@@ -91,9 +108,9 @@ body::after {
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 52%, rgba(255, 255, 255, 0.03), transparent 20%),
-    radial-gradient(circle at 50% 120%, rgba(212, 175, 55, 0.10), transparent 48%),
-    #050505;
+    radial-gradient(circle at 44% 12%, rgba(230, 199, 122, 0.08), transparent 34%),
+    radial-gradient(circle at 78% 78%, rgba(53, 208, 127, 0.045), transparent 32%),
+    linear-gradient(180deg, #11141a, #07080b);
 }
 
 #spaceParticles,
@@ -107,19 +124,19 @@ body::after {
 
 #spaceParticles {
   z-index: 2;
-  opacity: 0.78;
+  opacity: 0.28;
 }
 
 .nebula-layer {
   z-index: 1;
   inset: -24%;
   background:
-    radial-gradient(ellipse at 18% 20%, rgba(212, 175, 55, 0.12), transparent 32%),
-    radial-gradient(ellipse at 74% 18%, rgba(245, 230, 179, 0.08), transparent 34%),
-    radial-gradient(ellipse at 54% 82%, rgba(230, 199, 122, 0.08), transparent 40%),
+    radial-gradient(ellipse at 18% 20%, rgba(212, 175, 55, 0.10), transparent 34%),
+    radial-gradient(ellipse at 78% 28%, rgba(144, 169, 201, 0.08), transparent 35%),
+    radial-gradient(ellipse at 54% 82%, rgba(53, 208, 127, 0.05), transparent 42%),
     radial-gradient(ellipse at 36% 48%, rgba(255, 255, 255, 0.035), transparent 30%);
-  filter: blur(34px);
-  opacity: 0.82;
+  filter: blur(44px);
+  opacity: 0.62;
   transform: translateZ(0);
   animation: nebulaBreath 52s ease-in-out infinite alternate;
 }
@@ -163,10 +180,10 @@ button {
 
 .app-shell::before {
   background-image:
-    radial-gradient(ellipse, rgba(245, 230, 179, 0.16) 0 1px, transparent 2.5px),
-    radial-gradient(ellipse, rgba(212, 175, 55, 0.12) 0 1px, transparent 2.2px);
-  background-size: 240px 180px, 340px 260px;
-  opacity: 0.08;
+    radial-gradient(ellipse, rgba(245, 230, 179, 0.12) 0 1px, transparent 2.8px),
+    radial-gradient(ellipse, rgba(53, 208, 127, 0.08) 0 1px, transparent 2.4px);
+  background-size: 320px 240px, 460px 340px;
+  opacity: 0.045;
   animation: particleLift 70s linear infinite;
 }
 
@@ -194,8 +211,8 @@ button {
 .eyebrow {
   margin: 0 0 6px;
   color: var(--gold);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -209,14 +226,15 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: 34px;
-  line-height: 1;
-  font-weight: 850;
+  font-size: 38px;
+  line-height: 1.05;
+  font-weight: 820;
 }
 
 h2 {
   margin-bottom: 0;
-  font-size: 19px;
+  font-size: 21px;
+  line-height: 1.2;
 }
 
 .mode-switch,
@@ -229,25 +247,25 @@ h2 {
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .mode-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
   width: 196px;
-  padding: 4px;
-  border-radius: 8px;
+  padding: 5px;
+  border-radius: 12px;
 }
 
 .mode-button {
-  min-height: 39px;
+  min-height: 42px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 9px;
   color: var(--muted);
   background: transparent;
-  font-weight: 850;
+  font-weight: 820;
   transition: transform 180ms ease, color 180ms ease, background 180ms ease;
 }
 
@@ -260,16 +278,16 @@ h2 {
 
 .mode-button.active {
   color: #050505;
-  background: linear-gradient(135deg, var(--gold), var(--starlight));
-  box-shadow: 0 0 24px rgba(212, 175, 55, 0.18);
+  background: linear-gradient(135deg, var(--emerald), #d9ffe8);
+  box-shadow: 0 0 24px rgba(53, 208, 127, 0.18);
 }
 
 .month-controls {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px;
-  border-radius: 8px;
+  padding: 7px;
+  border-radius: 12px;
 }
 
 #monthLabel {
@@ -506,8 +524,8 @@ h2 {
 .pulse-panel,
 .workspace-panel,
 .planning-panel {
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 22px;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
@@ -631,6 +649,9 @@ h2 {
 
 .planning-panel {
   overflow: hidden;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.08), transparent 30%),
+    rgba(17, 20, 27, 0.86);
 }
 
 .weekday-row,
@@ -907,8 +928,10 @@ h2 {
 label,
 .form-section {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 760;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -925,12 +948,12 @@ input,
 select,
 textarea {
   width: 100%;
-  min-height: 41px;
+  min-height: 46px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 9px 10px;
+  border-radius: 9px;
+  padding: 11px 12px;
   color: var(--ink);
-  background: var(--panel-soft);
+  background: rgba(255, 255, 255, 0.065);
   outline: none;
 }
 
@@ -1138,16 +1161,18 @@ textarea {
 .cash-panel,
 .grab-stats-panel {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 14px;
   background:
-    linear-gradient(135deg, rgba(212, 175, 55, 0.08), transparent 42%),
-    var(--panel-soft);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), transparent 46%),
+    rgba(20, 24, 31, 0.76);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.26);
 }
 
 .achievement-card {
+  position: relative;
   min-width: 0;
-  padding: 16px;
+  overflow: hidden;
+  padding: 18px;
 }
 
 .achievement-card span,
@@ -1155,8 +1180,10 @@ textarea {
 .grab-day-summary span {
   display: block;
   color: var(--muted);
-  font-size: 10px;
-  font-weight: 850;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 760;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -1164,82 +1191,206 @@ textarea {
 .stat-card strong,
 .grab-day-summary strong {
   display: block;
-  margin-top: 7px;
-  color: var(--starlight);
-  font-size: clamp(18px, 2.2vw, 30px);
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: clamp(21px, 2.45vw, 34px);
   line-height: 1.05;
-  font-weight: 950;
+  font-weight: 880;
   overflow-wrap: anywhere;
 }
 
 .achievement-card small,
 .stat-card small {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .progress-track {
-  height: 7px;
-  margin-top: 12px;
+  height: 9px;
+  margin-top: 14px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.10);
 }
 
 .progress-track i {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--gold), var(--starlight));
+  background: linear-gradient(90deg, var(--amber), var(--gold), var(--starlight));
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.22);
 }
 
 .achievement-card.complete {
-  border-color: rgba(212, 175, 55, 0.5);
+  border-color: rgba(53, 208, 127, 0.62);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(53, 208, 127, 0.22), transparent 34%),
+    linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(53, 208, 127, 0.08)),
+    rgba(19, 26, 26, 0.86);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.30), 0 0 0 1px rgba(53, 208, 127, 0.10);
+}
+
+.achievement-card.complete::after {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 5px 9px;
+  border: 1px solid rgba(53, 208, 127, 0.42);
+  border-radius: 999px;
+  color: #d9ffe8;
+  background: rgba(53, 208, 127, 0.13);
+  font-size: 11px;
+  font-weight: 820;
+  content: "Completed";
+}
+
+.achievement-card.complete .progress-track i {
+  background: linear-gradient(90deg, var(--emerald), #b8ffd2, var(--gold));
+}
+
+.achievement-card.pocket {
+  border-color: rgba(144, 169, 201, 0.26);
+  background:
+    radial-gradient(circle at 85% 18%, rgba(144, 169, 201, 0.16), transparent 32%),
+    rgba(20, 24, 31, 0.78);
 }
 
 .grab-layout {
   display: grid;
-  grid-template-columns: minmax(0, 3.3fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 3.55fr) minmax(340px, 1fr);
   gap: 18px;
   align-items: start;
 }
 
 .grab-calendar-panel .day-card {
-  min-height: 118px;
+  min-height: 126px;
+  padding: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
+    rgba(10, 12, 16, 0.16);
+}
+
+.grab-calendar-panel .day-card:hover {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 55%),
+    rgba(255, 255, 255, 0.055);
+}
+
+.grab-calendar-panel .day-card.selected {
+  box-shadow: inset 0 0 0 1px rgba(230, 199, 122, 0.68), 0 0 0 1px rgba(230, 199, 122, 0.14), 0 16px 38px rgba(0, 0, 0, 0.24);
 }
 
 .driver-mini.rest {
-  color: var(--muted);
-  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  width: 100%;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  color: #8e96a3;
+  background: rgba(255, 255, 255, 0.025);
+  opacity: 0.88;
 }
 
 .driver-mini .day-status {
   color: var(--muted);
-  font-size: 9px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 820;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .driver-mini .net-profit {
-  color: var(--starlight);
-  font-size: clamp(13px, 1.5vw, 20px);
+  margin: 4px 0 3px;
+  color: var(--ink);
+  font-size: clamp(15px, 1.7vw, 23px);
   line-height: 1.05;
-  font-weight: 950;
+  font-weight: 920;
+  white-space: nowrap;
+}
+
+.driver-mini {
+  display: grid;
+  gap: 3px;
+  min-height: 82px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #c8c1b6;
+  font-size: 11px;
+  line-height: 1.28;
+}
+
+.driver-mini.grab {
+  border-left: 4px solid var(--grab);
+  background:
+    linear-gradient(135deg, rgba(53, 208, 127, 0.13), transparent 52%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.driver-mini.bolt {
+  border-left: 4px solid var(--bolt);
+  background:
+    linear-gradient(135deg, rgba(255, 159, 67, 0.14), transparent 52%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.driver-mini.profit.finished .net-profit {
+  color: #dfffe9;
+}
+
+.driver-mini.in-progress {
+  border-color: rgba(242, 162, 58, 0.36);
+}
+
+.driver-mini.in-progress .day-status {
+  color: #ffd49a;
+}
+
+.driver-mini.loss {
+  border-left-color: var(--loss);
+  background:
+    linear-gradient(135deg, var(--loss-soft), transparent 52%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.driver-mini.loss .net-profit {
+  color: #ffc2bb;
 }
 
 .grab-entry-panel {
   max-height: calc(100vh - 160px);
   overflow: auto;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(144, 169, 201, 0.10), transparent 32%),
+    rgba(17, 20, 27, 0.88);
 }
 
 .grab-day-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 12px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px;
+}
+
+.grab-day-summary > div {
+  min-width: 0;
+  padding: 2px;
+}
+
+.grab-day-summary strong {
+  color: var(--starlight);
+  font-size: clamp(21px, 1.7vw, 27px);
+  line-height: 1.08;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 .grab-form {
@@ -1250,14 +1401,15 @@ textarea {
   display: grid;
   gap: 12px;
   margin-top: 14px;
-  padding: 14px;
+  padding: 16px;
 }
 
 .cash-panel h3,
 .breakdown-card h3 {
   margin: 0;
-  color: var(--starlight);
-  font-size: 15px;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.25;
 }
 
 .cash-equation {
@@ -1277,14 +1429,15 @@ textarea {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px;
+  padding: 12px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.35;
   font-weight: 800;
 }
 
 .cash-equation strong {
-  color: var(--starlight);
+  color: var(--cash-blue);
 }
 
 .pending-list {
@@ -1345,18 +1498,19 @@ textarea {
 .stat-card,
 .breakdown-card {
   min-width: 0;
-  padding: 14px;
+  padding: 16px;
 }
 
 .bar-row {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   margin-top: 10px;
-  padding: 9px;
+  padding: 11px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.35;
   font-weight: 800;
 }
 

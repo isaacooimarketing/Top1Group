@@ -1,4 +1,5 @@
 const money = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" });
+const moneyCompact = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 });
 const dateFmt = new Intl.DateTimeFormat("en-MY", { weekday: "short", day: "numeric", month: "short" });
 const monthFmt = new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric" });
 
@@ -32,6 +33,11 @@ function num(value) {
   return Number.parseFloat(value || "0") || 0;
 }
 
+function moneySafe(value) {
+  const parsed = Number(value);
+  return money.format(Number.isFinite(parsed) ? parsed : 0);
+}
+
 function hasValue(value) {
   return value !== undefined && value !== null && String(value).trim() !== "";
 }
@@ -59,21 +65,21 @@ function reduction(opening, closing) {
 function driverMetrics(session) {
   if (session.driverIncomeModel === "grab_v13") {
     const detail = grabDailyMetrics(session);
-    return { income: detail.income, cost: detail.cost, net: detail.net, hours: detail.hours };
+    return { income: detail.income, cost: detail.cost, net: detail.net, hours: detail.hours, trips: detail.trips, incomePerHour: detail.incomePerHour };
   }
 
   if (session.driverIncomeModel === "corrected_daily_summary_v1") {
     const income = num(session.correctedIncome);
     const cost = num(session.correctedCost);
     const hours = num(session.totalDrivingHours);
-    return { income, cost, net: income - cost, hours };
+    return { income, cost, net: income - cost, hours, trips: num(session.totalTrips), incomePerHour: hours ? income / hours : 0 };
   }
 
   if ("income" in session || "cost" in session) {
     const income = num(session.income);
     const cost = num(session.cost);
     const hours = hoursBetween(session.startTime, session.endTime);
-    return { income, cost, net: income - cost, hours };
+    return { income, cost, net: income - cost, hours, trips: num(session.totalTrips), incomePerHour: hours ? income / hours : 0 };
   }
 
   if (session.driverIncomeModel === "wallet_cash_tng_v2") {
@@ -1266,11 +1272,13 @@ function driverDayMarkup(date) {
   const totals = driverTotals(sessions);
   const iph = totals.hours ? totals.income / totals.hours : 0;
   const platformClass = sessions.some(s => s.platform === "Bolt") && !sessions.some(s => s.platform === "Grab") ? "bolt" : "grab";
+  const resultClass = totals.net < 0 ? "loss" : "profit";
+  const statusClassName = status.toLowerCase().replace(/\s+/g, "-");
   const platforms = [...new Set(sessions.map(s => s.platform).filter(Boolean))].join(" + ");
-  return `<div class="driver-mini ${platformClass}">
-    <div class="day-status">${status}</div>
-    <div class="net-profit">${money.format(totals.net)}</div>
-    <div>${money.format(iph)} income/hour</div>
+  return `<div class="driver-mini ${platformClass} ${resultClass} ${statusClassName}">
+    <div class="day-status">${status}${platforms ? ` · ${platforms}` : ""}</div>
+    <div class="net-profit">${moneyCompact.format(totals.net)}</div>
+    <div>${moneyCompact.format(iph)}/h income</div>
     <div>${totals.hours.toFixed(1)}h · ${totals.trips || 0} trips</div>
   </div>`;
 }
@@ -1558,8 +1566,8 @@ function driverSidebar() {
   const settings = state.grabSettings || defaultGrabSettings();
   return `<section class="grab-day-summary">
     <div><span>Status</span><strong>${dayStatus(selectedDate)}</strong></div>
-    <div><span>Net Profit</span><strong>${money.format(metrics.net)}</strong></div>
-    <div><span>Income/hour</span><strong>${money.format(metrics.incomePerHour)}</strong></div>
+    <div><span>Net Profit</span><strong>${moneySafe(metrics.net)}</strong></div>
+    <div><span>Income/hour</span><strong>${moneySafe(metrics.incomePerHour)}</strong></div>
     <div><span>Trips</span><strong>${metrics.trips || 0}</strong></div>
   </section>
 
