@@ -16,6 +16,10 @@
       "dest": "/api/state.js"
     },
     {
+      "src": "/api/config",
+      "dest": "/api/config.js"
+    },
+    {
       "src": "/",
       "dest": "/public/index.html"
     },

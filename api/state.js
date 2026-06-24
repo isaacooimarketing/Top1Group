@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
+const { bearerToken, stateQueryForUser } = require("./auth-utils");
 
 const dataFile = path.join(process.cwd(), "data", "app-data.json");
-const stateId = process.env.TOP1GROUP_STATE_ID || "top1group";
 const supabaseUrl = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "";
+const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "";
 
 function readBundledState() {
   try {
@@ -42,20 +42,28 @@ function hasSupabaseConfig() {
   return Boolean(supabaseUrl && supabaseKey);
 }
 
-function supabaseHeaders(extra = {}) {
+function supabaseHeaders(accessToken, extra = {}) {
   return {
     apikey: supabaseKey,
-    Authorization: `Bearer ${supabaseKey}`,
+    Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
     ...extra
   };
 }
 
-async function readCloudState() {
-  const url = `${supabaseUrl}/rest/v1/app_state?id=eq.${encodeURIComponent(stateId)}&select=state`;
+async function authenticatedUser(accessToken) {
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: supabaseHeaders(accessToken)
+  });
+  if (!response.ok) return null;
+  return response.json();
+}
+
+async function readCloudState(user, accessToken) {
+  const url = `${supabaseUrl}/rest/v1/app_state?${stateQueryForUser(user.id)}`;
   const response = await fetch(url, {
     method: "GET",
-    headers: supabaseHeaders()
+    headers: supabaseHeaders(accessToken)
   });
 
   if (!response.ok) {
@@ -63,10 +71,10 @@ async function readCloudState() {
   }
 
   const rows = await response.json();
-  return rows[0]?.state || readBundledState();
+  return rows[0]?.state || null;
 }
 
-async function writeCloudState(nextState) {
+async function writeCloudState(user, accessToken, nextState) {
   const cleanState = {
     ...(nextState || {}),
     updatedAt: new Date().toISOString()
@@ -74,9 +82,10 @@ async function writeCloudState(nextState) {
 
   const response = await fetch(`${supabaseUrl}/rest/v1/app_state`, {
     method: "POST",
-    headers: supabaseHeaders({ Prefer: "resolution=merge-duplicates,return=representation" }),
+    headers: supabaseHeaders(accessToken, { Prefer: "resolution=merge-duplicates,return=representation" }),
     body: JSON.stringify({
-      id: stateId,
+      id: user.id,
+      user_id: user.id,
       state: cleanState
     })
   });
@@ -91,10 +100,23 @@ async function writeCloudState(nextState) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
+  const accessToken = bearerToken(req.headers.authorization);
+
+  if (hasSupabaseConfig() && !accessToken) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+
+  const user = hasSupabaseConfig() ? await authenticatedUser(accessToken) : null;
+  if (hasSupabaseConfig() && !user) {
+    res.status(401).json({ error: "Invalid or expired session" });
+    return;
+  }
 
   if (req.method === "GET") {
     try {
-      res.status(200).json(hasSupabaseConfig() ? await readCloudState() : readBundledState());
+      const cloudState = hasSupabaseConfig() ? await readCloudState(user, accessToken) : readBundledState();
+      res.status(200).json(cloudState || readBundledState());
     } catch (error) {
       res.status(502).json({ error: "Unable to read cloud state", detail: error.message });
     }
@@ -104,7 +126,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "POST") {
     try {
       if (hasSupabaseConfig()) {
-        res.status(200).json(await writeCloudState(req.body || {}));
+        res.status(200).json(await writeCloudState(user, accessToken, req.body || {}));
         return;
       }
 

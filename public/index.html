@@ -6,13 +6,51 @@
     <title>TOP 1 GROUP MALAYSIA</title>
     <link rel="stylesheet" href="styles.css">
   </head>
-  <body class="theme-dark">
+  <body class="theme-dark auth-locked">
     <div class="universe-background" aria-hidden="true">
       <canvas id="spaceParticles"></canvas>
       <div class="nebula-layer"></div>
       <div class="light-ray-layer"></div>
     </div>
-    <div class="app-shell">
+    <section class="auth-gate" id="authGate">
+      <div class="auth-orbit" aria-hidden="true"></div>
+      <div class="auth-stage">
+        <div class="auth-product">
+          <p class="eyebrow">TOP 1 GROUP MALAYSIA</p>
+          <h1>Driver OS</h1>
+          <p id="authIntro">Your time, income and daily execution in one private operating system.</p>
+          <div class="auth-signals" aria-hidden="true">
+            <span>Today</span><i></i><span>Execution</span><i></i><span>Profit</span>
+          </div>
+        </div>
+        <div class="auth-panel">
+          <div class="auth-panel-head">
+            <span class="auth-mark">T1</span>
+            <div>
+              <p>Secure Access</p>
+              <h2>Welcome back</h2>
+            </div>
+          </div>
+          <form id="authForm" class="auth-form">
+            <label>Account ID or Email<input name="account" autocomplete="username" required placeholder="isaac"></label>
+            <div id="registrationFields" hidden>
+              <label>Your Name<input name="displayName" autocomplete="name" placeholder="Driver name"></label>
+              <label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+            </div>
+            <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Enter password"></label>
+            <p class="auth-message" id="authMessage" aria-live="polite"></p>
+            <button class="auth-primary" id="authSubmit" type="submit">Enter Driver OS</button>
+          </form>
+          <div class="auth-secondary-actions">
+            <button id="authModeButton" type="button">Create Driver Account</button>
+            <button id="demoAccessButton" type="button">Presentation Demo</button>
+          </div>
+          <small>Private workspace · Secure cloud sync · Your data only</small>
+        </div>
+      </div>
+    </section>
+
+    <div class="app-shell" id="appShell" hidden>
       <header class="topbar">
         <div class="brand-block">
           <div>
@@ -30,6 +68,8 @@
           <button class="icon-button" id="nextMonth" aria-label="Next month">&rsaquo;</button>
           <button class="today-button" id="todayButton">Today</button>
           <button class="theme-button" id="themeButton" type="button" aria-label="Switch color theme">Light</button>
+          <span class="account-label" id="accountLabel"></span>
+          <button class="logout-button" id="logoutButton" type="button">Log out</button>
         </div>
       </header>
 
@@ -76,6 +116,7 @@
 
     <script src="date-utils.js"></script>
     <script src="calendar-utils.js"></script>
+    <script src="auth.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -132,7 +132,7 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
     "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
   });
   res.end(body);
 }
@@ -140,6 +140,15 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
 const server = http.createServer((req, res) => {
   if (req.method === "OPTIONS") {
     send(res, 204, "");
+    return;
+  }
+
+  if (req.url === "/api/config" && req.method === "GET") {
+    send(res, 200, JSON.stringify({
+      supabaseUrl: "",
+      supabaseKey: "",
+      authEnabled: false
+    }));
     return;
   }
 

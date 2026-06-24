@@ -19,6 +19,8 @@ let editingSolarId = null;
 let saving = false;
 let theme = localStorage.getItem("topOneGroupTheme") || "dark";
 let todayOS = null;
+let authManager = null;
+let appStarted = false;
 
 const $ = selector => document.querySelector(selector);
 
@@ -879,7 +881,14 @@ function countValue(value, format = "number") {
 
 async function loadState() {
   try {
-    const response = await fetch("/api/state", { cache: "no-store" });
+    const response = await fetch("/api/state", {
+      cache: "no-store",
+      headers: authManager?.authHeaders() || {}
+    });
+    if (response.status === 401) {
+      await authManager?.signOut();
+      return;
+    }
     state = normalizeOSState(await response.json());
   } catch {
     state = normalizeOSState(JSON.parse(localStorage.getItem("topOneGroupState") || JSON.stringify(state)));
@@ -897,7 +906,10 @@ async function persistState() {
   try {
     const response = await fetch("/api/state", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(authManager?.authHeaders() || {})
+      },
       body: JSON.stringify(state)
     });
     state = normalizeOSState(await response.json());
@@ -2072,7 +2084,15 @@ function startSpaceParticles() {
   requestAnimationFrame(draw);
 }
 
-setInterval(updateLiveCountdowns, 1000);
-setInterval(loadState, 15000);
-startSpaceParticles();
-loadState();
+async function startAuthenticatedApp() {
+  if (appStarted) return;
+  appStarted = true;
+  document.querySelector("#logoutButton")?.addEventListener("click", () => authManager.signOut());
+  setInterval(updateLiveCountdowns, 1000);
+  setInterval(loadState, 15000);
+  startSpaceParticles();
+  await loadState();
+}
+
+authManager = new Top1Auth.AuthManager(startAuthenticatedApp);
+authManager.init();
