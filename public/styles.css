@@ -654,6 +654,11 @@ h2 {
     rgba(17, 20, 27, 0.86);
 }
 
+.calendar-scroll {
+  margin: 0 -20px -20px;
+  overflow-x: clip;
+}
+
 .weekday-row,
 .calendar-grid {
   display: grid;
@@ -661,7 +666,7 @@ h2 {
 }
 
 .weekday-row {
-  margin: 0 -20px;
+  margin: 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -676,7 +681,7 @@ h2 {
 }
 
 .calendar-grid {
-  margin: 0 -20px -20px;
+  margin: 0;
 }
 
 .day-card {
@@ -1594,25 +1599,75 @@ textarea {
     justify-content: space-between;
   }
 
-  .weekday-row span {
-    padding: 8px 2px;
+  .grab-calendar-panel {
+    position: relative;
+  }
+
+  .calendar-scroll {
+    width: calc(100% + 40px);
+    margin: 0 -20px -20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(230, 199, 122, 0.42) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calendar-scroll::after {
+    position: sticky;
+    right: 8px;
+    bottom: 8px;
+    display: block;
+    width: max-content;
+    margin: -28px 8px 8px auto;
+    padding: 4px 8px;
+    border: 1px solid rgba(230, 199, 122, 0.2);
+    border-radius: 999px;
+    color: rgba(245, 230, 179, 0.72);
+    background: rgba(8, 10, 14, 0.82);
+    content: "Swipe to explore";
     font-size: 9px;
+    font-weight: 750;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+  }
+
+  .weekday-row,
+  .calendar-grid {
+    width: 756px;
+    min-width: 756px;
+    grid-template-columns: repeat(7, 108px);
+  }
+
+  .weekday-row {
+    margin: 0;
+  }
+
+  .weekday-row span {
+    padding: 10px 6px;
+    font-size: 10px;
   }
 
   .calendar-grid {
-    grid-auto-rows: minmax(88px, auto);
+    margin: 0;
+    grid-auto-rows: minmax(104px, auto);
   }
 
   .day-card {
-    min-width: 0;
+    min-width: 108px;
+    padding: 8px;
+    scroll-snap-align: center;
   }
 
   .day-number {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .driver-mini .net-profit {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .grab-day-summary {

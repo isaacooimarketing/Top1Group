@@ -1239,6 +1239,22 @@ function renderCalendar() {
       render();
     });
   });
+  revealSelectedCalendarDay();
+}
+
+function revealSelectedCalendarDay() {
+  const viewport = document.querySelector(".calendar-scroll");
+  const selectedCard = document.querySelector(`.day-card[data-date="${selectedDate}"]`);
+  if (!viewport || !selectedCard) return;
+  if (window.innerWidth > 620) {
+    viewport.scrollLeft = 0;
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    const centered = selectedCard.offsetLeft - ((viewport.clientWidth - selectedCard.offsetWidth) / 2);
+    viewport.scrollTo({ left: Math.max(0, centered), behavior: "smooth" });
+  });
 }
 
 function calendarIndicatorMarkup(indicators, iso) {
