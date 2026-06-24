@@ -21,7 +21,7 @@ let theme = localStorage.getItem("topOneGroupTheme") || "dark";
 let todayOS = null;
 let authManager = null;
 let appStarted = false;
-const { recordChanges } = Top1RecordUtils;
+const { recordChanges, resolvedDrivingHours, resolvedStatus } = Top1RecordUtils;
 const { buildDailySummary } = Top1SummaryUtils;
 const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
 
@@ -1617,15 +1617,15 @@ function driverSidebar() {
     ${field("Starting", "smartTagOpening", "number", editing.smartTagOpening || "")}
     ${field("Ending", "smartTagClosing", "number", editing.smartTagClosing || "")}
     <div class="form-section full">Grab Cash Wallet Balance</div>
-    ${field("Starting", "grabCashWalletOpening", "number", hasValue(editing.grabCashWalletOpening) ? editing.grabCashWalletOpening : settings.grabWalletBase)}
+    ${field("Starting", "grabCashWalletOpening", "number", hasValue(editing.grabCashWalletOpening) ? editing.grabCashWalletOpening : editing.id ? "" : settings.grabWalletBase)}
     ${field("Ending Before Withdrawal", "grabCashWalletEnding", "number", editing.grabCashWalletEnding || "")}
     ${field("Wallet Base", "grabWalletBase", "number", editing.grabWalletBase || settings.grabWalletBase)}
-    <div class="field"><label>Auto Transfer To Bank</label><input disabled value="${money.format(metrics.transferToBank)}"></div>
+    <div class="field"><label>Auto Transfer To Bank</label><input disabled value="${moneySafe(metrics.transferToBank)}"></div>
     <div class="form-section full">Cash / Petrol / Trips</div>
     ${field("Cash Collected Today", "cashCollected", "number", editing.cashCollected || editing.cashReceived || "")}
     ${petrolFields(editing)}
     ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
-    <div class="field"><label>Grab Wallet Top-Up Cost</label><input disabled value="${money.format(metrics.grabWalletTopUp)}"></div>
+    <div class="field"><label>Grab Wallet Top-Up Cost</label><input disabled value="${moneySafe(metrics.grabWalletTopUp)}"></div>
     <div class="field full"><label>Remark</label><textarea name="remark">${escapeHtml(editing.remark || "")}</textarea></div>
     <div class="action-row full">
       <button class="secondary-action" name="saveTemp" type="submit">Temporarily Save</button>
@@ -1947,9 +1947,17 @@ function bindSidebar() {
       const existing = recordsForDate(data.date).find(item => item.driverIncomeModel === "grab_v13")
         || recordsForDate(data.date).find(item => item.platform === "Grab")
         || null;
-      const status = event.submitter.name === "finishToday" ? "Finished" : "In Progress";
+      const requestedStatus = event.submitter.name === "finishToday" ? "Finished" : "In Progress";
+      const status = resolvedStatus(existing?.status, requestedStatus);
       const session = buildGrabV13Record(data, existing, status);
       const changes = existing ? recordChanges(existing, session) : [];
+      if (existing) {
+        const beforeMetrics = existing.driverIncomeModel === "grab_v13" ? grabDailyMetrics(existing) : driverMetrics(existing);
+        const afterMetrics = grabDailyMetrics(session);
+        if (Math.abs(beforeMetrics.net - afterMetrics.net) > 0.004) {
+          changes.push({ label: "Net Profit", before: beforeMetrics.net, after: afterMetrics.net, format: "money" });
+        }
+      }
       if (existing && !(await confirmRecordUpdate(changes, data.date))) return;
       const balancesBefore = cashBalances();
       const cashBefore = balancesBefore.pettyCash + balancesBefore.cashAtHome;
@@ -2092,6 +2100,7 @@ function buildGrabV13Record(data, existing, status) {
   }, defaults)).filter(entry => entry.amount > 0);
   const firstSession = drivingSessions[0] || {};
   const lastSession = drivingSessions[drivingSessions.length - 1] || {};
+  const calculatedHours = sessionHours(drivingSessions);
   return {
     ...(existing || {}),
     id: existing?.id || uid("drive"),
@@ -2102,7 +2111,7 @@ function buildGrabV13Record(data, existing, status) {
     drivingSessions,
     startTime: firstSession.startTime || "",
     endTime: lastSession.endTime || "",
-    totalDrivingHours: sessionHours(drivingSessions),
+    totalDrivingHours: resolvedDrivingHours(calculatedHours, existing?.totalDrivingHours),
     tngOpening: data.tngOpening || "",
     tngClosing: data.tngClosing || "",
     smartTagOpening: data.smartTagOpening || "",

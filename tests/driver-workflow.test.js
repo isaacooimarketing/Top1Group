@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { recordChanges } = require("../public/record-utils");
+const { recordChanges, resolvedDrivingHours, resolvedStatus } = require("../public/record-utils");
 const { buildDailySummary } = require("../public/summary-utils");
 const {
   normalizePetrolEntry,
@@ -17,6 +17,13 @@ test("recordChanges reports only changed operational fields", () => {
     { label: "Cash Collected", before: 120, after: 150, format: "money" },
     { label: "Total Trips", before: 18, after: 21, format: "number" }
   ]);
+});
+
+test("historical updates preserve hours and finished status when details are unavailable", () => {
+  assert.equal(resolvedDrivingHours(0, 12), 12);
+  assert.equal(resolvedDrivingHours(8, 12), 8);
+  assert.equal(resolvedStatus("Finished", "In Progress"), "Finished");
+  assert.equal(resolvedStatus("In Progress", "Finished"), "Finished");
 });
 
 test("buildDailySummary includes execution, income, cost, and cash movement", () => {

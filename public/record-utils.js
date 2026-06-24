@@ -33,5 +33,14 @@
     }, []);
   }
 
-  return { recordChanges };
+  function resolvedDrivingHours(calculatedHours, existingHours) {
+    return Number(calculatedHours) || Number(existingHours) || 0;
+  }
+
+  function resolvedStatus(existingStatus, requestedStatus) {
+    if (existingStatus === "Finished" && requestedStatus === "In Progress") return "Finished";
+    return requestedStatus;
+  }
+
+  return { recordChanges, resolvedDrivingHours, resolvedStatus };
 }));
