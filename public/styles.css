@@ -1345,10 +1345,6 @@ textarea {
     rgba(255, 255, 255, 0.045);
 }
 
-.driver-mini.profit.finished .net-profit {
-  color: #dfffe9;
-}
-
 .driver-mini.in-progress {
   border-color: rgba(242, 162, 58, 0.36);
 }
@@ -1366,6 +1362,79 @@ textarea {
 
 .driver-mini.loss .net-profit {
   color: #ffc2bb;
+}
+
+.driver-mini.finished.net-neutral {
+  border-left-color: #aeb6c3;
+  background:
+    linear-gradient(135deg, rgba(174, 182, 195, 0.10), transparent 56%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.driver-mini.finished.net-neutral .net-profit {
+  color: #edf1f7;
+}
+
+.driver-mini.finished.net-blue-light {
+  border-color: rgba(126, 183, 255, 0.30);
+  border-left-color: #8ec5ff;
+  background:
+    linear-gradient(135deg, rgba(110, 174, 255, 0.18), transparent 58%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.driver-mini.finished.net-blue-light .net-profit {
+  color: #b9dcff;
+}
+
+.driver-mini.finished.net-blue-deep {
+  border-color: rgba(69, 133, 235, 0.36);
+  border-left-color: #4d91f2;
+  background:
+    linear-gradient(135deg, rgba(54, 116, 218, 0.24), transparent 60%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.driver-mini.finished.net-blue-deep .net-profit {
+  color: #78adff;
+}
+
+.driver-mini.finished.net-cyan-light {
+  border-color: rgba(82, 216, 218, 0.32);
+  border-left-color: #65dfe0;
+  background:
+    linear-gradient(135deg, rgba(71, 203, 205, 0.19), transparent 58%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.driver-mini.finished.net-cyan-light .net-profit {
+  color: #a7f1ef;
+}
+
+.driver-mini.finished.net-cyan-deep {
+  border-color: rgba(33, 178, 184, 0.40);
+  border-left-color: #22b9be;
+  background:
+    linear-gradient(135deg, rgba(25, 157, 164, 0.26), transparent 60%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.driver-mini.finished.net-cyan-deep .net-profit {
+  color: #5ce0df;
+}
+
+.driver-mini.finished.net-gold {
+  border-color: rgba(230, 199, 122, 0.44);
+  border-left-color: #e6c77a;
+  background:
+    linear-gradient(135deg, rgba(212, 175, 55, 0.24), transparent 62%),
+    rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 0 18px rgba(212, 175, 55, 0.05);
+}
+
+.driver-mini.finished.net-gold .net-profit {
+  color: #f5e6b3;
+  text-shadow: 0 0 14px rgba(230, 199, 122, 0.18);
 }
 
 .grab-entry-panel {

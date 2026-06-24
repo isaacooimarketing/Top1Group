@@ -8,6 +8,7 @@ const {
   weekRange,
   recordsThroughSelectedDate
 } = window.Top1DateUtils;
+const { profitTier } = window.Top1CalendarUtils;
 
 let state = defaultOSState();
 let mode = "driver";
@@ -1274,9 +1275,10 @@ function driverDayMarkup(date) {
   const iph = totals.hours ? totals.income / totals.hours : 0;
   const platformClass = sessions.some(s => s.platform === "Bolt") && !sessions.some(s => s.platform === "Grab") ? "bolt" : "grab";
   const resultClass = totals.net < 0 ? "loss" : "profit";
+  const tierClass = profitTier(totals.net);
   const statusClassName = status.toLowerCase().replace(/\s+/g, "-");
   const platforms = [...new Set(sessions.map(s => s.platform).filter(Boolean))].join(" + ");
-  return `<div class="driver-mini ${platformClass} ${resultClass} ${statusClassName}">
+  return `<div class="driver-mini ${platformClass} ${resultClass} ${tierClass} ${statusClassName}">
     <div class="day-status">${status}${platforms ? ` · ${platforms}` : ""}</div>
     <div class="net-profit">${moneyCompact.format(totals.net)}</div>
     <div>${moneyCompact.format(iph)}/h income</div>
