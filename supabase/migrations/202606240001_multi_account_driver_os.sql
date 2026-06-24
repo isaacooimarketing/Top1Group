@@ -128,7 +128,7 @@ begin
 end;
 $$;
 
-revoke all on function public.handle_new_driver_user() from public;
+revoke execute on function public.handle_new_driver_user() from public, anon, authenticated;
 
 drop trigger if exists on_auth_user_created_driver_os on auth.users;
 create trigger on_auth_user_created_driver_os

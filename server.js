@@ -30,6 +30,7 @@ function defaultState() {
     cashLedger: [],
     pendingCashActions: [],
     bankTransfers: [],
+    petrolCardPayments: [],
     driverSessions: [],
     solarEvents: [],
     updatedAt: new Date().toISOString()
@@ -43,6 +44,8 @@ function defaultGrabSettings() {
     grabWalletBase: 500,
     pettyCashOpening: 0,
     cashAtHomeOpening: 0,
+    defaultPetrolStation: "Petron",
+    defaultPetrolPaymentMethod: "Credit Card",
     cashCategories: ["bank in", "pocket money", "service car"]
   };
 }
@@ -97,6 +100,7 @@ function normalizeState(state) {
     cashLedger: Array.isArray(state.cashLedger) ? state.cashLedger : [],
     pendingCashActions: Array.isArray(state.pendingCashActions) ? state.pendingCashActions : [],
     bankTransfers: Array.isArray(state.bankTransfers) ? state.bankTransfers : [],
+    petrolCardPayments: Array.isArray(state.petrolCardPayments) ? state.petrolCardPayments : [],
     driverSessions: Array.isArray(state.driverSessions) ? state.driverSessions : [],
     solarEvents: Array.isArray(state.solarEvents) ? state.solarEvents : []
   };
@@ -118,6 +122,7 @@ function writeState(state) {
     cashLedger: Array.isArray(state.cashLedger) ? state.cashLedger : [],
     pendingCashActions: Array.isArray(state.pendingCashActions) ? state.pendingCashActions : [],
     bankTransfers: Array.isArray(state.bankTransfers) ? state.bankTransfers : [],
+    petrolCardPayments: Array.isArray(state.petrolCardPayments) ? state.petrolCardPayments : [],
     driverSessions: Array.isArray(state.driverSessions) ? state.driverSessions : [],
     solarEvents: Array.isArray(state.solarEvents) ? state.solarEvents : [],
     updatedAt: new Date().toISOString()

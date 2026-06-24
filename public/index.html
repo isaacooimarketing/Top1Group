@@ -32,7 +32,7 @@
             </div>
           </div>
           <form id="authForm" class="auth-form">
-            <label>Account ID or Email<input name="account" autocomplete="username" required placeholder="isaac"></label>
+            <label id="accountField">Account ID or Email<input name="account" autocomplete="username" required placeholder="isaac"></label>
             <div id="registrationFields" hidden>
               <label>Your Name<input name="displayName" autocomplete="name" placeholder="Driver name"></label>
               <label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
@@ -114,8 +114,37 @@
       </main>
     </div>
 
+    <dialog class="os-dialog" id="recordConfirmDialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Existing Record</p>
+          <h2 id="recordConfirmTitle">Update record?</h2>
+        </div>
+        <button class="dialog-close" id="recordConfirmClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="change-list" id="recordChangeList"></div>
+      <div class="dialog-actions">
+        <button class="secondary-action" id="recordConfirmCancel" type="button">Cancel</button>
+        <button class="primary-action" id="recordConfirmUpdate" type="button">Update Existing Record</button>
+      </div>
+    </dialog>
+
+    <dialog class="os-dialog summary-dialog" id="dailySummaryDialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Finish Today</p>
+          <h2 id="dailySummaryTitle">Daily Summary</h2>
+        </div>
+        <button class="dialog-close" id="dailySummaryClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="dailySummaryBody"></div>
+    </dialog>
+
     <script src="date-utils.js"></script>
     <script src="calendar-utils.js"></script>
+    <script src="record-utils.js"></script>
+    <script src="summary-utils.js"></script>
+    <script src="petrol-utils.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
   </body>

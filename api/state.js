@@ -26,16 +26,53 @@ function readBundledState() {
         grabWalletBase: 500,
         pettyCashOpening: 0,
         cashAtHomeOpening: 0,
+        defaultPetrolStation: "Petron",
+        defaultPetrolPaymentMethod: "Credit Card",
         cashCategories: ["bank in", "pocket money", "service car"]
       },
       cashLedger: [],
       pendingCashActions: [],
       bankTransfers: [],
+      petrolCardPayments: [],
       driverSessions: [],
       solarEvents: [],
       updatedAt: new Date().toISOString()
     };
   }
+}
+
+function newWorkspaceState() {
+  return {
+    businesses: [
+      { id: "business_driver", name: "Driver", type: "service", color: "green", active: true },
+      { id: "business_solar", name: "Solar", type: "sales", color: "blue", active: false }
+    ],
+    people: [],
+    events: [],
+    tasks: [],
+    incomeEntries: [],
+    locations: [],
+    activityLogs: [],
+    driverRawRecords: [],
+    driverAnalytics: {},
+    grabSettings: {
+      carRentalTarget: 390,
+      housingLoanTarget: 1000,
+      grabWalletBase: 500,
+      pettyCashOpening: 0,
+      cashAtHomeOpening: 0,
+      defaultPetrolStation: "Petron",
+      defaultPetrolPaymentMethod: "Credit Card",
+      cashCategories: ["bank in", "pocket money", "service car"]
+    },
+    cashLedger: [],
+    pendingCashActions: [],
+    bankTransfers: [],
+    petrolCardPayments: [],
+    driverSessions: [],
+    solarEvents: [],
+    updatedAt: new Date().toISOString()
+  };
 }
 
 function hasSupabaseConfig() {
@@ -116,7 +153,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const cloudState = hasSupabaseConfig() ? await readCloudState(user, accessToken) : readBundledState();
-      res.status(200).json(cloudState || readBundledState());
+      res.status(200).json(cloudState || newWorkspaceState());
     } catch (error) {
       res.status(502).json({ error: "Unable to read cloud state", detail: error.message });
     }

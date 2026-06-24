@@ -21,6 +21,9 @@ let theme = localStorage.getItem("topOneGroupTheme") || "dark";
 let todayOS = null;
 let authManager = null;
 let appStarted = false;
+const { recordChanges } = Top1RecordUtils;
+const { buildDailySummary } = Top1SummaryUtils;
+const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
 
 const $ = selector => document.querySelector(selector);
 
@@ -148,6 +151,7 @@ function defaultOSState() {
     cashLedger: [],
     pendingCashActions: [],
     bankTransfers: [],
+    petrolCardPayments: [],
     driverSessions: [],
     solarEvents: [],
     updatedAt: ""
@@ -162,6 +166,9 @@ function defaultGrabSettings() {
     pettyCashOpening: 0,
     cashAtHomeOpening: 0,
     cashCategories: ["bank in", "pocket money", "service car"]
+    ,
+    defaultPetrolStation: "Petron",
+    defaultPetrolPaymentMethod: "Credit Card"
   };
 }
 
@@ -184,6 +191,7 @@ function normalizeOSState(input = {}) {
     cashLedger: Array.isArray(input.cashLedger) ? input.cashLedger : [],
     pendingCashActions: Array.isArray(input.pendingCashActions) ? input.pendingCashActions : [],
     bankTransfers: Array.isArray(input.bankTransfers) ? input.bankTransfers : [],
+    petrolCardPayments: Array.isArray(input.petrolCardPayments) ? input.petrolCardPayments : [],
     driverSessions: Array.isArray(input.driverSessions) ? input.driverSessions : [],
     solarEvents: Array.isArray(input.solarEvents) ? input.solarEvents : []
   };
@@ -889,6 +897,7 @@ async function loadState() {
       await authManager?.signOut();
       return;
     }
+    if (!response.ok) throw new Error("Unable to load state");
     state = normalizeOSState(await response.json());
   } catch {
     state = normalizeOSState(JSON.parse(localStorage.getItem("topOneGroupState") || JSON.stringify(state)));
@@ -903,6 +912,7 @@ async function persistState() {
   localStorage.setItem("topOneGroupState", JSON.stringify(state));
   if (saving) return;
   saving = true;
+  let cloudSaved = false;
   try {
     const response = await fetch("/api/state", {
       method: "POST",
@@ -912,14 +922,21 @@ async function persistState() {
       },
       body: JSON.stringify(state)
     });
+    if (response.status === 401) {
+      await authManager?.signOut();
+      return false;
+    }
+    if (!response.ok) throw new Error("Unable to save state");
     state = normalizeOSState(await response.json());
     syncUniversalObjects();
+    cloudSaved = true;
   } catch {
     // Local storage keeps the app usable if the data server is offline.
   } finally {
     saving = false;
     render();
   }
+  return cloudSaved;
 }
 
 function sessionsForDate(date) {
@@ -1024,7 +1041,7 @@ function sessionHours(sessions = []) {
 }
 
 function petrolTotal(entries = []) {
-  return entries.reduce((sum, value) => sum + num(value), 0);
+  return petrolTotals(entries).operatingCost;
 }
 
 function grabDailyMetrics(record = {}) {
@@ -1579,7 +1596,8 @@ function driverSidebar() {
   const pending = state.pendingCashActions.filter(item => item.date === selectedDate);
   const bankTotals = bankTransferTotals();
   const settings = state.grabSettings || defaultGrabSettings();
-  return `<section class="grab-day-summary">
+  return `${editing.id ? `<div class="existing-record-banner"><span>Existing Record</span><strong>${editing.status || "Saved"}</strong></div>` : ""}
+  <section class="grab-day-summary">
     <div><span>Status</span><strong>${dayStatus(selectedDate)}</strong></div>
     <div><span>Net Profit</span><strong>${moneySafe(metrics.net)}</strong></div>
     <div><span>Income/hour</span><strong>${moneySafe(metrics.incomePerHour)}</strong></div>
@@ -1612,6 +1630,7 @@ function driverSidebar() {
     <div class="action-row full">
       <button class="secondary-action" name="saveTemp" type="submit">Temporarily Save</button>
       <button class="primary-action" name="finishToday" type="submit">Finish Today</button>
+      ${editing.status === "Finished" ? `<button class="secondary-action" data-view-summary="${editing.id}" type="button">View Daily Summary</button>` : ""}
     </div>
   </form>
 
@@ -1638,7 +1657,9 @@ function driverSidebar() {
   <section class="history compact-history">
     <h3>Cash History</h3>
     ${cashHistory()}
-  </section>`;
+  </section>
+
+  ${petrolLiabilityMarkup()}`;
 }
 
 function sessionFields(editing) {
@@ -1653,10 +1674,67 @@ function sessionFields(editing) {
 }
 
 function petrolFields(editing) {
-  const entries = Array.isArray(editing.petrolEntries) && editing.petrolEntries.length
+  const settings = state.grabSettings || defaultGrabSettings();
+  const defaults = {
+    station: settings.defaultPetrolStation || "Petron",
+    paymentMethod: settings.defaultPetrolPaymentMethod || "Credit Card"
+  };
+  const sourceEntries = Array.isArray(editing.petrolEntries) && editing.petrolEntries.length
     ? editing.petrolEntries
-    : [editing.petrolCost || "", ""];
-  return [0, 1, 2].map(index => field(`Petrol ${index + 1}`, `petrol${index + 1}`, "number", entries[index] || "")).join("");
+    : editing.petrolCost
+      ? [{ amount: editing.petrolCost, station: "Petron", paymentMethod: "Legacy / Settled" }, "", ""]
+      : ["", "", ""];
+  const entries = [0, 1, 2].map(index => normalizePetrolEntry(sourceEntries[index] || {}, defaults));
+  const stations = ["Petron", "Petronas", "Shell", "BHPetrol", "Caltex", "Other"];
+  const methods = ["Credit Card", "Cash", "Points / Rewards", "Other", "Legacy / Settled"];
+  return entries.map((entry, index) => `<div class="petrol-entry full">
+    <strong>Petrol ${index + 1}</strong>
+    ${field("Amount", `petrolAmount${index + 1}`, "number", entry.amount || "")}
+    ${field("Station", `petrolStation${index + 1}`, "select", entry.station, stations)}
+    ${field("Payment", `petrolPayment${index + 1}`, "select", entry.paymentMethod, methods)}
+  </div>`).join("");
+}
+
+function explicitPetrolEntries(records = state.driverSessions) {
+  return records.flatMap(record => (Array.isArray(record.petrolEntries) ? record.petrolEntries : [])
+    .filter(entry => entry && typeof entry === "object")
+    .map(entry => ({ ...normalizePetrolEntry(entry), date: record.date, sourceId: record.id })));
+}
+
+function petrolLiabilityMarkup() {
+  const entries = explicitPetrolEntries();
+  const payments = state.petrolCardPayments || [];
+  const totals = petrolTotals(entries, payments);
+  const [weekStart, weekEnd] = weekRange(selectedDate);
+  const month = selectedDate.slice(0, 7);
+  const petrolCostForRecord = record => record.driverIncomeModel === "grab_v13"
+    ? grabDailyMetrics(record).petrol
+    : num(record.petrolCost || record.metadata?.petrolCost);
+  const weekCost = state.driverSessions
+    .filter(record => record.date >= weekStart && record.date <= weekEnd)
+    .reduce((sum, record) => sum + petrolCostForRecord(record), 0);
+  const monthCost = state.driverSessions
+    .filter(record => record.date.startsWith(month))
+    .reduce((sum, record) => sum + petrolCostForRecord(record), 0);
+  const history = [...payments].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 6);
+  return `<section class="history petrol-liability">
+    <div class="section-title-row"><h3>Petrol Credit Card</h3><span>${money.format(totals.cardOutstanding)} outstanding</span></div>
+    <div class="petrol-ledger-grid">
+      <div><span>Week Cost</span><strong>${money.format(weekCost)}</strong></div>
+      <div><span>Month Cost</span><strong>${money.format(monthCost)}</strong></div>
+      <div><span>Card Charged</span><strong>${money.format(totals.cardCharged)}</strong></div>
+      <div><span>Paid</span><strong>${money.format(totals.cardPaid)}</strong></div>
+    </div>
+    <form id="petrolPaymentForm" class="form-grid compact-form">
+      ${field("Payment Date", "date", "date", selectedDate)}
+      ${field("Pay Amount", "amount", "number", "")}
+      <div class="field full"><label>Note</label><input name="note" placeholder="Credit card payment"></div>
+      <button class="primary-action full" type="submit">Pay Petrol Card</button>
+    </form>
+    <div class="compact-history">
+      ${history.length ? history.map(item => `<div class="history-item"><div class="history-line"><span>${item.date} · Payment</span><strong>${money.format(num(item.amount))}</strong></div><div class="muted">${escapeHtml(item.note || "")}</div></div>`).join("") : `<div class="empty-note">No petrol card payment yet.</div>`}
+    </div>
+  </section>`;
 }
 
 function pendingItem(item) {
@@ -1770,22 +1848,130 @@ function field(label, name, type, value, options) {
   return `<div class="field"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
 }
 
+function formatChangeValue(value, format) {
+  if (value === "") return "Empty";
+  if (format === "money") return money.format(num(value));
+  if (format === "hours") return `${num(value).toFixed(1)}h`;
+  return String(value);
+}
+
+function confirmRecordUpdate(changes, date) {
+  const dialog = $("#recordConfirmDialog");
+  $("#recordConfirmTitle").textContent = `Update ${dateFmt.format(parseDate(date))}?`;
+  $("#recordChangeList").innerHTML = changes.length
+    ? changes.map(change => `<div class="change-row"><span>${escapeHtml(change.label)}</span><strong>${escapeHtml(formatChangeValue(change.before, change.format))} → ${escapeHtml(formatChangeValue(change.after, change.format))}</strong></div>`).join("")
+    : `<div class="empty-note">The save status will be updated.</div>`;
+  dialog.showModal();
+  return new Promise(resolve => {
+    const finish = decision => {
+      dialog.close();
+      $("#recordConfirmUpdate").onclick = null;
+      $("#recordConfirmCancel").onclick = null;
+      $("#recordConfirmClose").onclick = null;
+      resolve(decision);
+    };
+    $("#recordConfirmUpdate").onclick = () => finish(true);
+    $("#recordConfirmCancel").onclick = () => finish(false);
+    $("#recordConfirmClose").onclick = () => finish(false);
+  });
+}
+
+function summaryForRecord(record, cashBeforeValue = null) {
+  const metrics = record.driverIncomeModel === "grab_v13" ? grabDailyMetrics(record) : driverMetrics(record);
+  const balances = cashBalances();
+  const totalCash = balances.pettyCash + balances.cashAtHome;
+  return buildDailySummary({
+    record,
+    metrics: {
+      ...metrics,
+      cashIncome: hasValue(metrics.cash) ? metrics.cash : num(record.cashCollected || record.cashReceived),
+      tngIncome: hasValue(metrics.tngIncome) ? metrics.tngIncome : Math.max(0, num(record.tngCollected)),
+      grabWalletIncome: hasValue(metrics.grabWalletIncome) ? metrics.grabWalletIncome : Math.max(0, num(record.walletIncreaseIncome)),
+      toll: hasValue(metrics.toll) ? metrics.toll : num(record.smartTagReduction),
+      petrol: hasValue(metrics.petrol) ? metrics.petrol : num(record.petrolCost),
+      grabWalletTopUp: hasValue(metrics.grabWalletTopUp) ? metrics.grabWalletTopUp : num(record.grabCreditWalletTopUp)
+    },
+    cashBefore: cashBeforeValue === null ? totalCash : cashBeforeValue,
+    confirmedCash: metrics.cash,
+    pettyCash: balances.pettyCash,
+    cashAtHome: balances.cashAtHome
+  });
+}
+
+function showDailySummary(record, cashBeforeValue = null) {
+  const summary = summaryForRecord(record, cashBeforeValue);
+  $("#dailySummaryTitle").textContent = dateFmt.format(parseDate(summary.date));
+  $("#dailySummaryBody").innerHTML = `<section class="summary-hero">
+    <div><span>Net Profit</span><strong>${money.format(summary.net)}</strong></div>
+    <div><span>Total Income</span><strong>${money.format(summary.income)}</strong></div>
+  </section>
+  <section class="summary-execution">
+    <div><span>Trips</span><strong>${summary.trips}</strong></div>
+    <div><span>Driving Hours</span><strong>${summary.hours.toFixed(1)}h</strong></div>
+    <div><span>Income / Hour</span><strong>${money.format(summary.incomePerHour)}</strong></div>
+    <div><span>Total Cost</span><strong>${money.format(summary.cost)}</strong></div>
+  </section>
+  <div class="summary-columns">
+    <section>
+      <h3>Income</h3>
+      <div class="summary-line"><span>Cash Collected</span><strong>${money.format(summary.incomeSources.cash)}</strong></div>
+      <div class="summary-line"><span>TNG eWallet</span><strong>${money.format(summary.incomeSources.tng)}</strong></div>
+      <div class="summary-line"><span>Grab Cash Wallet</span><strong>${money.format(summary.incomeSources.grabWallet)}</strong></div>
+    </section>
+    <section>
+      <h3>Cost</h3>
+      <div class="summary-line"><span>Petrol</span><strong>${money.format(summary.costSources.petrol)}</strong></div>
+      <div class="summary-line"><span>Toll / SmartTAG</span><strong>${money.format(summary.costSources.toll)}</strong></div>
+      <div class="summary-line"><span>Grab Wallet Top-Up</span><strong>${money.format(summary.costSources.grabWalletTopUp)}</strong></div>
+    </section>
+  </div>
+  <section class="cash-flow-summary">
+    <p>Cash Movement</p>
+    <div><span>Previous Total Cash<strong>${money.format(summary.cashBefore)}</strong></span><b>+</b><span>Today's Cash<strong>${money.format(summary.confirmedCash)}</strong></span><b>=</b><span>New Total Cash<strong>${money.format(summary.cashAfter)}</strong></span></div>
+    <small>Petty Cash ${money.format(summary.pettyCash)} + Cash At Home ${money.format(summary.cashAtHome)} = ${money.format(summary.totalCash)}</small>
+  </section>`;
+  $("#dailySummaryDialog").showModal();
+}
+
 function bindSidebar() {
   const driverForm = $("#driverForm");
   if (driverForm) {
-    driverForm.addEventListener("submit", event => {
+    driverForm.elements.date.addEventListener("change", () => {
+      selectedDate = driverForm.elements.date.value;
+      editingDriverId = null;
+      render();
+    });
+    driverForm.addEventListener("submit", async event => {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(driverForm).entries());
-      const existing = selectedGrabRecord();
+      const existing = recordsForDate(data.date).find(item => item.driverIncomeModel === "grab_v13")
+        || recordsForDate(data.date).find(item => item.platform === "Grab")
+        || null;
       const status = event.submitter.name === "finishToday" ? "Finished" : "In Progress";
       const session = buildGrabV13Record(data, existing, status);
+      const changes = existing ? recordChanges(existing, session) : [];
+      if (existing && !(await confirmRecordUpdate(changes, data.date))) return;
+      const balancesBefore = cashBalances();
+      const cashBefore = balancesBefore.pettyCash + balancesBefore.cashAtHome;
+      if (existing) {
+        state.activityLogs.push({
+          id: uid("activity"),
+          date: new Date().toISOString(),
+          action: "driver_record_updated",
+          sourceId: existing.id,
+          businessId: "business_driver",
+          before: existing,
+          after: session
+        });
+      }
       state.driverSessions = existing
         ? state.driverSessions.map(item => item.id === existing.id ? session : item)
         : [...state.driverSessions, session];
       if (status === "Finished") createFinishPendingActions(session);
       selectedDate = data.date;
       editingDriverId = null;
-      persistState();
+      const saved = await persistState();
+      if (status === "Finished" && saved) showDailySummary(session, cashBefore);
     });
     document.querySelectorAll("[data-edit-driver]").forEach(button => {
       button.addEventListener("click", () => {
@@ -1807,6 +1993,30 @@ function bindSidebar() {
       persistState();
     });
   });
+
+  document.querySelectorAll("[data-view-summary]").forEach(button => {
+    button.addEventListener("click", () => {
+      const record = state.driverSessions.find(item => item.id === button.dataset.viewSummary);
+      if (record) showDailySummary(record);
+    });
+  });
+
+  const petrolPaymentForm = $("#petrolPaymentForm");
+  if (petrolPaymentForm) {
+    petrolPaymentForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(petrolPaymentForm).entries());
+      const amount = num(data.amount);
+      if (!amount) return;
+      state.petrolCardPayments.push({
+        id: uid("petrol_payment"),
+        date: data.date || selectedDate,
+        amount,
+        note: data.note || ""
+      });
+      persistState();
+    });
+  }
 
   const cashSettingsForm = $("#cashSettingsForm");
   if (cashSettingsForm) {
@@ -1871,7 +2081,15 @@ function buildGrabV13Record(data, existing, status) {
     startTime: data[`sessionStart${index}`] || "",
     endTime: data[`sessionEnd${index}`] || ""
   })).filter(item => item.startTime || item.endTime);
-  const petrolEntries = [1, 2, 3].map(index => data[`petrol${index}`]).filter(hasValue);
+  const defaults = {
+    station: state.grabSettings?.defaultPetrolStation || "Petron",
+    paymentMethod: state.grabSettings?.defaultPetrolPaymentMethod || "Credit Card"
+  };
+  const petrolEntries = [1, 2, 3].map(index => normalizePetrolEntry({
+    amount: data[`petrolAmount${index}`],
+    station: data[`petrolStation${index}`],
+    paymentMethod: data[`petrolPayment${index}`]
+  }, defaults)).filter(entry => entry.amount > 0);
   const firstSession = drivingSessions[0] || {};
   const lastSession = drivingSessions[drivingSessions.length - 1] || {};
   return {
@@ -2088,6 +2306,7 @@ async function startAuthenticatedApp() {
   if (appStarted) return;
   appStarted = true;
   document.querySelector("#logoutButton")?.addEventListener("click", () => authManager.signOut());
+  document.querySelector("#dailySummaryClose")?.addEventListener("click", () => $("#dailySummaryDialog").close());
   setInterval(updateLiveCountdowns, 1000);
   setInterval(loadState, 15000);
   startSpaceParticles();

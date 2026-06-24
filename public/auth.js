@@ -76,6 +76,8 @@
     renderMode() {
       const registering = this.mode === "register";
       document.querySelector("#registrationFields").hidden = !registering;
+      document.querySelector("#accountField").hidden = registering;
+      document.querySelector("#authForm").elements.account.required = !registering;
       document.querySelector("#authSubmit").textContent = registering ? "Create Driver Account" : "Enter Driver OS";
       document.querySelector("#authModeButton").textContent = registering ? "Back to Sign In" : "Create Driver Account";
       document.querySelector("#authIntro").textContent = registering
