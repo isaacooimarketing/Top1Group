@@ -2,6 +2,12 @@ const money = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR
 const moneyCompact = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 });
 const dateFmt = new Intl.DateTimeFormat("en-MY", { weekday: "short", day: "numeric", month: "short" });
 const monthFmt = new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric" });
+const {
+  toISODate,
+  parseDate,
+  weekRange,
+  recordsThroughSelectedDate
+} = window.Top1DateUtils;
 
 let state = defaultOSState();
 let mode = "driver";
@@ -14,16 +20,6 @@ let theme = localStorage.getItem("topOneGroupTheme") || "dark";
 let todayOS = null;
 
 const $ = selector => document.querySelector(selector);
-
-function toISODate(date) {
-  const local = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  return local.toISOString().slice(0, 10);
-}
-
-function parseDate(iso) {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
 
 function uid(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -949,16 +945,6 @@ function monthDriverSessions() {
   });
 }
 
-function weekRange(dateIso) {
-  const date = parseDate(dateIso);
-  const day = (date.getDay() + 6) % 7;
-  const start = new Date(date);
-  start.setDate(date.getDate() - day);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  return [toISODate(start), toISODate(end)];
-}
-
 function renderKpis() {
   const strip = $("#kpiStrip");
   if (mode === "driver") {
@@ -1099,8 +1085,7 @@ function totalsForRecords(records) {
 }
 
 function weekRecords(dateIso = selectedDate) {
-  const [start, end] = weekRange(dateIso);
-  return state.driverSessions.filter(item => item.date >= start && item.date <= end);
+  return recordsThroughSelectedDate(state.driverSessions, dateIso);
 }
 
 function monthRecords() {
