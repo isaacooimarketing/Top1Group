@@ -1,7 +1,8 @@
 const money = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR" });
 const moneyCompact = new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 });
-const dateFmt = new Intl.DateTimeFormat("en-MY", { weekday: "short", day: "numeric", month: "short" });
-const monthFmt = new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric" });
+let language = Top1UI.normalizeLanguage(localStorage.getItem("top1groupLanguage") || "en");
+let dateFmt = new Intl.DateTimeFormat(Top1UI.localeForLanguage(language), { weekday: "short", day: "numeric", month: "short" });
+let monthFmt = new Intl.DateTimeFormat(Top1UI.localeForLanguage(language), { month: "long", year: "numeric" });
 const {
   toISODate,
   parseDate,
@@ -26,6 +27,28 @@ const { buildDailySummary } = Top1SummaryUtils;
 const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
 
 const $ = selector => document.querySelector(selector);
+
+function updateLanguage(nextLanguage) {
+  language = Top1UI.normalizeLanguage(nextLanguage);
+  localStorage.setItem("top1groupLanguage", language);
+  const locale = Top1UI.localeForLanguage(language);
+  dateFmt = new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short" });
+  monthFmt = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+}
+
+function applyAccountCapabilities() {
+  const canUseSolar = Top1UI.canAccessSolar(authManager?.accountType());
+  const solarButton = document.querySelector('.mode-button[data-mode="solar"]');
+  if (solarButton) solarButton.hidden = !canUseSolar;
+  if (!canUseSolar && mode === "solar") mode = "driver";
+}
+
+function localizeUI() {
+  Top1UI.applyTranslations(document.body, language);
+  document.querySelectorAll("[data-language]").forEach(button => {
+    button.classList.toggle("active", button.dataset.language === language);
+  });
+}
 
 function uid(prefix) {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -2179,6 +2202,7 @@ function statusClass(status) {
 }
 
 function render() {
+  applyAccountCapabilities();
   todayOS = buildDerivedTodayData(selectedDate);
   document.body.dataset.nextAction = todayOS.nextAction ? todayOS.nextAction.kind : "none";
   document.body.classList.toggle("theme-light", theme === "light");
@@ -2195,6 +2219,7 @@ function render() {
   renderGrabStats();
   animateCounters();
   updateLiveCountdowns();
+  localizeUI();
 }
 
 document.querySelectorAll(".mode-button").forEach(button => {
@@ -2226,6 +2251,11 @@ $("#themeButton").addEventListener("click", () => {
   theme = theme === "dark" ? "light" : "dark";
   localStorage.setItem("topOneGroupTheme", theme);
   render();
+});
+
+window.addEventListener("top1-language-change", event => {
+  updateLanguage(event.detail?.language);
+  if (appStarted) render();
 });
 
 document.addEventListener("pointermove", event => {
@@ -2314,6 +2344,8 @@ function startSpaceParticles() {
 async function startAuthenticatedApp() {
   if (appStarted) return;
   appStarted = true;
+  updateLanguage(authManager.language());
+  applyAccountCapabilities();
   document.querySelector("#logoutButton")?.addEventListener("click", () => authManager.signOut());
   document.querySelector("#dailySummaryClose")?.addEventListener("click", () => $("#dailySummaryDialog").close());
   setInterval(updateLiveCountdowns, 1000);

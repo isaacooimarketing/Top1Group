@@ -71,19 +71,30 @@
         form.elements.account.value = "demo";
         form.elements.password.focus();
       });
+      document.querySelectorAll("[data-language]").forEach(button => {
+        button.addEventListener("click", () => {
+          localStorage.setItem("top1groupLanguage", button.dataset.language);
+          this.applyLanguage();
+          window.dispatchEvent(new CustomEvent("top1-language-change", {
+            detail: { language: button.dataset.language }
+          }));
+        });
+      });
     }
 
     renderMode() {
+      const translate = Top1UI.createTranslator(this.language());
       const registering = this.mode === "register";
       document.querySelector("#registrationFields").hidden = !registering;
       document.querySelector("#accountField").hidden = registering;
       document.querySelector("#authForm").elements.account.required = !registering;
-      document.querySelector("#authSubmit").textContent = registering ? "Create Driver Account" : "Enter Driver OS";
-      document.querySelector("#authModeButton").textContent = registering ? "Back to Sign In" : "Create Driver Account";
+      document.querySelector("#authSubmit").textContent = translate(registering ? "Create Driver Account" : "Enter Driver OS");
+      document.querySelector("#authModeButton").textContent = translate(registering ? "Back to Sign In" : "Create Driver Account");
       document.querySelector("#authIntro").textContent = registering
-        ? "Create your own private Driver workspace."
-        : "Your time, income and daily execution in one private operating system.";
+        ? translate("Create your own private Driver workspace.")
+        : translate("Your time, income and daily execution in one private operating system.");
       this.setMessage("");
+      this.applyLanguage();
     }
 
     async submit(formData) {
@@ -210,6 +221,8 @@
         || this.session?.user?.email?.split("@")[0]
         || "Local";
       document.querySelector("#accountLabel").textContent = label;
+      document.body.dataset.accountType = this.accountType();
+      this.applyLanguage();
       await this.onAuthenticated();
     }
 
@@ -217,6 +230,7 @@
       document.body.classList.add("auth-locked");
       document.querySelector("#authGate").hidden = false;
       document.querySelector("#appShell").hidden = true;
+      this.applyLanguage();
     }
 
     async signOut() {
@@ -248,8 +262,26 @@
 
     setMessage(message, tone = "") {
       const node = document.querySelector("#authMessage");
-      node.textContent = message;
+      node.textContent = Top1UI.createTranslator(this.language())(message);
       node.dataset.tone = tone;
+    }
+
+    language() {
+      return Top1UI.normalizeLanguage(localStorage.getItem("top1groupLanguage") || "en");
+    }
+
+    accountType() {
+      return this.session?.user?.app_metadata?.account_type
+        || this.session?.user?.user_metadata?.account_type
+        || "driver";
+    }
+
+    applyLanguage() {
+      const language = this.language();
+      document.querySelectorAll("[data-language]").forEach(button => {
+        button.classList.toggle("active", button.dataset.language === language);
+      });
+      Top1UI.applyTranslations(document.body, language);
     }
   }
 

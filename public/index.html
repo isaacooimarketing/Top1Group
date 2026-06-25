@@ -31,6 +31,10 @@
               <h2>Welcome back</h2>
             </div>
           </div>
+          <div class="language-switch auth-language" aria-label="Language">
+            <button type="button" data-language="en">EN</button>
+            <button type="button" data-language="zh-CN">简体中文</button>
+          </div>
           <form id="authForm" class="auth-form">
             <label id="accountField">Account ID or Email<input name="account" autocomplete="username" required placeholder="isaac"></label>
             <div id="registrationFields" hidden>
@@ -68,6 +72,10 @@
           <button class="icon-button" id="nextMonth" aria-label="Next month">&rsaquo;</button>
           <button class="today-button" id="todayButton">Today</button>
           <button class="theme-button" id="themeButton" type="button" aria-label="Switch color theme">Light</button>
+          <div class="language-switch" aria-label="Language">
+            <button type="button" data-language="en">EN</button>
+            <button type="button" data-language="zh-CN">简体中文</button>
+          </div>
           <span class="account-label" id="accountLabel"></span>
           <button class="logout-button" id="logoutButton" type="button">Log out</button>
         </div>
@@ -142,6 +150,7 @@
 
     <script src="date-utils.js"></script>
     <script src="calendar-utils.js"></script>
+    <script src="ui-preferences.js"></script>
     <script src="record-utils.js"></script>
     <script src="summary-utils.js"></script>
     <script src="petrol-utils.js"></script>

@@ -1,0 +1,272 @@
+{
+  "businesses": [
+    { "id": "business_driver", "name": "Driver", "type": "service", "color": "green", "active": true },
+    { "id": "business_solar", "name": "Solar", "type": "sales", "color": "blue", "active": false }
+  ],
+  "people": [],
+  "events": [],
+  "tasks": [],
+  "incomeEntries": [],
+  "locations": [],
+  "activityLogs": [],
+  "driverRawRecords": [],
+  "driverAnalytics": {},
+  "grabSettings": {
+    "carRentalTarget": 390,
+    "housingLoanTarget": 1000,
+    "grabWalletBase": 500,
+    "pettyCashOpening": 250,
+    "cashAtHomeOpening": 800,
+    "defaultPetrolStation": "Petron",
+    "defaultPetrolPaymentMethod": "Credit Card",
+    "cashCategories": ["bank in", "pocket money", "service car"]
+  },
+  "cashLedger": [
+    {
+      "id": "demo_cash_1",
+      "date": "2026-06-13",
+      "type": "cash_collected",
+      "account": "petty_cash",
+      "amount": 135,
+      "category": "cash collected"
+    },
+    {
+      "id": "demo_cash_2",
+      "date": "2026-06-18",
+      "type": "cash_move",
+      "fromAccount": "petty_cash",
+      "toAccount": "cash_at_home",
+      "amount": 300,
+      "category": "cash at home"
+    }
+  ],
+  "pendingCashActions": [],
+  "bankTransfers": [
+    {
+      "id": "demo_bank_1",
+      "date": "2026-06-13",
+      "source": "grab_wallet",
+      "amount": 188.4,
+      "category": "Grab wallet"
+    },
+    {
+      "id": "demo_bank_2",
+      "date": "2026-06-20",
+      "source": "grab_wallet",
+      "amount": 236.7,
+      "category": "Grab wallet"
+    }
+  ],
+  "petrolCardPayments": [
+    {
+      "id": "demo_petrol_payment_1",
+      "date": "2026-06-21",
+      "amount": 100,
+      "note": "Demo credit card payment"
+    }
+  ],
+  "driverSessions": [
+    {
+      "id": "demo_drive_0602",
+      "date": "2026-06-02",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 8,
+      "totalTrips": 19,
+      "correctedIncome": 268.5,
+      "correctedCost": 48.2,
+      "correctedNet": 220.3,
+      "petrolCost": 42.2,
+      "smartTagReduction": 6,
+      "cashCollected": 82,
+      "walletIncreaseIncome": 186.5
+    },
+    {
+      "id": "demo_drive_0604",
+      "date": "2026-06-04",
+      "platform": "Bolt",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 6.5,
+      "totalTrips": 14,
+      "correctedIncome": 196.8,
+      "correctedCost": 38.9,
+      "correctedNet": 157.9,
+      "petrolCost": 34.9,
+      "smartTagReduction": 4,
+      "cashCollected": 110,
+      "walletIncreaseIncome": 86.8
+    },
+    {
+      "id": "demo_drive_0606",
+      "date": "2026-06-06",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 11,
+      "totalTrips": 31,
+      "correctedIncome": 426.2,
+      "correctedCost": 69.4,
+      "correctedNet": 356.8,
+      "petrolCost": 61.4,
+      "smartTagReduction": 8,
+      "cashCollected": 156,
+      "walletIncreaseIncome": 270.2
+    },
+    {
+      "id": "demo_drive_0608",
+      "date": "2026-06-08",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 5,
+      "totalTrips": 12,
+      "correctedIncome": 142.7,
+      "correctedCost": 31.5,
+      "correctedNet": 111.2,
+      "petrolCost": 28.5,
+      "smartTagReduction": 3,
+      "cashCollected": 48,
+      "walletIncreaseIncome": 94.7
+    },
+    {
+      "id": "demo_drive_0610",
+      "date": "2026-06-10",
+      "platform": "Bolt",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 9,
+      "totalTrips": 22,
+      "correctedIncome": 315.4,
+      "correctedCost": 57.1,
+      "correctedNet": 258.3,
+      "petrolCost": 49.1,
+      "smartTagReduction": 8,
+      "cashCollected": 174,
+      "walletIncreaseIncome": 141.4
+    },
+    {
+      "id": "demo_drive_0613",
+      "date": "2026-06-13",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "grab_v13",
+      "drivingSessions": [
+        { "startTime": "06:00", "endTime": "11:30" },
+        { "startTime": "14:00", "endTime": "18:30" }
+      ],
+      "totalDrivingHours": 10,
+      "totalTrips": 27,
+      "tngOpening": 120,
+      "tngClosing": 151.6,
+      "smartTagOpening": 90,
+      "smartTagClosing": 84.5,
+      "grabCashWalletOpening": 500,
+      "grabCashWalletEnding": 688.4,
+      "grabWalletBase": 500,
+      "cashCollected": 135,
+      "petrolEntries": [
+        { "amount": 52.8, "station": "Petron", "paymentMethod": "Credit Card", "note": "" }
+      ]
+    },
+    {
+      "id": "demo_drive_0615",
+      "date": "2026-06-15",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 7,
+      "totalTrips": 18,
+      "correctedIncome": 235.9,
+      "correctedCost": 44.6,
+      "correctedNet": 191.3,
+      "petrolCost": 40.6,
+      "smartTagReduction": 4,
+      "cashCollected": 75,
+      "walletIncreaseIncome": 160.9
+    },
+    {
+      "id": "demo_drive_0618",
+      "date": "2026-06-18",
+      "platform": "Bolt",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 12,
+      "totalTrips": 34,
+      "correctedIncome": 462.1,
+      "correctedCost": 76.3,
+      "correctedNet": 385.8,
+      "petrolCost": 67.3,
+      "smartTagReduction": 9,
+      "cashCollected": 214,
+      "walletIncreaseIncome": 248.1
+    },
+    {
+      "id": "demo_drive_0620",
+      "date": "2026-06-20",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "grab_v13",
+      "drivingSessions": [
+        { "startTime": "05:30", "endTime": "12:00" },
+        { "startTime": "15:30", "endTime": "20:00" }
+      ],
+      "totalDrivingHours": 11,
+      "totalTrips": 30,
+      "tngOpening": 96.2,
+      "tngClosing": 129.4,
+      "smartTagOpening": 75.6,
+      "smartTagClosing": 69.8,
+      "grabCashWalletOpening": 500,
+      "grabCashWalletEnding": 736.7,
+      "grabWalletBase": 500,
+      "cashCollected": 118,
+      "petrolEntries": [
+        { "amount": 61.5, "station": "Shell", "paymentMethod": "Credit Card", "note": "Demo fuel" }
+      ]
+    },
+    {
+      "id": "demo_drive_0622",
+      "date": "2026-06-22",
+      "platform": "Grab",
+      "status": "Finished",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "totalDrivingHours": 4.5,
+      "totalTrips": 10,
+      "correctedIncome": 128.4,
+      "correctedCost": 29.8,
+      "correctedNet": 98.6,
+      "petrolCost": 27.8,
+      "smartTagReduction": 2,
+      "cashCollected": 42,
+      "walletIncreaseIncome": 86.4
+    },
+    {
+      "id": "demo_drive_0624",
+      "date": "2026-06-24",
+      "platform": "Grab",
+      "status": "In Progress",
+      "driverIncomeModel": "grab_v13",
+      "drivingSessions": [
+        { "startTime": "06:00", "endTime": "10:30" }
+      ],
+      "totalDrivingHours": 4.5,
+      "totalTrips": 11,
+      "tngOpening": 129.4,
+      "tngClosing": 142.9,
+      "smartTagOpening": 69.8,
+      "smartTagClosing": 67.1,
+      "grabCashWalletOpening": 500,
+      "grabCashWalletEnding": 592.3,
+      "grabWalletBase": 500,
+      "cashCollected": 55,
+      "petrolEntries": [
+        { "amount": 30, "station": "Petron", "paymentMethod": "Cash", "note": "" }
+      ]
+    }
+  ],
+  "solarEvents": [],
+  "demoWorkspace": true,
+  "updatedAt": "2026-06-25T00:00:00.000Z"
+}

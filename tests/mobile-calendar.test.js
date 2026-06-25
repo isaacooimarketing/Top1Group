@@ -13,3 +13,10 @@ test("mobile calendar uses one horizontal viewport for weekdays and dates", () =
   assert.match(css, /\.calendar-scroll\s*\{[^}]*overflow-x:\s*auto/s);
   assert.match(css, /min-width:\s*756px/);
 });
+
+test("light theme covers daily summary and breakdown panels", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /body\.theme-light \.grab-day-summary/);
+  assert.match(css, /body\.theme-light \.breakdown-card/);
+});
