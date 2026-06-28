@@ -21,13 +21,24 @@ test("mobile calendar does not auto-scroll to selected day after render", () => 
   assert.doesNotMatch(js, /scrollTo\(\{\s*left:\s*Math\.max\(0,\s*centered\)/s);
 });
 
-test("calendar includes a fixed weekly summary column before weekdays", () => {
+test("calendar includes a weekly summary column that scrolls with weekdays", () => {
   const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
   assert.match(css, /grid-template-columns:\s*var\(--week-summary-width\)\s+repeat\(7,/);
   assert.match(js, /class="week-summary-card/);
   assert.match(js, /weeklyTarget/);
+  assert.doesNotMatch(css, /\.week-summary-card\s*\{[^}]*position:\s*sticky/s);
+  assert.doesNotMatch(css, /\.week-summary-card\s*\{[^}]*left:\s*0/s);
+});
+
+test("calendar day header keeps date and lunar marker pinned to the top", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /\.day-number\s*\{[^}]*align-items:\s*flex-start/s);
+  assert.match(css, /\.day-number\s*\{[^}]*min-height:\s*28px/s);
+  assert.match(css, /\.lunar-note\.active\s*\{[^}]*border:/s);
+  assert.doesNotMatch(css, /\.lunar-note\s+b\s*\{/);
 });
 
 test("light theme covers daily summary and breakdown panels", () => {

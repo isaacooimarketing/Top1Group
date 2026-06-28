@@ -1324,9 +1324,9 @@ function weekSummaryMarkup(weekStartDate) {
 function lunarReminderMarkup(iso) {
   const lunar = lunarVegetarianReminder(iso);
   if (!lunar.lunarLabel && !lunar.reminder) return "";
-  return `<small class="lunar-note${lunar.reminder ? " active" : ""}">
+  const title = lunar.reminder ? ` title="${lunar.reminder}" aria-label="${lunar.reminder}"` : "";
+  return `<small class="lunar-note${lunar.reminder ? " active" : ""}"${title}>
     <span>${lunar.lunarLabel}</span>
-    ${lunar.reminder ? `<b>${lunar.reminder}</b>` : ""}
   </small>`;
 }
 

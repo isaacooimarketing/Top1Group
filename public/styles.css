@@ -1424,7 +1424,9 @@ h2 {
 
 .day-number {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
+  min-height: 28px;
   margin-bottom: 5px;
   font-size: 12px;
   font-weight: 900;
@@ -1498,9 +1500,14 @@ h2 {
 }
 
 .lunar-note {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 18px;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   color: rgba(245, 230, 179, 0.48);
   font-size: 8px;
   font-weight: 750;
@@ -1508,10 +1515,11 @@ h2 {
   text-align: right;
 }
 
-.lunar-note b {
-  color: var(--starlight);
-  font-size: 8px;
-  font-weight: 900;
+.lunar-note.active {
+  border: 1px solid rgba(255, 111, 97, 0.72);
+  color: #ffe2d6;
+  background: rgba(255, 111, 97, 0.12);
+  box-shadow: 0 0 12px rgba(255, 111, 97, 0.18);
 }
 
 .calendar-signal,
@@ -2552,15 +2560,11 @@ textarea {
   }
 
   .week-summary-card {
-    position: sticky;
-    left: 0;
-    z-index: 2;
     min-width: var(--week-summary-width);
     min-height: 104px;
     background:
       linear-gradient(180deg, rgba(212, 175, 55, 0.16), rgba(6, 8, 12, 0.92)),
       #0b0d11;
-    backdrop-filter: blur(12px);
   }
 
   .day-number {
