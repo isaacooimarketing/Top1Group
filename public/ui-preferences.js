@@ -38,6 +38,7 @@
     "Fri": "周五",
     "Sat": "周六",
     "Sun": "周日",
+    "Week": "周",
     "Light": "浅色",
     "Dark": "深色",
     "Log out": "退出登录",
@@ -180,7 +181,10 @@
     "Creating your workspace...": "正在创建你的工作空间...",
     "Account created. Check your email if confirmation is required.": "账号已创建。如需要验证，请检查电子邮箱。",
     "Unable to sign in.": "无法登录。",
-    "Swipe to explore": "左右滑动查看"
+    "Swipe to explore": "左右滑动查看",
+    "Vegetarian": "吃斋",
+    "Guan Yin Day": "观音诞",
+    "Lunar": "农历"
   };
 
   const reverseZh = Object.fromEntries(Object.entries(zh).map(([en, value]) => [value, en]));
@@ -221,6 +225,9 @@
         .replace(/\bincome\b/g, "收入")
         .replace(/\btrips\b/g, "行程")
         .replace(/\bmonth net\b/g, "本月净利润")
+        .replace(/\bLunar (\d+)\/(\d+)\b/g, "农历 $1/$2")
+        .replace(/\bVegetarian\b/g, "吃斋")
+        .replace(/\bGuan Yin Day\b/g, "观音诞")
         .replace(/\bevents\b/g, "事件")
         .replace(/\btasks\b/g, "任务")
         .replace(/^Session (\d+) Start$/, "时段 $1 开始")
@@ -238,6 +245,9 @@
         .replace(/收入/g, "income")
         .replace(/行程/g, "trips")
         .replace(/本月净利润/g, "month net")
+        .replace(/农历 (\d+)\/(\d+)/g, "Lunar $1/$2")
+        .replace(/吃斋/g, "Vegetarian")
+        .replace(/观音诞/g, "Guan Yin Day")
         .replace(/事件/g, "events")
         .replace(/任务/g, "tasks")
         .replace(/^时段 (\d+) 开始$/, "Session $1 Start")

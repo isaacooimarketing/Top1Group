@@ -32,6 +32,7 @@
   --mode: var(--gold);
   --mouse-x: 50vw;
   --mouse-y: 20vh;
+  --week-summary-width: 112px;
 }
 
 body.theme-light {
@@ -1367,7 +1368,7 @@ h2 {
 .weekday-row,
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: var(--week-summary-width) repeat(7, minmax(0, 1fr));
 }
 
 .weekday-row {
@@ -1403,7 +1404,7 @@ h2 {
   transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
-.day-card:nth-child(7n) {
+.day-card:nth-child(8n) {
   border-right: 0;
 }
 
@@ -1445,6 +1446,72 @@ h2 {
 .mini-stack {
   display: grid;
   gap: 4px;
+}
+
+.week-summary-card {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 76px;
+  padding: 10px 8px;
+  border-right: 1px solid rgba(230, 199, 122, 0.18);
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(212, 175, 55, 0.095), rgba(255, 255, 255, 0.018)),
+    rgba(5, 7, 10, 0.24);
+}
+
+.week-summary-card span,
+.week-summary-card small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.week-summary-card strong {
+  color: var(--starlight);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.week-summary-card i {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.week-summary-card b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7bb7ff, #54decf, #d4af37);
+}
+
+.week-summary-card.complete {
+  border-color: rgba(212, 175, 55, 0.5);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.2), transparent 62%),
+    rgba(212, 175, 55, 0.08);
+}
+
+.lunar-note {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: rgba(245, 230, 179, 0.48);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.05;
+  text-align: right;
+}
+
+.lunar-note b {
+  color: var(--starlight);
+  font-size: 8px;
+  font-weight: 900;
 }
 
 .calendar-signal,
@@ -2459,9 +2526,9 @@ textarea {
 
   .weekday-row,
   .calendar-grid {
-    width: 756px;
-    min-width: 756px;
-    grid-template-columns: repeat(7, 108px);
+    width: 868px;
+    min-width: 868px;
+    grid-template-columns: var(--week-summary-width) repeat(7, 108px);
   }
 
   .weekday-row {
@@ -2482,6 +2549,18 @@ textarea {
     min-width: 108px;
     padding: 8px;
     scroll-snap-align: center;
+  }
+
+  .week-summary-card {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    min-width: var(--week-summary-width);
+    min-height: 104px;
+    background:
+      linear-gradient(180deg, rgba(212, 175, 55, 0.16), rgba(6, 8, 12, 0.92)),
+      #0b0d11;
+    backdrop-filter: blur(12px);
   }
 
   .day-number {

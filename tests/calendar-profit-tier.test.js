@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { profitTier } = require("../public/calendar-utils");
+const { profitTier, lunarVegetarianReminder } = require("../public/calendar-utils");
 
 test("profitTier classifies every net-profit boundary", () => {
   const cases = [
@@ -23,4 +23,20 @@ test("profitTier classifies every net-profit boundary", () => {
   cases.forEach(([net, expected]) => {
     assert.equal(profitTier(net), expected, `Expected RM${net} to be ${expected}`);
   });
+});
+
+test("lunarVegetarianReminder marks first, fifteenth, and Guan Yin lunar days", () => {
+  assert.deepEqual(lunarVegetarianReminder("2026-06-15"), {
+    lunarLabel: "Lunar 5/1",
+    reminder: "Vegetarian"
+  });
+  assert.deepEqual(lunarVegetarianReminder("2026-06-29"), {
+    lunarLabel: "Lunar 5/15",
+    reminder: "Vegetarian"
+  });
+  assert.deepEqual(lunarVegetarianReminder("2026-04-06"), {
+    lunarLabel: "Lunar 2/19",
+    reminder: "Guan Yin Day"
+  });
+  assert.equal(lunarVegetarianReminder("2026-06-16").reminder, "");
 });

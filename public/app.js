@@ -9,7 +9,7 @@ const {
   weekRange,
   recordsThroughSelectedDate
 } = window.Top1DateUtils;
-const { profitTier } = window.Top1CalendarUtils;
+const { profitTier, lunarVegetarianReminder } = window.Top1CalendarUtils;
 
 let state = defaultOSState();
 let mode = "driver";
@@ -1271,17 +1271,26 @@ function renderCalendar() {
   const todayIso = toISODate(new Date());
   const cards = [];
 
-  for (let i = 0; i < 42; i += 1) {
-    const day = new Date(start);
-    day.setDate(start.getDate() + i);
-    const iso = toISODate(day);
-    const outside = day.getMonth() !== visibleDate.getMonth() ? " outside" : "";
-    const selected = iso === selectedDate ? " selected" : "";
-    const indicators = calendarDayIndicators(iso);
-    cards.push(`<button class="day-card${outside}${selected}" data-date="${iso}" data-events="${indicators.events}" data-tasks="${indicators.tasks}" data-income="${indicators.income}">
-      <div class="day-number"><span class="${iso === todayIso ? "today-dot" : ""}">${day.getDate()}</span></div>
-      <div class="mini-stack">${calendarIndicatorMarkup(indicators, iso)}</div>
-    </button>`);
+  for (let week = 0; week < 6; week += 1) {
+    const weekStartDate = new Date(start);
+    weekStartDate.setDate(start.getDate() + (week * 7));
+    cards.push(weekSummaryMarkup(weekStartDate));
+
+    for (let weekday = 0; weekday < 7; weekday += 1) {
+      const day = new Date(weekStartDate);
+      day.setDate(weekStartDate.getDate() + weekday);
+      const iso = toISODate(day);
+      const outside = day.getMonth() !== visibleDate.getMonth() ? " outside" : "";
+      const selected = iso === selectedDate ? " selected" : "";
+      const indicators = calendarDayIndicators(iso);
+      cards.push(`<button class="day-card${outside}${selected}" data-date="${iso}" data-events="${indicators.events}" data-tasks="${indicators.tasks}" data-income="${indicators.income}">
+        <div class="day-number">
+          <span class="${iso === todayIso ? "today-dot" : ""}">${day.getDate()}</span>
+          ${lunarReminderMarkup(iso)}
+        </div>
+        <div class="mini-stack">${calendarIndicatorMarkup(indicators, iso)}</div>
+      </button>`);
+    }
   }
   grid.innerHTML = cards.join("");
   grid.querySelectorAll(".day-card").forEach(card => {
@@ -1292,22 +1301,33 @@ function renderCalendar() {
       render();
     });
   });
-  revealSelectedCalendarDay();
 }
 
-function revealSelectedCalendarDay() {
-  const viewport = document.querySelector(".calendar-scroll");
-  const selectedCard = document.querySelector(`.day-card[data-date="${selectedDate}"]`);
-  if (!viewport || !selectedCard) return;
-  if (window.innerWidth > 620) {
-    viewport.scrollLeft = 0;
-    return;
-  }
+function weekSummaryMarkup(weekStartDate) {
+  const weeklyTarget = 1390;
+  const weekStartIso = toISODate(weekStartDate);
+  const weekEndDate = new Date(weekStartDate);
+  weekEndDate.setDate(weekStartDate.getDate() + 6);
+  const weekEndIso = toISODate(weekEndDate);
+  const sessions = state.driverSessions.filter(item => item.date >= weekStartIso && item.date <= weekEndIso);
+  const totals = driverTotals(sessions);
+  const pct = Math.min(100, Math.max(0, (totals.net / weeklyTarget) * 100));
+  const complete = pct >= 100 ? " complete" : "";
+  return `<div class="week-summary-card${complete}">
+    <span>Week Net</span>
+    <strong>${moneyCompact.format(totals.net)}</strong>
+    <small>/ ${moneyCompact.format(weeklyTarget)}</small>
+    <i><b style="width:${pct}%"></b></i>
+  </div>`;
+}
 
-  requestAnimationFrame(() => {
-    const centered = selectedCard.offsetLeft - ((viewport.clientWidth - selectedCard.offsetWidth) / 2);
-    viewport.scrollTo({ left: Math.max(0, centered), behavior: "smooth" });
-  });
+function lunarReminderMarkup(iso) {
+  const lunar = lunarVegetarianReminder(iso);
+  if (!lunar.lunarLabel && !lunar.reminder) return "";
+  return `<small class="lunar-note${lunar.reminder ? " active" : ""}">
+    <span>${lunar.lunarLabel}</span>
+    ${lunar.reminder ? `<b>${lunar.reminder}</b>` : ""}
+  </small>`;
 }
 
 function calendarIndicatorMarkup(indicators, iso) {
