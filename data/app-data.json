@@ -201,7 +201,7 @@
       "petrolCost": 47.44,
       "smartTagReduction": 0,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": -11.29000000000002,
+      "walletIncreaseIncome": -11.29,
       "cashCollected": 324,
       "accountingNote": "Wallet decrease reflected in sales. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Wallet decrease reflected in sales"
@@ -226,7 +226,7 @@
       "petrolCost": 49.5,
       "smartTagReduction": 0,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 117.63999999999999,
+      "walletIncreaseIncome": 117.64,
       "cashCollected": 92,
       "accountingNote": "Insurance excluded. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Insurance excluded"
@@ -376,7 +376,7 @@
       "petrolCost": 53.07,
       "smartTagReduction": 3.04,
       "grabCreditWalletTopUp": 100,
-      "walletIncreaseIncome": 103.73000000000002,
+      "walletIncreaseIncome": 103.73,
       "cashCollected": 157,
       "accountingNote": "Credit wallet top up counted as cost. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Credit wallet top up counted as cost"
@@ -426,7 +426,7 @@
       "petrolCost": 51.83,
       "smartTagReduction": 1.56,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 127.66999999999999,
+      "walletIncreaseIncome": 127.67,
       "cashCollected": 117,
       "accountingNote": "Bolt day. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Bolt day"
@@ -551,7 +551,7 @@
       "petrolCost": 39.03,
       "smartTagReduction": 11.42,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 18.010000000000005,
+      "walletIncreaseIncome": 18.01,
       "cashCollected": 80,
       "accountingNote": "Bolt tng negative counted in cost. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Bolt tng negative counted in cost"
@@ -601,7 +601,7 @@
       "petrolCost": 54.34,
       "smartTagReduction": 26.46,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 61.83000000000001,
+      "walletIncreaseIncome": 61.83,
       "cashCollected": 131,
       "accountingNote": "Bolt tng negative counted in cost. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Bolt tng negative counted in cost"
@@ -626,7 +626,7 @@
       "petrolCost": 45.97,
       "smartTagReduction": 0,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 4.899999999999999,
+      "walletIncreaseIncome": 4.9,
       "cashCollected": 44,
       "accountingNote": "Solar appointment toll excluded. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Solar appointment toll excluded"
@@ -651,7 +651,7 @@
       "petrolCost": 12.95,
       "smartTagReduction": 20.44,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 189.76999999999998,
+      "walletIncreaseIncome": 189.77,
       "cashCollected": 160,
       "accountingNote": "Free petrol noted but not costed. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Free petrol noted but not costed"
@@ -701,7 +701,7 @@
       "petrolCost": 40.21,
       "smartTagReduction": 3.64,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 123.44999999999999,
+      "walletIncreaseIncome": 123.45,
       "cashCollected": 141,
       "accountingNote": "Insurance excluded. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Insurance excluded"
@@ -726,7 +726,7 @@
       "petrolCost": 61.93,
       "smartTagReduction": 14.76,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 127.66000000000003,
+      "walletIncreaseIncome": 127.66,
       "cashCollected": 360,
       "accountingNote": "Insurance excluded. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Insurance excluded"
@@ -751,7 +751,7 @@
       "petrolCost": 38.78,
       "smartTagReduction": 5.6,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 113.96000000000001,
+      "walletIncreaseIncome": 113.96,
       "cashCollected": 50,
       "accountingNote": "Insurance excluded. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Insurance excluded"
@@ -776,7 +776,7 @@
       "petrolCost": 43.8,
       "smartTagReduction": 1,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 195.97000000000003,
+      "walletIncreaseIncome": 195.97,
       "cashCollected": 68,
       "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Summary cost excludes insurance"
@@ -801,7 +801,7 @@
       "petrolCost": 38.6,
       "smartTagReduction": 23.73,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 15.789999999999992,
+      "walletIncreaseIncome": 15.79,
       "cashCollected": 171,
       "accountingNote": "TNG negative counted in cost. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "TNG negative counted in cost"
@@ -976,7 +976,7 @@
       "petrolCost": 66.74,
       "smartTagReduction": 4.13,
       "grabCreditWalletTopUp": 0,
-      "walletIncreaseIncome": 246.33999999999997,
+      "walletIncreaseIncome": 246.34,
       "cashCollected": 210,
       "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Summary cost excludes insurance"
@@ -1005,10 +1005,135 @@
       "cashCollected": 41,
       "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
       "remark": "Summary cost excludes insurance"
+    },
+    {
+      "id": "drive_timeline_2026_06_23",
+      "rawRecordId": "raw_timeline_2026-06-23",
+      "importSource": "user_manual_timeline",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "date": "2026-06-23",
+      "platform": "Grab",
+      "startTime": "",
+      "endTime": "",
+      "status": "Finished",
+      "totalDrivingHours": 12,
+      "totalTrips": 25,
+      "correctedIncome": 362.43,
+      "correctedCost": 70.72,
+      "correctedNet": 291.71,
+      "originalCost": 76.22,
+      "ignoredGrabInsurance": 5.5,
+      "petrolCost": 60.47,
+      "smartTagReduction": 10.25,
+      "grabCreditWalletTopUp": 0,
+      "walletIncreaseIncome": 237.43,
+      "cashCollected": 125,
+      "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
+      "remark": "Summary cost excludes insurance"
+    },
+    {
+      "id": "drive_timeline_2026_06_25",
+      "rawRecordId": "raw_timeline_2026-06-25",
+      "importSource": "user_manual_timeline",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "date": "2026-06-25",
+      "platform": "Grab",
+      "startTime": "",
+      "endTime": "",
+      "status": "Finished",
+      "totalDrivingHours": 0,
+      "totalTrips": 0,
+      "correctedIncome": 148.29,
+      "correctedCost": 43.3,
+      "correctedNet": 104.99,
+      "originalCost": 48.8,
+      "ignoredGrabInsurance": 5.5,
+      "petrolCost": 26.8,
+      "smartTagReduction": 16.5,
+      "grabCreditWalletTopUp": 0,
+      "walletIncreaseIncome": 114.29,
+      "cashCollected": 34,
+      "accountingNote": "Hours and trips missing in raw note. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
+      "remark": "Hours and trips missing in raw note"
+    },
+    {
+      "id": "drive_timeline_2026_06_26",
+      "rawRecordId": "raw_timeline_2026-06-26",
+      "importSource": "user_manual_timeline",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "date": "2026-06-26",
+      "platform": "Grab",
+      "startTime": "",
+      "endTime": "",
+      "status": "Finished",
+      "totalDrivingHours": 13,
+      "totalTrips": 30,
+      "correctedIncome": 333.63,
+      "correctedCost": 55.06,
+      "correctedNet": 278.57,
+      "originalCost": 60.56,
+      "ignoredGrabInsurance": 5.5,
+      "petrolCost": 55.06,
+      "smartTagReduction": 0,
+      "grabCreditWalletTopUp": 0,
+      "walletIncreaseIncome": 168.63,
+      "cashCollected": 165,
+      "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
+      "remark": "Summary cost excludes insurance"
+    },
+    {
+      "id": "drive_timeline_2026_06_27",
+      "rawRecordId": "raw_timeline_2026-06-27",
+      "importSource": "user_manual_timeline",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "date": "2026-06-27",
+      "platform": "Grab",
+      "startTime": "",
+      "endTime": "",
+      "status": "Finished",
+      "totalDrivingHours": 5,
+      "totalTrips": 13,
+      "correctedIncome": 138.87,
+      "correctedCost": 48.91,
+      "correctedNet": 89.96,
+      "originalCost": 54.41,
+      "ignoredGrabInsurance": 5.5,
+      "petrolCost": 44.81,
+      "smartTagReduction": 4.1,
+      "grabCreditWalletTopUp": 0,
+      "walletIncreaseIncome": 93.87,
+      "cashCollected": 45,
+      "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
+      "remark": "Summary cost excludes insurance"
+    },
+    {
+      "id": "drive_timeline_2026_06_28",
+      "rawRecordId": "raw_timeline_2026-06-28",
+      "importSource": "user_manual_timeline",
+      "driverIncomeModel": "corrected_daily_summary_v1",
+      "date": "2026-06-28",
+      "platform": "Grab",
+      "startTime": "",
+      "endTime": "",
+      "status": "Finished",
+      "totalDrivingHours": 5,
+      "totalTrips": 20,
+      "correctedIncome": 181.35,
+      "correctedCost": 40.57,
+      "correctedNet": 140.78,
+      "originalCost": 46.07,
+      "ignoredGrabInsurance": 5.5,
+      "petrolCost": 40.57,
+      "smartTagReduction": 0,
+      "grabCreditWalletTopUp": 0,
+      "walletIncreaseIncome": 50.35,
+      "cashCollected": 131,
+      "accountingNote": "Summary cost excludes insurance. RM5.50 Grab insurance kept as raw note only, not corrected cost.",
+      "remark": "Summary cost excludes insurance"
     }
   ],
   "solarEvents": [],
-  "updatedAt": "2026-06-23T06:30:54.851Z",
+  "updatedAt": "2026-06-29T01:08:36.096Z",
   "driverRawRecords": [
     {
       "id": "raw_driver_verified_totals_as_of_2026_06_09",
@@ -1693,6 +1818,76 @@
       "note": "Summary cost excludes insurance"
     },
     {
+      "id": "raw_timeline_2026-06-23",
+      "type": "driver_daily_record",
+      "source": "user_manual_timeline",
+      "date": "2026-06-23",
+      "platform": "Grab",
+      "income": 362.43,
+      "correctedCost": 70.72,
+      "correctedNet": 291.71,
+      "hours": 12,
+      "trips": 25,
+      "ignoredGrabInsurance": 5.5,
+      "note": "Summary cost excludes insurance"
+    },
+    {
+      "id": "raw_timeline_2026-06-25",
+      "type": "driver_daily_record",
+      "source": "user_manual_timeline",
+      "date": "2026-06-25",
+      "platform": "Grab",
+      "income": 148.29,
+      "correctedCost": 43.3,
+      "correctedNet": 104.99,
+      "hours": 0,
+      "trips": 0,
+      "ignoredGrabInsurance": 5.5,
+      "note": "Hours and trips missing in raw note"
+    },
+    {
+      "id": "raw_timeline_2026-06-26",
+      "type": "driver_daily_record",
+      "source": "user_manual_timeline",
+      "date": "2026-06-26",
+      "platform": "Grab",
+      "income": 333.63,
+      "correctedCost": 55.06,
+      "correctedNet": 278.57,
+      "hours": 13,
+      "trips": 30,
+      "ignoredGrabInsurance": 5.5,
+      "note": "Summary cost excludes insurance"
+    },
+    {
+      "id": "raw_timeline_2026-06-27",
+      "type": "driver_daily_record",
+      "source": "user_manual_timeline",
+      "date": "2026-06-27",
+      "platform": "Grab",
+      "income": 138.87,
+      "correctedCost": 48.91,
+      "correctedNet": 89.96,
+      "hours": 5,
+      "trips": 13,
+      "ignoredGrabInsurance": 5.5,
+      "note": "Summary cost excludes insurance"
+    },
+    {
+      "id": "raw_timeline_2026-06-28",
+      "type": "driver_daily_record",
+      "source": "user_manual_timeline",
+      "date": "2026-06-28",
+      "platform": "Grab",
+      "income": 181.35,
+      "correctedCost": 40.57,
+      "correctedNet": 140.78,
+      "hours": 5,
+      "trips": 20,
+      "ignoredGrabInsurance": 5.5,
+      "note": "Summary cost excludes insurance"
+    },
+    {
       "id": "raw_timeline_setup_2026-05-01_training",
       "type": "pre_grab_expense",
       "date": "2026-05-01",
@@ -1771,8 +1966,8 @@
     }
   ],
   "driverAnalytics": {
-    "generatedAt": "2026-06-23T06:30:54.850Z",
-    "scope": "timeline_import_2026_05_07_to_2026_06_22",
+    "generatedAt": "2026-06-29T01:08:36.096Z",
+    "scope": "timeline_import_2026_05_07_to_2026_06_28",
     "accountingRules": {
       "grabInsuranceCountedAsCost": false,
       "grabCreditWalletTopUpCountedAsCost": true,
@@ -1783,15 +1978,19 @@
       "cashWithdrawalsSeparatedFromGrabProfit": true
     },
     "timelineTotals": {
-      "totalSales": 9647.9,
-      "totalCost": 2097.98,
-      "totalNetIncome": 7549.92,
-      "totalHours": 329.25,
-      "totalTrips": 672,
-      "ignoredGrabInsurance": 115.5,
-      "averageIncomePerHour": 29.3,
-      "averageNetPerHour": 22.93,
-      "averageNetPerTrip": 11.24
+      "scope": "timeline_import_2026_05_07_to_2026_06_28",
+      "operatingSales": 10812.47,
+      "salesWithRefunds": 10982.47,
+      "operatingCost": 2356.54,
+      "operatingNet": 8455.93,
+      "netAfterPreGrabExpenses": 7800.57,
+      "netAfterPreGrabExpensesAndRefunds": 7970.57,
+      "totalHours": 364.25,
+      "totalTrips": 760,
+      "ignoredGrabInsurance": 143,
+      "averageIncomePerHour": 29.68,
+      "averageNetPerHour": 23.21,
+      "averageNetPerTrip": 11.13
     },
     "preGrabExpenses": {
       "total": 655.36,
@@ -1861,7 +2060,7 @@
       ]
     },
     "bankTransfers": {
-      "total": 4892.37,
+      "total": 5458.17,
       "items": [
         {
           "date": "2026-05-16",
@@ -1937,6 +2136,36 @@
           "date": "2026-06-22",
           "source": "grab_wallet",
           "amount": 300.52
+        },
+        {
+          "date": "2026-06-24",
+          "source": "grab_wallet",
+          "amount": 179
+        },
+        {
+          "date": "2026-06-24",
+          "source": "grab_wallet",
+          "amount": 55.59
+        },
+        {
+          "date": "2026-06-25",
+          "source": "grab_wallet",
+          "amount": 93.49
+        },
+        {
+          "date": "2026-06-26",
+          "source": "grab_wallet",
+          "amount": 159.93
+        },
+        {
+          "date": "2026-06-27",
+          "source": "grab_wallet",
+          "amount": 28.13
+        },
+        {
+          "date": "2026-06-28",
+          "source": "grab_wallet",
+          "amount": 49.66
         }
       ]
     }
@@ -2031,6 +2260,42 @@
       "date": "2026-06-22",
       "source": "grab_wallet",
       "amount": 300.52
+    },
+    {
+      "id": "bank_timeline_2026_06_24_grab_wallet_179",
+      "date": "2026-06-24",
+      "source": "grab_wallet",
+      "amount": 179
+    },
+    {
+      "id": "bank_timeline_2026_06_24_grab_wallet_55_59",
+      "date": "2026-06-24",
+      "source": "grab_wallet",
+      "amount": 55.59
+    },
+    {
+      "id": "bank_timeline_2026_06_25_grab_wallet_93_49",
+      "date": "2026-06-25",
+      "source": "grab_wallet",
+      "amount": 93.49
+    },
+    {
+      "id": "bank_timeline_2026_06_26_grab_wallet_159_93",
+      "date": "2026-06-26",
+      "source": "grab_wallet",
+      "amount": 159.93
+    },
+    {
+      "id": "bank_timeline_2026_06_27_grab_wallet_28_13",
+      "date": "2026-06-27",
+      "source": "grab_wallet",
+      "amount": 28.13
+    },
+    {
+      "id": "bank_timeline_2026_06_28_grab_wallet_49_66",
+      "date": "2026-06-28",
+      "source": "grab_wallet",
+      "amount": 49.66
     }
   ],
   "cashLedger": [
@@ -2064,6 +2329,14 @@
       "type": "cash_withdrawal",
       "fromAccount": "cash_at_home",
       "amount": 200,
+      "category": "pocket money"
+    },
+    {
+      "id": "cash_timeline_2026_06_28_pocket_money",
+      "date": "2026-06-28",
+      "type": "cash_withdrawal",
+      "fromAccount": "cash_at_home",
+      "amount": 400,
       "category": "pocket money"
     }
   ],
