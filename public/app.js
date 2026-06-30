@@ -22,6 +22,7 @@ let theme = localStorage.getItem("topOneGroupTheme") || "dark";
 let todayOS = null;
 let authManager = null;
 let appStarted = false;
+let driverFormDirty = false;
 const { recordChanges, resolvedDrivingHours, resolvedStatus } = Top1RecordUtils;
 const { buildDailySummary } = Top1SummaryUtils;
 const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
@@ -911,6 +912,7 @@ function countValue(value, format = "number") {
 }
 
 async function loadState() {
+  if (hasUnsavedDriverFormEdits()) return;
   try {
     const response = await fetch("/api/state", {
       cache: "no-store",
@@ -927,6 +929,10 @@ async function loadState() {
   }
   syncUniversalObjects();
   render();
+}
+
+function hasUnsavedDriverFormEdits() {
+  return driverFormDirty && Boolean($("#driverForm"));
 }
 
 async function persistState() {
@@ -2004,9 +2010,16 @@ function bindSidebar() {
   if (driverForm) {
     bindTimeDisplays(driverForm);
     driverForm.elements.date.addEventListener("change", () => {
+      driverFormDirty = false;
       selectedDate = driverForm.elements.date.value;
       editingDriverId = null;
       render();
+    });
+    driverForm.addEventListener("input", () => {
+      driverFormDirty = true;
+    });
+    driverForm.addEventListener("change", event => {
+      if (event.target !== driverForm.elements.date) driverFormDirty = true;
     });
     driverForm.addEventListener("submit", async event => {
       event.preventDefault();
@@ -2045,6 +2058,7 @@ function bindSidebar() {
       if (status === "Finished") createFinishPendingActions(session);
       selectedDate = data.date;
       editingDriverId = null;
+      driverFormDirty = false;
       const saved = await persistState();
       if (status === "Finished" && saved) showDailySummary(session, cashBefore);
     });

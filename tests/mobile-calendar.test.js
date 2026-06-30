@@ -60,3 +60,14 @@ test("mobile time fields render a visible synced display over native picker", ()
   assert.match(css, /\.time-display\s*\{/);
   assert.match(css, /\.time-input-wrap input\[type="time"\]/);
 });
+
+test("background sync does not redraw over unsaved driver form edits", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /let driverFormDirty = false/);
+  assert.match(js, /function hasUnsavedDriverFormEdits/);
+  assert.match(js, /if \(hasUnsavedDriverFormEdits\(\)\) return/);
+  assert.match(js, /driverForm\.addEventListener\("input"/);
+  assert.match(js, /driverFormDirty = true/);
+  assert.match(js, /driverFormDirty = false/);
+});
