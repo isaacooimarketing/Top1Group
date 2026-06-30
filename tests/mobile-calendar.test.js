@@ -47,3 +47,16 @@ test("light theme covers daily summary and breakdown panels", () => {
   assert.match(css, /body\.theme-light \.grab-day-summary/);
   assert.match(css, /body\.theme-light \.breakdown-card/);
 });
+
+test("mobile time fields render a visible synced display over native picker", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /class="field time-field"/);
+  assert.match(js, /data-time-display="\$\{name\}"/);
+  assert.match(js, /function bindTimeDisplays/);
+  assert.match(js, /input\.addEventListener\("input", sync\)/);
+  assert.match(js, /input\.addEventListener\("change", sync\)/);
+  assert.match(css, /\.time-display\s*\{/);
+  assert.match(css, /\.time-input-wrap input\[type="time"\]/);
+});

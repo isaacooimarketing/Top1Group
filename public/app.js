@@ -1888,7 +1888,30 @@ function field(label, name, type, value, options) {
       `<option ${option === value ? "selected" : ""}>${option}</option>`
     ).join("")}</select></div>`;
   }
+  if (type === "time") {
+    return `<div class="field time-field"><label>${label}</label><div class="time-input-wrap"><input name="${name}" type="time" value="${escapeHtml(value)}"><span class="time-display" data-time-display="${name}">${formatTimeDisplay(value)}</span></div></div>`;
+  }
   return `<div class="field"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
+}
+
+function formatTimeDisplay(value) {
+  const clean = String(value || "").trim();
+  return clean ? clean : "--:--";
+}
+
+function bindTimeDisplays(scope = document) {
+  scope.querySelectorAll(".time-input-wrap input[type='time']").forEach(input => {
+    const display = input.parentElement?.querySelector(".time-display");
+    if (!display) return;
+    const sync = () => {
+      display.textContent = formatTimeDisplay(input.value);
+      input.classList.toggle("has-time-value", Boolean(input.value));
+    };
+    input.addEventListener("input", sync);
+    input.addEventListener("change", sync);
+    input.addEventListener("blur", sync);
+    sync();
+  });
 }
 
 function formatChangeValue(value, format) {
@@ -1979,6 +2002,7 @@ function showDailySummary(record, cashBeforeValue = null) {
 function bindSidebar() {
   const driverForm = $("#driverForm");
   if (driverForm) {
+    bindTimeDisplays(driverForm);
     driverForm.elements.date.addEventListener("change", () => {
       selectedDate = driverForm.elements.date.value;
       editingDriverId = null;
@@ -2091,6 +2115,7 @@ function bindSidebar() {
 
   const solarForm = $("#solarForm");
   if (solarForm) {
+    bindTimeDisplays(solarForm);
     const postcode = solarForm.elements.postcode;
     postcode.addEventListener("input", () => {
       if (postcode.value.trim() === "52100" && !solarForm.elements.area.value.trim()) {

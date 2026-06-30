@@ -1742,6 +1742,50 @@ textarea {
   outline: none;
 }
 
+.time-input-wrap {
+  position: relative;
+}
+
+.time-input-wrap input[type="time"] {
+  position: relative;
+  z-index: 2;
+  color: transparent;
+  caret-color: transparent;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.time-input-wrap input[type="time"]::-webkit-datetime-edit,
+.time-input-wrap input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+.time-input-wrap input[type="time"]::-webkit-datetime-edit-hour-field,
+.time-input-wrap input[type="time"]::-webkit-datetime-edit-minute-field,
+.time-input-wrap input[type="time"]::-webkit-datetime-edit-ampm-field,
+.time-input-wrap input[type="time"]::-webkit-datetime-edit-text {
+  color: transparent;
+}
+
+.time-display {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 0 42px 0 12px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 780;
+  pointer-events: none;
+}
+
+.time-input-wrap input[type="time"]:not(.has-time-value) + .time-display {
+  color: rgba(244, 240, 231, 0.42);
+}
+
+body.theme-light .time-input-wrap input[type="time"]:not(.has-time-value) + .time-display {
+  color: rgba(23, 25, 27, 0.42);
+}
+
 input:focus,
 select:focus,
 textarea:focus {
