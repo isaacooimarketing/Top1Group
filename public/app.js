@@ -2407,7 +2407,6 @@ async function startAuthenticatedApp() {
   applyAccountCapabilities();
   document.querySelector("#logoutButton")?.addEventListener("click", () => authManager.signOut());
   document.querySelector("#dailySummaryClose")?.addEventListener("click", () => $("#dailySummaryDialog").close());
-  setInterval(updateLiveCountdowns, 1000);
   startSpaceParticles();
   await loadState();
 }
