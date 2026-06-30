@@ -71,3 +71,9 @@ test("background sync does not redraw over unsaved driver form edits", () => {
   assert.match(js, /driverFormDirty = true/);
   assert.match(js, /driverFormDirty = false/);
 });
+
+test("driver form is not interrupted by fixed background state refresh", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.doesNotMatch(js, /setInterval\(loadState,\s*15000\)/);
+});
