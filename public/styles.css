@@ -2361,6 +2361,29 @@ textarea {
   font-weight: 900;
 }
 
+.split-pending-item {
+  grid-template-columns: 1fr;
+}
+
+.pending-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pending-split label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.pending-split input {
+  width: 100%;
+}
+
 .cash-tools .form-grid {
   padding: 14px;
 }

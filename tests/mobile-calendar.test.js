@@ -83,3 +83,39 @@ test("driver form is not interrupted by fixed countdown refresh", () => {
 
   assert.doesNotMatch(js, /setInterval\(updateLiveCountdowns,\s*1000\)/);
 });
+
+test("calendar day click opens daily summary before editing", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(html, /id="dailySummaryEdit"/);
+  assert.match(html, /data-edit-summary/);
+  assert.match(js, /summaryRecordId/);
+  assert.match(js, /showDailySummary\(summaryRecord\)/);
+  assert.match(js, /dataset\.editSummary/);
+});
+
+test("finished grab records do not keep the driver form in edit mode", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function selectedGrabRecord/);
+  assert.match(js, /editingDriverId/);
+  assert.match(js, /record\.status === "In Progress"/);
+});
+
+test("cash confirmation can be split between petty cash and cash at home", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /data-pending-petty/);
+  assert.match(js, /data-pending-home/);
+  assert.match(js, /cashPositionForm/);
+  assert.match(js, /type: "cash_adjustment"/);
+});
+
+test("mobile disables canvas particle animation for smoother input", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /maxTouchPoints/);
+  assert.match(js, /max-width:\s*980px/);
+  assert.match(js, /canvas\.hidden = true/);
+});

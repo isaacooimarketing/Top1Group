@@ -23,6 +23,7 @@ let todayOS = null;
 let authManager = null;
 let appStarted = false;
 let driverFormDirty = false;
+let summaryRecordId = null;
 const { recordChanges, resolvedDrivingHours, resolvedStatus } = Top1RecordUtils;
 const { buildDailySummary } = Top1SummaryUtils;
 const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
@@ -1060,8 +1061,20 @@ function recordsForDate(date) {
 }
 
 function selectedGrabRecord() {
-  return recordsForDate(selectedDate).find(item => item.driverIncomeModel === "grab_v13")
+  if (editingDriverId) {
+    return state.driverSessions.find(item => item.id === editingDriverId) || null;
+  }
+  const record = recordsForDate(selectedDate).find(item => item.driverIncomeModel === "grab_v13")
     || recordsForDate(selectedDate).find(item => item.platform === "Grab")
+    || null;
+  return record && record.status === "In Progress" ? record : null;
+}
+
+function summaryGrabRecord(date = selectedDate) {
+  const records = recordsForDate(date);
+  return records.find(item => item.driverIncomeModel === "grab_v13")
+    || records.find(item => item.platform === "Grab")
+    || records[0]
     || null;
 }
 
@@ -1173,6 +1186,26 @@ function cashBalances() {
   });
 }
 
+function setCashPosition(data) {
+  const current = cashBalances();
+  const targetPetty = num(data.pettyCashCurrent);
+  const targetHome = num(data.cashAtHomeCurrent);
+  [
+    { account: "petty_cash", amount: targetPetty - current.pettyCash },
+    { account: "cash_at_home", amount: targetHome - current.cashAtHome }
+  ].filter(item => Math.abs(item.amount) > 0.004).forEach(item => {
+    state.cashLedger.push({
+      id: uid("cash"),
+      date: selectedDate,
+      type: "cash_adjustment",
+      account: item.account,
+      amount: item.amount,
+      category: "manual cash position update",
+      remark: "Set current cash position"
+    });
+  });
+}
+
 function bankTransferTotals() {
   const [weekStart, weekEnd] = weekRange(selectedDate);
   const month = selectedDate.slice(0, 7);
@@ -1215,18 +1248,28 @@ function createFinishPendingActions(record) {
   });
 }
 
-function confirmPending(id) {
+function confirmPending(id, allocation = null) {
   const action = state.pendingCashActions.find(item => item.id === id);
   if (!action) return;
   if (action.type === "cash_collected_to_petty") {
-    state.cashLedger.push({
-      id: uid("cash"),
-      date: action.date,
-      type: "cash_collected",
-      account: "petty_cash",
-      amount: num(action.amount),
-      category: "cash collected",
-      sourceId: action.sourceId
+    const total = num(action.amount);
+    const requestedPetty = allocation ? num(allocation.pettyCash) : total;
+    const requestedHome = allocation ? num(allocation.cashAtHome) : 0;
+    const hasAllocation = Math.abs(requestedPetty) > 0.004 || Math.abs(requestedHome) > 0.004;
+    const lines = [
+      { account: "petty_cash", amount: hasAllocation ? requestedPetty : total },
+      { account: "cash_at_home", amount: hasAllocation ? requestedHome : 0 }
+    ];
+    lines.filter(item => Math.abs(item.amount) > 0.004).forEach(item => {
+      state.cashLedger.push({
+        id: uid("cash"),
+        date: action.date,
+        type: "cash_collected",
+        account: item.account,
+        amount: item.amount,
+        category: "cash collected",
+        sourceId: action.sourceId
+      });
     });
   }
   if (action.type === "grab_wallet_transfer_to_bank") {
@@ -1305,6 +1348,8 @@ function renderCalendar() {
       editingDriverId = null;
       editingSolarId = null;
       render();
+      const summaryRecord = mode === "driver" ? summaryGrabRecord(selectedDate) : null;
+      if (summaryRecord) showDailySummary(summaryRecord);
     });
   });
 }
@@ -1640,7 +1685,9 @@ function updateLiveCountdowns() {
 
 function driverSidebar() {
   const editing = selectedGrabRecord() || {};
-  const metrics = editing.id ? (editing.driverIncomeModel === "grab_v13" ? grabDailyMetrics(editing) : driverMetrics(editing)) : grabDailyMetrics({});
+  const summaryRecord = summaryGrabRecord(selectedDate);
+  const metricRecord = editing.id ? editing : summaryRecord;
+  const metrics = metricRecord ? (metricRecord.driverIncomeModel === "grab_v13" ? grabDailyMetrics(metricRecord) : driverMetrics(metricRecord)) : grabDailyMetrics({});
   const balances = cashBalances();
   const pending = state.pendingCashActions.filter(item => item.date === selectedDate);
   const bankTotals = bankTransferTotals();
@@ -1787,6 +1834,16 @@ function petrolLiabilityMarkup() {
 }
 
 function pendingItem(item) {
+  if (item.type === "cash_collected_to_petty") {
+    return `<article class="pending-item split-pending-item">
+      <div><strong>${escapeHtml(item.label)}</strong><span>${money.format(item.amount)}</span></div>
+      <div class="pending-split">
+        <label>Keep Petty Cash <input data-pending-petty="${item.id}" type="number" step="0.01" value="${num(item.amount).toFixed(2)}"></label>
+        <label>Put At Home <input data-pending-home="${item.id}" type="number" step="0.01" value="0.00"></label>
+      </div>
+      <button class="primary-action" type="button" data-confirm-pending="${item.id}">Confirm</button>
+    </article>`;
+  }
   return `<article class="pending-item">
     <div><strong>${escapeHtml(item.label)}</strong><span>${money.format(item.amount)}</span></div>
     <button class="primary-action" type="button" data-confirm-pending="${item.id}">Confirm</button>
@@ -1795,12 +1852,20 @@ function pendingItem(item) {
 
 function cashToolsMarkup() {
   const settings = state.grabSettings || defaultGrabSettings();
+  const balances = cashBalances();
   const categories = settings.cashCategories.map(item => `<option value="${escapeHtml(item)}"></option>`).join("");
   return `<details class="record-details cash-tools">
     <summary>Cash Tools</summary>
+    <form id="cashPositionForm" class="form-grid">
+      <div class="form-section full">Set Current Cash Position</div>
+      ${field("Current Petty Cash", "pettyCashCurrent", "number", balances.pettyCash)}
+      ${field("Current Cash At Home", "cashAtHomeCurrent", "number", balances.cashAtHome)}
+      <div class="action-row full"><button class="primary-action" type="submit">Update Cash Position</button></div>
+    </form>
     <form id="cashSettingsForm" class="form-grid">
-      ${field("Petty Cash Opening", "pettyCashOpening", "number", settings.pettyCashOpening)}
-      ${field("Cash At Home Opening", "cashAtHomeOpening", "number", settings.cashAtHomeOpening)}
+      <div class="form-section full">Starting Balance Settings</div>
+      ${field("Starting Petty Cash", "pettyCashOpening", "number", settings.pettyCashOpening)}
+      ${field("Starting Cash At Home", "cashAtHomeOpening", "number", settings.cashAtHomeOpening)}
       ${field("Car Rental Target", "carRentalTarget", "number", settings.carRentalTarget)}
       ${field("Housing Loan Target", "housingLoanTarget", "number", settings.housingLoanTarget)}
       ${field("Grab Wallet Base", "grabWalletBase", "number", settings.grabWalletBase)}
@@ -1971,6 +2036,7 @@ function summaryForRecord(record, cashBeforeValue = null) {
 }
 
 function showDailySummary(record, cashBeforeValue = null) {
+  summaryRecordId = record.id;
   const summary = summaryForRecord(record, cashBeforeValue);
   $("#dailySummaryTitle").textContent = dateFmt.format(parseDate(summary.date));
   $("#dailySummaryBody").innerHTML = `<section class="summary-hero">
@@ -2002,6 +2068,8 @@ function showDailySummary(record, cashBeforeValue = null) {
     <div><span>Previous Total Cash<strong>${money.format(summary.cashBefore)}</strong></span><b>+</b><span>Today's Cash<strong>${money.format(summary.confirmedCash)}</strong></span><b>=</b><span>New Total Cash<strong>${money.format(summary.cashAfter)}</strong></span></div>
     <small>Petty Cash ${money.format(summary.pettyCash)} + Cash At Home ${money.format(summary.cashAtHome)} = ${money.format(summary.totalCash)}</small>
   </section>`;
+  const editButton = $("#dailySummaryEdit");
+  if (editButton) editButton.dataset.editSummary = record.id;
   $("#dailySummaryDialog").showModal();
 }
 
@@ -2078,7 +2146,14 @@ function bindSidebar() {
 
   document.querySelectorAll("[data-confirm-pending]").forEach(button => {
     button.addEventListener("click", () => {
-      confirmPending(button.dataset.confirmPending);
+      const id = button.dataset.confirmPending;
+      const safeId = window.CSS?.escape ? CSS.escape(id) : id;
+      const pettyInput = document.querySelector(`[data-pending-petty="${safeId}"]`);
+      const homeInput = document.querySelector(`[data-pending-home="${safeId}"]`);
+      confirmPending(id, pettyInput || homeInput ? {
+        pettyCash: pettyInput?.value || 0,
+        cashAtHome: homeInput?.value || 0
+      } : null);
       persistState();
     });
   });
@@ -2113,6 +2188,16 @@ function bindSidebar() {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(cashSettingsForm).entries());
       state.grabSettings = { ...state.grabSettings, ...data };
+      persistState();
+    });
+  }
+
+  const cashPositionForm = $("#cashPositionForm");
+  if (cashPositionForm) {
+    cashPositionForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(cashPositionForm).entries());
+      setCashPosition(data);
       persistState();
     });
   }
@@ -2325,6 +2410,12 @@ document.addEventListener("pointermove", event => {
 function startSpaceParticles() {
   const canvas = $("#spaceParticles");
   if (!canvas) return;
+  const touchDevice = navigator.maxTouchPoints > 0;
+  const compactViewport = window.matchMedia("(max-width: 980px)").matches;
+  if (touchDevice || compactViewport) {
+    canvas.hidden = true;
+    return;
+  }
   const ctx = canvas.getContext("2d");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let width = 0;
@@ -2407,6 +2498,17 @@ async function startAuthenticatedApp() {
   applyAccountCapabilities();
   document.querySelector("#logoutButton")?.addEventListener("click", () => authManager.signOut());
   document.querySelector("#dailySummaryClose")?.addEventListener("click", () => $("#dailySummaryDialog").close());
+  document.querySelector("#dailySummaryEdit")?.addEventListener("click", event => {
+    const id = event.currentTarget.dataset.editSummary || summaryRecordId;
+    if (!id) return;
+    const record = state.driverSessions.find(item => item.id === id);
+    if (!record) return;
+    $("#dailySummaryDialog").close();
+    mode = "driver";
+    selectedDate = record.date;
+    editingDriverId = id;
+    render();
+  });
   startSpaceParticles();
   await loadState();
 }
