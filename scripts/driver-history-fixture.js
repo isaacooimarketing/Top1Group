@@ -38,7 +38,9 @@ const daily = [
   record("2026-06-25", "Grab", 148.29, 43.3, 104.99, 0, 0, 26.8, 16.5, 0, 34, 5.5, "Hours and trips missing in raw note"),
   record("2026-06-26", "Grab", 333.63, 55.06, 278.57, 13, 30, 55.06, 0, 0, 165, 5.5, "Summary cost excludes insurance"),
   record("2026-06-27", "Grab", 138.87, 48.91, 89.96, 5, 13, 44.81, 4.1, 0, 45, 5.5, "Summary cost excludes insurance"),
-  record("2026-06-28", "Grab", 181.35, 40.57, 140.78, 5, 20, 40.57, 0, 0, 131, 5.5, "Summary cost excludes insurance")
+  record("2026-06-28", "Grab", 244.17, 40.57, 203.6, 5, 20, 40.57, 0, 0, 131, 5.5, "Wallet ending corrected to RM612.48; insurance excluded"),
+  record("2026-06-30", "Grab", 371.55, 42.86, 328.69, 12.5, 29, 42.86, 0, 0, 82, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-02", "Grab", 328.99, 53.79, 275.2, 10, 23, 51.79, 2, 0, 123, 5.5, "Summary cost excludes insurance")
 ];
 
 const setupExpenses = [
@@ -75,7 +77,11 @@ const bankTransfers = [
   transfer("2026-06-25", "grab_wallet", 93.49),
   transfer("2026-06-26", "grab_wallet", 159.93),
   transfer("2026-06-27", "grab_wallet", 28.13),
-  transfer("2026-06-28", "grab_wallet", 49.66)
+  transfer("2026-06-28", "grab_wallet", 49.66),
+  transfer("2026-06-30", "grab_wallet", 62.82),
+  transfer("2026-06-30", "grab_wallet", 221.84),
+  transfer("2026-07-01", "cash_at_home_bank_in", 1000),
+  transfer("2026-07-02", "grab_wallet", 156.55)
 ];
 
 const cashWithdrawals = [
@@ -83,7 +89,9 @@ const cashWithdrawals = [
   cash("2026-06-07", "cash_at_home", 400, "bank in"),
   cash("2026-06-18", "cash_at_home", 400, "service car"),
   cash("2026-06-20", "cash_at_home", 200, "pocket money"),
-  cash("2026-06-28", "cash_at_home", 400, "pocket money")
+  cash("2026-06-28", "cash_at_home", 400, "pocket money"),
+  cash("2026-07-01", "cash_at_home", 1000, "bank in"),
+  cash("2026-07-01", "cash_at_home", 300, "loose cash")
 ];
 
 const refund = { id: "refund_grab_2026_05_13", date: "2026-05-13", amount: 170, type: "refund_reimbursement", source: "Grab" };
@@ -117,7 +125,7 @@ const baseTotals = daily.reduce((acc, item) => {
 
 const preGrabExpensesTotal = setupExpenses.reduce((sum, item) => sum + item.amount, 0);
 const timelineTotals = {
-  scope: "timeline_import_2026_05_07_to_2026_06_28",
+  scope: "timeline_import_2026_05_07_to_2026_07_02",
   operatingSales: round(baseTotals.operatingSales),
   salesWithRefunds: round(baseTotals.operatingSales + refund.amount),
   operatingCost: round(baseTotals.operatingCost),
