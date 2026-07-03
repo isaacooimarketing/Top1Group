@@ -2128,7 +2128,10 @@ function bindSidebar() {
       editingDriverId = null;
       driverFormDirty = false;
       const saved = await persistState();
-      if (status === "Finished" && saved) showDailySummary(session, cashBefore);
+      if (status === "Finished" && saved) {
+        showDailySummary(session, cashBefore);
+        render();
+      }
     });
     document.querySelectorAll("[data-edit-driver]").forEach(button => {
       button.addEventListener("click", () => {

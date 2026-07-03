@@ -103,6 +103,12 @@ test("finished grab records do not keep the driver form in edit mode", () => {
   assert.match(js, /record\.status === "In Progress"/);
 });
 
+test("finish today rerenders sidebar so completed inputs clear immediately", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /if \(status === "Finished" && saved\) \{\s*showDailySummary\(session, cashBefore\);\s*render\(\);\s*\}/);
+});
+
 test("cash confirmation can be split between petty cash and cash at home", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
