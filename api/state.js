@@ -80,12 +80,15 @@ function hasIdPrefix(item, prefixes) {
   return prefixes.some(prefix => id.startsWith(prefix));
 }
 
-function mergeListByImportedPrefixes(cloudList = [], bundledList = [], prefixes = []) {
+function mergeListByImportedPrefixes(cloudList = [], bundledList = [], prefixes = [], options = {}) {
   const bundledImported = (bundledList || []).filter(item => hasIdPrefix(item, prefixes));
   const bundledIds = new Set(bundledImported.map(item => item.id));
+  const bundledDates = options.replaceSameDate
+    ? new Set(bundledImported.map(item => item.date).filter(Boolean))
+    : new Set();
   const keptCloud = (cloudList || []).filter(item => {
     if (!item?.id) return true;
-    return !hasIdPrefix(item, prefixes) && !bundledIds.has(item.id);
+    return !hasIdPrefix(item, prefixes) && !bundledIds.has(item.id) && !bundledDates.has(item.date);
   });
   return [...keptCloud, ...bundledImported];
 }
@@ -104,7 +107,7 @@ function mergeBundledTimelineState(cloudState = {}, bundledState = readBundledSt
     driverSessions: mergeListByImportedPrefixes(base.driverSessions, bundled.driverSessions, [
       "drive_timeline_",
       "drive_import_2026_06_"
-    ]),
+    ], { replaceSameDate: true }),
     driverRawRecords: mergeListByImportedPrefixes(base.driverRawRecords, bundled.driverRawRecords, [
       "raw_timeline_",
       "refund_grab_"
