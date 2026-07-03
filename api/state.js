@@ -75,6 +75,67 @@ function newWorkspaceState() {
   };
 }
 
+function hasIdPrefix(item, prefixes) {
+  const id = String(item?.id || "");
+  return prefixes.some(prefix => id.startsWith(prefix));
+}
+
+function mergeListByImportedPrefixes(cloudList = [], bundledList = [], prefixes = []) {
+  const bundledImported = (bundledList || []).filter(item => hasIdPrefix(item, prefixes));
+  const bundledIds = new Set(bundledImported.map(item => item.id));
+  const keptCloud = (cloudList || []).filter(item => {
+    if (!item?.id) return true;
+    return !hasIdPrefix(item, prefixes) && !bundledIds.has(item.id);
+  });
+  return [...keptCloud, ...bundledImported];
+}
+
+function shouldHydrateBundledTimeline(user) {
+  return String(user?.email || "").toLowerCase() === "isaac@top1group.com";
+}
+
+function mergeBundledTimelineState(cloudState = {}, bundledState = readBundledState()) {
+  const base = cloudState && typeof cloudState === "object" ? cloudState : {};
+  const bundled = bundledState && typeof bundledState === "object" ? bundledState : readBundledState();
+
+  return {
+    ...base,
+    businesses: base.businesses?.length ? base.businesses : bundled.businesses,
+    driverSessions: mergeListByImportedPrefixes(base.driverSessions, bundled.driverSessions, [
+      "drive_timeline_",
+      "drive_import_2026_06_"
+    ]),
+    driverRawRecords: mergeListByImportedPrefixes(base.driverRawRecords, bundled.driverRawRecords, [
+      "raw_timeline_",
+      "refund_grab_"
+    ]),
+    events: mergeListByImportedPrefixes(base.events, bundled.events, [
+      "event_legacy_driver_drive_timeline_",
+      "event_legacy_driver_drive_import_2026_06_"
+    ]),
+    incomeEntries: mergeListByImportedPrefixes(base.incomeEntries, bundled.incomeEntries, [
+      "income_legacy_driver_drive_timeline_",
+      "income_legacy_driver_drive_import_2026_06_"
+    ]),
+    activityLogs: mergeListByImportedPrefixes(base.activityLogs, bundled.activityLogs, [
+      "log_driver_timeline_"
+    ]),
+    bankTransfers: mergeListByImportedPrefixes(base.bankTransfers, bundled.bankTransfers, [
+      "bank_timeline_"
+    ]),
+    cashLedger: mergeListByImportedPrefixes(base.cashLedger, bundled.cashLedger, [
+      "cash_timeline_"
+    ]),
+    driverAnalytics: bundled.driverAnalytics && Object.keys(bundled.driverAnalytics).length
+      ? bundled.driverAnalytics
+      : base.driverAnalytics,
+    grabSettings: {
+      ...(bundled.grabSettings || {}),
+      ...(base.grabSettings || {})
+    }
+  };
+}
+
 function hasSupabaseConfig() {
   return Boolean(supabaseUrl && supabaseKey);
 }
@@ -135,7 +196,7 @@ async function writeCloudState(user, accessToken, nextState) {
   return rows[0]?.state || cleanState;
 }
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const accessToken = bearerToken(req.headers.authorization);
 
@@ -152,8 +213,15 @@ module.exports = async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const cloudState = hasSupabaseConfig() ? await readCloudState(user, accessToken) : readBundledState();
-      res.status(200).json(cloudState || newWorkspaceState());
+      const bundledState = readBundledState();
+      const cloudState = hasSupabaseConfig() ? await readCloudState(user, accessToken) : bundledState;
+      const fallbackState = shouldHydrateBundledTimeline(user) ? bundledState : newWorkspaceState();
+      const state = cloudState || fallbackState;
+      res.status(200).json(
+        shouldHydrateBundledTimeline(user)
+          ? mergeBundledTimelineState(state, bundledState)
+          : state
+      );
     } catch (error) {
       res.status(502).json({ error: "Unable to read cloud state", detail: error.message });
     }
@@ -181,4 +249,8 @@ module.exports = async function handler(req, res) {
 
   res.setHeader("Allow", "GET, POST");
   res.status(405).json({ error: "Method not allowed" });
-};
+}
+
+module.exports = handler;
+module.exports.mergeBundledTimelineState = mergeBundledTimelineState;
+module.exports.shouldHydrateBundledTimeline = shouldHydrateBundledTimeline;
