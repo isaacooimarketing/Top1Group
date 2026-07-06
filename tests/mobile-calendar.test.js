@@ -118,6 +118,22 @@ test("cash confirmation can be split between petty cash and cash at home", () =>
   assert.match(js, /type: "cash_adjustment"/);
 });
 
+test("daily summary includes pending cash confirmations", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function summaryPendingMarkup/);
+  assert.match(js, /summaryPendingMarkup\(record\)/);
+  assert.match(js, /bindPendingConfirmControls\(\$\(("#|')dailySummaryDialog/);
+});
+
+test("put at home pending input starts blank for faster mobile entry", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /data-pending-home/);
+  assert.doesNotMatch(js, /data-pending-home="\$\{item\.id\}"[^>]*value="0\.00"/);
+  assert.match(js, /data-pending-home="\$\{item\.id\}"[^>]*placeholder="0\.00"/);
+});
+
 test("mobile disables canvas particle animation for smoother input", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

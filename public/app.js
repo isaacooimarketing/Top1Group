@@ -1839,7 +1839,7 @@ function pendingItem(item) {
       <div><strong>${escapeHtml(item.label)}</strong><span>${money.format(item.amount)}</span></div>
       <div class="pending-split">
         <label>Keep Petty Cash <input data-pending-petty="${item.id}" type="number" step="0.01" value="${num(item.amount).toFixed(2)}"></label>
-        <label>Put At Home <input data-pending-home="${item.id}" type="number" step="0.01" value="0.00"></label>
+        <label>Put At Home <input data-pending-home="${item.id}" type="number" step="0.01" placeholder="0.00"></label>
       </div>
       <button class="primary-action" type="button" data-confirm-pending="${item.id}">Confirm</button>
     </article>`;
@@ -1848,6 +1848,14 @@ function pendingItem(item) {
     <div><strong>${escapeHtml(item.label)}</strong><span>${money.format(item.amount)}</span></div>
     <button class="primary-action" type="button" data-confirm-pending="${item.id}">Confirm</button>
   </article>`;
+}
+
+function summaryPendingMarkup(record) {
+  const pending = state.pendingCashActions.filter(item => item.sourceId === record.id);
+  return pending.length ? `<section class="summary-confirmations">
+    <h3>Cash Confirmation</h3>
+    <div class="pending-list">${pending.map(pendingItem).join("")}</div>
+  </section>` : "";
 }
 
 function cashToolsMarkup() {
@@ -2067,10 +2075,34 @@ function showDailySummary(record, cashBeforeValue = null) {
     <p>Cash Movement</p>
     <div><span>Previous Total Cash<strong>${money.format(summary.cashBefore)}</strong></span><b>+</b><span>Today's Cash<strong>${money.format(summary.confirmedCash)}</strong></span><b>=</b><span>New Total Cash<strong>${money.format(summary.cashAfter)}</strong></span></div>
     <small>Petty Cash ${money.format(summary.pettyCash)} + Cash At Home ${money.format(summary.cashAtHome)} = ${money.format(summary.totalCash)}</small>
-  </section>`;
+  </section>
+  ${summaryPendingMarkup(record)}`;
   const editButton = $("#dailySummaryEdit");
   if (editButton) editButton.dataset.editSummary = record.id;
-  $("#dailySummaryDialog").showModal();
+  bindPendingConfirmControls($("#dailySummaryDialog"));
+  const dialog = $("#dailySummaryDialog");
+  if (!dialog.open) dialog.showModal();
+}
+
+function bindPendingConfirmControls(root = document) {
+  root.querySelectorAll("[data-confirm-pending]").forEach(button => {
+    if (button.dataset.pendingBound) return;
+    button.dataset.pendingBound = "true";
+    button.addEventListener("click", async () => {
+      const id = button.dataset.confirmPending;
+      const safeId = window.CSS?.escape ? CSS.escape(id) : id;
+      const pettyInput = document.querySelector(`[data-pending-petty="${safeId}"]`);
+      const homeInput = document.querySelector(`[data-pending-home="${safeId}"]`);
+      confirmPending(id, pettyInput || homeInput ? {
+        pettyCash: pettyInput?.value || 0,
+        cashAtHome: homeInput?.value || 0
+      } : null);
+      await persistState();
+      render();
+      const record = summaryRecordId ? state.driverSessions.find(item => item.id === summaryRecordId) : null;
+      if (record && $("#dailySummaryDialog")?.open) showDailySummary(record);
+    });
+  });
 }
 
 function bindSidebar() {
@@ -2147,19 +2179,7 @@ function bindSidebar() {
     });
   }
 
-  document.querySelectorAll("[data-confirm-pending]").forEach(button => {
-    button.addEventListener("click", () => {
-      const id = button.dataset.confirmPending;
-      const safeId = window.CSS?.escape ? CSS.escape(id) : id;
-      const pettyInput = document.querySelector(`[data-pending-petty="${safeId}"]`);
-      const homeInput = document.querySelector(`[data-pending-home="${safeId}"]`);
-      confirmPending(id, pettyInput || homeInput ? {
-        pettyCash: pettyInput?.value || 0,
-        cashAtHome: homeInput?.value || 0
-      } : null);
-      persistState();
-    });
-  });
+  bindPendingConfirmControls(document);
 
   document.querySelectorAll("[data-view-summary]").forEach(button => {
     button.addEventListener("click", () => {
