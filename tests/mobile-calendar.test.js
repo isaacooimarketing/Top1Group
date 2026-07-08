@@ -126,12 +126,31 @@ test("daily summary includes pending cash confirmations", () => {
   assert.match(js, /bindPendingConfirmControls\(\$\(("#|')dailySummaryDialog/);
 });
 
+test("daily summary shows cash at home plus petty cash equation", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.doesNotMatch(js, /Previous Total Cash/);
+  assert.doesNotMatch(js, /Today's Cash/);
+  assert.doesNotMatch(js, /New Total Cash/);
+  assert.match(js, /Cash At Home/);
+  assert.match(js, /Petty Cash/);
+  assert.match(js, /summary\.availablePettyCash/);
+});
+
 test("put at home pending input starts blank for faster mobile entry", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
   assert.match(js, /data-pending-home/);
   assert.doesNotMatch(js, /data-pending-home="\$\{item\.id\}"[^>]*value="0\.00"/);
   assert.match(js, /data-pending-home="\$\{item\.id\}"[^>]*placeholder="0\.00"/);
+});
+
+test("cash collected confirmation sets final petty cash instead of adding it twice", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const availablePettyCash = current\.pettyCash \+ total/);
+  assert.match(js, /amount: requestedPetty - current\.pettyCash/);
+  assert.match(js, /amount: requestedHome/);
 });
 
 test("mobile disables canvas particle animation for smoother input", () => {

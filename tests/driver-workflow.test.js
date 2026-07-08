@@ -54,6 +54,21 @@ test("buildDailySummary includes execution, income, cost, and cash movement", ()
   assert.equal(summary.net, 320);
 });
 
+test("buildDailySummary separates cash equation from on-hand cash allocation", () => {
+  const summary = buildDailySummary({
+    record: { date: "2026-07-08", totalTrips: 18 },
+    metrics: { cashIncome: 142 },
+    confirmedCash: 142,
+    pettyCash: 190,
+    cashAtHome: 550
+  });
+
+  assert.equal(summary.cashAtHome, 550);
+  assert.equal(summary.pettyCash, 190);
+  assert.equal(summary.totalCash, 740);
+  assert.equal(summary.availablePettyCash, 332);
+});
+
 test("petrolTotals separates operating cost from credit-card liability", () => {
   const entries = [
     normalizePetrolEntry({ amount: 100, station: "Petron", paymentMethod: "Credit Card" }),

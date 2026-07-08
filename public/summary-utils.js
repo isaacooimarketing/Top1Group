@@ -31,7 +31,8 @@
       cashAfter: number(cashBefore) + number(confirmedCash),
       pettyCash: number(pettyCash),
       cashAtHome: number(cashAtHome),
-      totalCash: number(pettyCash) + number(cashAtHome)
+      totalCash: number(pettyCash) + number(cashAtHome),
+      availablePettyCash: number(pettyCash) + number(confirmedCash)
     };
   }
 

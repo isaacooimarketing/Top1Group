@@ -1253,12 +1253,15 @@ function confirmPending(id, allocation = null) {
   if (!action) return;
   if (action.type === "cash_collected_to_petty") {
     const total = num(action.amount);
-    const requestedPetty = allocation ? num(allocation.pettyCash) : total;
-    const requestedHome = allocation ? num(allocation.cashAtHome) : 0;
-    const hasAllocation = Math.abs(requestedPetty) > 0.004 || Math.abs(requestedHome) > 0.004;
+    const current = cashBalances();
+    const availablePettyCash = current.pettyCash + total;
+    const requestedHome = allocation && hasValue(allocation.cashAtHome) ? num(allocation.cashAtHome) : 0;
+    const requestedPetty = allocation && hasValue(allocation.pettyCash)
+      ? num(allocation.pettyCash)
+      : availablePettyCash - requestedHome;
     const lines = [
-      { account: "petty_cash", amount: hasAllocation ? requestedPetty : total },
-      { account: "cash_at_home", amount: hasAllocation ? requestedHome : 0 }
+      { account: "petty_cash", amount: requestedPetty - current.pettyCash },
+      { account: "cash_at_home", amount: requestedHome }
     ];
     lines.filter(item => Math.abs(item.amount) > 0.004).forEach(item => {
       state.cashLedger.push({
@@ -1835,10 +1838,13 @@ function petrolLiabilityMarkup() {
 
 function pendingItem(item) {
   if (item.type === "cash_collected_to_petty") {
+    const balances = cashBalances();
+    const availablePettyCash = balances.pettyCash + num(item.amount);
     return `<article class="pending-item split-pending-item">
-      <div><strong>${escapeHtml(item.label)}</strong><span>${money.format(item.amount)}</span></div>
+      <div><strong>Set today's cash position</strong><span>${money.format(availablePettyCash)}</span></div>
+      <small>Petty Cash ${money.format(balances.pettyCash)} + Cash Collected ${money.format(num(item.amount))}</small>
       <div class="pending-split">
-        <label>Keep Petty Cash <input data-pending-petty="${item.id}" type="number" step="0.01" value="${num(item.amount).toFixed(2)}"></label>
+        <label>Final Petty Cash <input data-pending-petty="${item.id}" type="number" step="0.01" value="${availablePettyCash.toFixed(2)}"></label>
         <label>Put At Home <input data-pending-home="${item.id}" type="number" step="0.01" placeholder="0.00"></label>
       </div>
       <button class="primary-action" type="button" data-confirm-pending="${item.id}">Confirm</button>
@@ -2072,9 +2078,9 @@ function showDailySummary(record, cashBeforeValue = null) {
     </section>
   </div>
   <section class="cash-flow-summary">
-    <p>Cash Movement</p>
-    <div><span>Previous Total Cash<strong>${money.format(summary.cashBefore)}</strong></span><b>+</b><span>Today's Cash<strong>${money.format(summary.confirmedCash)}</strong></span><b>=</b><span>New Total Cash<strong>${money.format(summary.cashAfter)}</strong></span></div>
-    <small>Petty Cash ${money.format(summary.pettyCash)} + Cash At Home ${money.format(summary.cashAtHome)} = ${money.format(summary.totalCash)}</small>
+    <p>Cash Position</p>
+    <div><span>Cash At Home<strong>${money.format(summary.cashAtHome)}</strong></span><b>+</b><span>Petty Cash<strong>${money.format(summary.pettyCash)}</strong></span><b>=</b><span>Total Cash<strong>${money.format(summary.totalCash)}</strong></span></div>
+    <small>Available on hand after today: Petty Cash ${money.format(summary.pettyCash)} + Cash Collected ${money.format(summary.confirmedCash)} = ${money.format(summary.availablePettyCash)}</small>
   </section>
   ${summaryPendingMarkup(record)}`;
   const editButton = $("#dailySummaryEdit");
