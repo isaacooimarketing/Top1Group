@@ -137,6 +137,18 @@ test("daily summary shows cash at home plus petty cash equation", () => {
   assert.match(js, /summary\.availablePettyCash/);
 });
 
+test("daily summary projects today's cash before cash confirmation", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const cashPending = state\.pendingCashActions\.find/);
+  assert.match(js, /const displayPettyCash = cashPending \? summary\.availablePettyCash : summary\.pettyCash/);
+  assert.match(js, /const displayCashAtHome = summary\.cashAtHome/);
+  assert.match(js, /const displayTotalCash = displayCashAtHome \+ displayPettyCash/);
+  assert.match(js, /money\.format\(displayCashAtHome\)/);
+  assert.match(js, /money\.format\(displayPettyCash\)/);
+  assert.match(js, /money\.format\(displayTotalCash\)/);
+});
+
 test("put at home pending input starts blank for faster mobile entry", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
@@ -151,6 +163,24 @@ test("cash collected confirmation sets final petty cash instead of adding it twi
   assert.match(js, /const availablePettyCash = current\.pettyCash \+ total/);
   assert.match(js, /amount: requestedPetty - current\.pettyCash/);
   assert.match(js, /amount: requestedHome/);
+});
+
+test("pending cash confirmation reads inputs from the clicked confirmation card", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const pendingCard = button\.closest\("\.pending-item"\) \|\| root/);
+  assert.match(js, /pendingCard\.querySelector\(`\[data-pending-petty="\$\{safeId\}"\]`\)/);
+  assert.match(js, /pendingCard\.querySelector\(`\[data-pending-home="\$\{safeId\}"\]`\)/);
+  assert.doesNotMatch(js, /const pettyInput = document\.querySelector\(`\[data-pending-petty="\$\{safeId\}"\]`\)/);
+});
+
+test("grab cash wallet shortfall is not auto-counted as top-up cost", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.doesNotMatch(js, /Grab Wallet Top-Up Cost/);
+  assert.doesNotMatch(js, /<span>Grab Wallet Top-Up<\/span>/);
+  assert.doesNotMatch(js, /Math\.max\(0, -walletMove\)/);
+  assert.match(js, /grabWalletTopUp: 0/);
 });
 
 test("mobile disables canvas particle animation for smoother input", () => {

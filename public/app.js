@@ -1106,10 +1106,9 @@ function grabDailyMetrics(record = {}) {
   const tngIncome = Math.max(0, tngMove);
   const tngCost = Math.max(0, -tngMove);
   const grabWalletIncome = Math.max(0, walletMove);
-  const grabWalletTopUp = Math.max(0, -walletMove);
   const income = cash + tngIncome + grabWalletIncome;
   const toll = smartTagCost + tngCost;
-  const cost = petrol + toll + grabWalletTopUp;
+  const cost = petrol + toll;
   return {
     hours,
     trips: num(record.totalTrips),
@@ -1125,7 +1124,7 @@ function grabDailyMetrics(record = {}) {
     toll,
     petrol,
     grabWalletIncome,
-    grabWalletTopUp,
+    grabWalletTopUp: 0,
     walletOpening,
     walletEnding,
     walletMove,
@@ -1151,9 +1150,8 @@ function totalsForRecords(records) {
     acc.trips += num(item.totalTrips);
     acc.petrol += item.driverIncomeModel === "grab_v13" ? metrics.petrol : num(item.petrolCost || item.metadata?.petrolCost);
     acc.toll += item.driverIncomeModel === "grab_v13" ? metrics.toll : num(item.smartTagReduction || item.metadata?.smartTagReduction);
-    acc.grabTopUp += item.driverIncomeModel === "grab_v13" ? metrics.grabWalletTopUp : 0;
     return acc;
-  }, { income: 0, cost: 0, net: 0, hours: 0, trips: 0, petrol: 0, toll: 0, grabTopUp: 0 });
+  }, { income: 0, cost: 0, net: 0, hours: 0, trips: 0, petrol: 0, toll: 0 });
 }
 
 function weekRecords(dateIso = selectedDate) {
@@ -1555,14 +1553,13 @@ function weeklyBreakdown(type) {
     if (metrics && type === "cost") {
       acc["Petrol"] += metrics.petrol;
       acc["Toll"] += metrics.toll;
-      acc["Grab Wallet Top-Up"] += metrics.grabWalletTopUp;
     }
     if (!metrics && type === "income") acc["Imported Summary"] += driverMetrics(item).income;
     if (!metrics && type === "cost") acc["Imported Summary"] += driverMetrics(item).cost;
     return acc;
   }, type === "income"
     ? { "Cash": 0, "TNG QR": 0, "Grab Wallet": 0, "Imported Summary": 0 }
-    : { "Petrol": 0, "Toll": 0, "Grab Wallet Top-Up": 0, "Imported Summary": 0 });
+    : { "Petrol": 0, "Toll": 0, "Imported Summary": 0 });
 }
 
 function breakdownBars(title, data) {
@@ -1724,7 +1721,6 @@ function driverSidebar() {
     ${field("Cash Collected Today", "cashCollected", "number", editing.cashCollected || editing.cashReceived || "")}
     ${petrolFields(editing)}
     ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
-    <div class="field"><label>Grab Wallet Top-Up Cost</label><input disabled value="${moneySafe(metrics.grabWalletTopUp)}"></div>
     <div class="field full"><label>Remark</label><textarea name="remark">${escapeHtml(editing.remark || "")}</textarea></div>
     <div class="action-row full">
       <button class="secondary-action" name="saveTemp" type="submit">Temporarily Save</button>
@@ -2052,6 +2048,13 @@ function summaryForRecord(record, cashBeforeValue = null) {
 function showDailySummary(record, cashBeforeValue = null) {
   summaryRecordId = record.id;
   const summary = summaryForRecord(record, cashBeforeValue);
+  const cashPending = state.pendingCashActions.find(item => item.sourceId === record.id && item.type === "cash_collected_to_petty");
+  const displayCashAtHome = summary.cashAtHome;
+  const displayPettyCash = cashPending ? summary.availablePettyCash : summary.pettyCash;
+  const displayTotalCash = displayCashAtHome + displayPettyCash;
+  const pendingCashNote = cashPending
+    ? `<small>Available on hand after today: Petty Cash ${money.format(summary.pettyCash)} + Cash Collected ${money.format(summary.confirmedCash)} = ${money.format(summary.availablePettyCash)}</small>`
+    : "";
   $("#dailySummaryTitle").textContent = dateFmt.format(parseDate(summary.date));
   $("#dailySummaryBody").innerHTML = `<section class="summary-hero">
     <div><span>Net Profit</span><strong>${money.format(summary.net)}</strong></div>
@@ -2074,13 +2077,12 @@ function showDailySummary(record, cashBeforeValue = null) {
       <h3>Cost</h3>
       <div class="summary-line"><span>Petrol</span><strong>${money.format(summary.costSources.petrol)}</strong></div>
       <div class="summary-line"><span>Toll / SmartTAG</span><strong>${money.format(summary.costSources.toll)}</strong></div>
-      <div class="summary-line"><span>Grab Wallet Top-Up</span><strong>${money.format(summary.costSources.grabWalletTopUp)}</strong></div>
     </section>
   </div>
   <section class="cash-flow-summary">
     <p>Cash Position</p>
-    <div><span>Cash At Home<strong>${money.format(summary.cashAtHome)}</strong></span><b>+</b><span>Petty Cash<strong>${money.format(summary.pettyCash)}</strong></span><b>=</b><span>Total Cash<strong>${money.format(summary.totalCash)}</strong></span></div>
-    <small>Available on hand after today: Petty Cash ${money.format(summary.pettyCash)} + Cash Collected ${money.format(summary.confirmedCash)} = ${money.format(summary.availablePettyCash)}</small>
+    <div><span>Cash At Home<strong>${money.format(displayCashAtHome)}</strong></span><b>+</b><span>Petty Cash<strong>${money.format(displayPettyCash)}</strong></span><b>=</b><span>Total Cash<strong>${money.format(displayTotalCash)}</strong></span></div>
+    ${pendingCashNote}
   </section>
   ${summaryPendingMarkup(record)}`;
   const editButton = $("#dailySummaryEdit");
@@ -2097,8 +2099,9 @@ function bindPendingConfirmControls(root = document) {
     button.addEventListener("click", async () => {
       const id = button.dataset.confirmPending;
       const safeId = window.CSS?.escape ? CSS.escape(id) : id;
-      const pettyInput = document.querySelector(`[data-pending-petty="${safeId}"]`);
-      const homeInput = document.querySelector(`[data-pending-home="${safeId}"]`);
+      const pendingCard = button.closest(".pending-item") || root;
+      const pettyInput = pendingCard.querySelector(`[data-pending-petty="${safeId}"]`);
+      const homeInput = pendingCard.querySelector(`[data-pending-home="${safeId}"]`);
       confirmPending(id, pettyInput || homeInput ? {
         pettyCash: pettyInput?.value || 0,
         cashAtHome: homeInput?.value || 0
