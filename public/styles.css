@@ -3227,3 +3227,264 @@ body.theme-light .bottom-nav-add {
     flex-wrap: wrap;
   }
 }
+
+/* Final light polish layer: keep the whole driver app visually consistent. */
+body.theme-light {
+  --ink: #141917;
+  --muted: #55645f;
+  --line: rgba(31, 64, 53, 0.12);
+  --line-strong: rgba(31, 64, 53, 0.20);
+}
+
+body.theme-light .dashboard-target-card,
+body.theme-light .dashboard-mini-card,
+body.theme-light .achievement-card,
+body.theme-light .planning-panel,
+body.theme-light .workspace-panel,
+body.theme-light .grab-stats-panel,
+body.theme-light .stat-card,
+body.theme-light .breakdown-card,
+body.theme-light .cash-panel,
+body.theme-light .grab-day-summary,
+body.theme-light .record-details {
+  border: 1px solid rgba(31, 64, 53, 0.12);
+  background: linear-gradient(180deg, #ffffff, #fbfcf9);
+  box-shadow:
+    0 14px 34px rgba(31, 64, 53, 0.10),
+    0 1px 0 rgba(255, 255, 255, 0.92) inset;
+}
+
+body.theme-light .dashboard-target-card {
+  background: linear-gradient(135deg, #b7f4c6 0%, #dff9e6 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .stat-card:nth-child(1) {
+  background: linear-gradient(180deg, #ffffff, #eef8f1);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .stat-card:nth-child(2) {
+  background: linear-gradient(180deg, #ffffff, #f5fbf7);
+}
+
+body.theme-light .dashboard-mini-card.warm,
+body.theme-light .stat-card:nth-child(3),
+body.theme-light .stat-card:nth-child(4) {
+  background: linear-gradient(180deg, #ffffff, #fff8ec);
+}
+
+body.theme-light .dashboard-target-card p {
+  color: rgba(20, 55, 42, 0.72);
+}
+
+body.theme-light .planning-panel,
+body.theme-light .workspace-panel,
+body.theme-light .grab-stats-panel {
+  overflow: hidden;
+}
+
+body.theme-light .calendar-scroll {
+  background: #ffffff;
+}
+
+body.theme-light .weekday-row {
+  border-color: rgba(31, 64, 53, 0.10);
+  background: #f7faf6;
+}
+
+body.theme-light .weekday-row span {
+  color: #52645f;
+}
+
+body.theme-light .calendar-grid {
+  background: #ffffff;
+}
+
+body.theme-light .day-card {
+  border-color: rgba(31, 64, 53, 0.09);
+  color: #151a18;
+  background: #ffffff;
+}
+
+body.theme-light .grab-calendar-panel .day-card {
+  background: #ffffff;
+}
+
+body.theme-light .grab-calendar-panel .day-card:hover,
+body.theme-light .grab-calendar-panel .day-card.selected {
+  background: #fbfdf9;
+  box-shadow: inset 0 0 0 1px rgba(20, 126, 78, 0.22);
+}
+
+body.theme-light .week-summary-card,
+body.theme-light .week-summary-card.complete {
+  border-right: 1px solid rgba(31, 64, 53, 0.10);
+  border-bottom: 1px solid rgba(31, 64, 53, 0.10);
+  background: linear-gradient(180deg, #eef8f1, #ffffff);
+}
+
+body.theme-light .week-summary-card span,
+body.theme-light .week-summary-card small {
+  color: #66736f;
+}
+
+body.theme-light .week-summary-card strong {
+  color: #173f35;
+}
+
+body.theme-light .week-summary-card i {
+  background: rgba(31, 64, 53, 0.10);
+}
+
+body.theme-light .week-summary-card b {
+  background: linear-gradient(90deg, #4aa3ff, #4ed4ca, #d6b83d);
+}
+
+body.theme-light .driver-mini {
+  border-color: rgba(31, 64, 53, 0.12);
+  color: #31413c;
+  background: #f8faf7;
+}
+
+body.theme-light .driver-mini.rest {
+  color: #7a8581;
+  border-color: rgba(31, 64, 53, 0.16);
+  background: #fbfbfa;
+}
+
+body.theme-light .driver-mini .day-status {
+  color: #4d5c57;
+}
+
+body.theme-light .driver-mini .net-profit,
+body.theme-light .driver-mini.finished.net-neutral .net-profit {
+  color: #111816;
+  text-shadow: none;
+}
+
+body.theme-light .driver-mini.finished.net-blue-light {
+  border-color: rgba(52, 132, 224, 0.22);
+  border-left-color: #8ec5ff;
+  background: #f3f8ff;
+}
+
+body.theme-light .driver-mini.finished.net-blue-light .net-profit {
+  color: #276fb8;
+}
+
+body.theme-light .driver-mini.finished.net-blue-deep {
+  border-color: rgba(52, 116, 218, 0.26);
+  border-left-color: #4d91f2;
+  background: #edf5ff;
+}
+
+body.theme-light .driver-mini.finished.net-blue-deep .net-profit {
+  color: #195eaa;
+}
+
+body.theme-light .driver-mini.finished.net-cyan-light,
+body.theme-light .driver-mini.finished.net-cyan-deep {
+  border-color: rgba(32, 153, 157, 0.26);
+  border-left-color: #27bfc4;
+  background: #effcfa;
+}
+
+body.theme-light .driver-mini.finished.net-cyan-light .net-profit,
+body.theme-light .driver-mini.finished.net-cyan-deep .net-profit {
+  color: #087b82;
+}
+
+body.theme-light .driver-mini.finished.net-gold {
+  border-color: rgba(189, 151, 40, 0.30);
+  border-left-color: #d2ac37;
+  background: #fff8df;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+}
+
+body.theme-light .driver-mini.finished.net-gold .net-profit {
+  color: #8f6900;
+  text-shadow: none;
+}
+
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light .time-input-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+body.theme-light .time-display {
+  color: #151a18;
+}
+
+body.theme-light .workspace-panel label,
+body.theme-light .form-grid > *,
+body.theme-light .time-input-wrap {
+  min-width: 0;
+}
+
+body.theme-light .stats-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.theme-light .breakdown-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.theme-light .bar-row {
+  border-color: rgba(31, 64, 53, 0.10);
+  background: #fbfcf9;
+}
+
+body.theme-light .bar-row div {
+  background: rgba(31, 64, 53, 0.08);
+}
+
+body.theme-light .bottom-nav {
+  bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 620px) {
+  body.theme-light .app-shell {
+    width: 100%;
+    padding: 18px 18px 112px;
+  }
+
+  body.theme-light .planning-panel,
+  body.theme-light .workspace-panel,
+  body.theme-light .grab-stats-panel {
+    padding: 18px;
+  }
+
+  body.theme-light .calendar-scroll {
+    width: calc(100% + 36px);
+    margin: 0 -18px -18px;
+  }
+
+  body.theme-light .week-summary-card,
+  body.theme-light .week-summary-card.complete {
+    background: linear-gradient(180deg, #eef8f1, #ffffff);
+  }
+
+  body.theme-light .stats-grid,
+  body.theme-light .breakdown-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  body.theme-light .stat-card,
+  body.theme-light .breakdown-card {
+    padding: 15px;
+  }
+
+  body.theme-light .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.theme-light .bottom-nav {
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}

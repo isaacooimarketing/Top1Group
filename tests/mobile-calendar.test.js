@@ -141,6 +141,16 @@ test("clean light visual system is fixed and mobile centered", () => {
   assert.match(css, /body\.theme-light \.dashboard-net-card\s*\{[^}]*background:\s*#11844f;/s);
 });
 
+test("light calendar and form controls stay readable on mobile", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /body\.theme-light \.week-summary-card,[\s\S]*?background:\s*linear-gradient\(180deg,\s*#eef8f1,\s*#ffffff\)/);
+  assert.match(css, /body\.theme-light \.driver-mini\.finished\.net-gold \.net-profit\s*\{[^}]*color:\s*#8f6900;/s);
+  assert.match(css, /body\.theme-light input,[\s\S]*?body\.theme-light \.time-input-wrap\s*\{[^}]*max-width:\s*100%;/s);
+  assert.match(css, /body\.theme-light \.stats-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*bottom:\s*max\(8px,\s*env\(safe-area-inset-bottom\)\)/s);
+});
+
 test("finished grab records do not keep the driver form in edit mode", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
