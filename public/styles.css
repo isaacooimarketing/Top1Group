@@ -1,10 +1,10 @@
 :root {
   color-scheme: dark;
-  --bg: #090b0f;
-  --bg-2: #11141a;
-  --panel: rgba(19, 22, 29, 0.88);
-  --panel-strong: rgba(14, 16, 21, 0.97);
-  --panel-soft: rgba(255, 255, 255, 0.06);
+  --bg: #000000;
+  --bg-2: #050505;
+  --panel: rgba(11, 12, 14, 0.88);
+  --panel-strong: rgba(4, 5, 7, 0.96);
+  --panel-soft: rgba(18, 19, 22, 0.74);
   --ink: #f4f0e7;
   --muted: #b1aa9d;
   --line: rgba(255, 255, 255, 0.12);
@@ -68,10 +68,9 @@ body {
   overflow-x: hidden;
   color: var(--ink);
   background:
-    radial-gradient(circle at 18% 8%, rgba(212, 175, 55, 0.13), transparent 28%),
-    radial-gradient(circle at 90% 18%, rgba(53, 208, 127, 0.08), transparent 30%),
-    radial-gradient(circle at 52% 105%, rgba(144, 169, 201, 0.08), transparent 36%),
-    linear-gradient(180deg, #12161d 0%, #090b0f 48%, #050608 100%);
+    radial-gradient(circle at 18% 8%, rgba(212, 175, 55, 0.10), transparent 28%),
+    radial-gradient(circle at 88% 14%, rgba(255, 255, 255, 0.035), transparent 26%),
+    linear-gradient(180deg, #050505 0%, #000000 58%, #000000 100%);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 15px;
   letter-spacing: 0;
@@ -814,9 +813,9 @@ body::after {
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(circle at 44% 12%, rgba(230, 199, 122, 0.08), transparent 34%),
-    radial-gradient(circle at 78% 78%, rgba(53, 208, 127, 0.045), transparent 32%),
-    linear-gradient(180deg, #11141a, #07080b);
+    radial-gradient(circle at 44% 12%, rgba(230, 199, 122, 0.06), transparent 34%),
+    radial-gradient(circle at 78% 78%, rgba(255, 255, 255, 0.018), transparent 32%),
+    linear-gradient(180deg, #050505, #000000);
 }
 
 #spaceParticles,
@@ -838,11 +837,11 @@ body::after {
   inset: -24%;
   background:
     radial-gradient(ellipse at 18% 20%, rgba(212, 175, 55, 0.10), transparent 34%),
-    radial-gradient(ellipse at 78% 28%, rgba(144, 169, 201, 0.08), transparent 35%),
-    radial-gradient(ellipse at 54% 82%, rgba(53, 208, 127, 0.05), transparent 42%),
+    radial-gradient(ellipse at 78% 28%, rgba(255, 255, 255, 0.035), transparent 35%),
+    radial-gradient(ellipse at 54% 82%, rgba(212, 175, 55, 0.035), transparent 42%),
     radial-gradient(ellipse at 36% 48%, rgba(255, 255, 255, 0.035), transparent 30%);
   filter: blur(44px);
-  opacity: 0.62;
+  opacity: 0.46;
   transform: translateZ(0);
   animation: nebulaBreath 52s ease-in-out infinite alternate;
 }
@@ -852,7 +851,7 @@ body::after {
   background:
     conic-gradient(from 198deg at 50% -8%, transparent 0deg, rgba(245, 230, 179, 0.055) 12deg, transparent 26deg, transparent 56deg, rgba(212, 175, 55, 0.04) 70deg, transparent 86deg),
     radial-gradient(ellipse at 50% 0%, rgba(245, 230, 179, 0.10), transparent 42%);
-  opacity: 0.56;
+  opacity: 0.34;
   mix-blend-mode: screen;
   animation: rayDrift 60s ease-in-out infinite alternate;
 }
@@ -872,7 +871,7 @@ button {
   position: relative;
   z-index: 4;
   min-height: 100vh;
-  padding: 28px;
+  padding: 24px 24px 116px;
 }
 
 .app-shell::before,
@@ -896,7 +895,7 @@ button {
 .app-shell::after {
   background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(245, 230, 179, 0.16), transparent 15%);
   mix-blend-mode: screen;
-  opacity: 0.22;
+  opacity: 0.14;
   transition: opacity 180ms ease;
 }
 
@@ -904,8 +903,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 22px;
+  margin-bottom: 22px;
 }
 
 .brand-block {
@@ -932,9 +931,10 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: 38px;
-  line-height: 1.05;
-  font-weight: 820;
+  font-size: clamp(28px, 3vw, 34px);
+  line-height: 1.08;
+  font-weight: 760;
+  letter-spacing: 0;
 }
 
 h2 {
@@ -955,6 +955,14 @@ h2 {
   box-shadow: var(--shadow);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+.gradient-border-surface {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel-strong), var(--panel-strong)) padding-box,
+    linear-gradient(135deg, rgba(245, 230, 179, 0.34), rgba(212, 175, 55, 0.16), rgba(255, 255, 255, 0.08)) border-box;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.26);
 }
 
 .mode-switch {
@@ -1974,7 +1982,7 @@ textarea {
 /* Grab V1.3 calendar-first tracker */
 .grab-tracker {
   display: grid;
-  gap: 18px;
+  gap: 22px;
 }
 
 .driver-dashboard {
@@ -1988,19 +1996,28 @@ textarea {
 .dashboard-net-card,
 .dashboard-mini-card {
   min-width: 0;
-  border: 1px solid rgba(230, 199, 122, 0.16);
+  border: 1px solid transparent;
   border-radius: 16px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 48%),
-    rgba(18, 22, 28, 0.82);
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
+    linear-gradient(rgba(8, 9, 11, 0.88), rgba(8, 9, 11, 0.88)) padding-box,
+    linear-gradient(135deg, rgba(245, 230, 179, 0.28), rgba(212, 175, 55, 0.10), rgba(255, 255, 255, 0.06)) border-box;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.20);
+}
+
+.planning-panel,
+.workspace-panel,
+.grab-stats-panel {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(6, 7, 9, 0.90), rgba(6, 7, 9, 0.90)) padding-box,
+    linear-gradient(135deg, rgba(245, 230, 179, 0.18), rgba(212, 175, 55, 0.07), rgba(255, 255, 255, 0.045)) border-box;
 }
 
 .dashboard-target-card {
-  padding: 20px;
+  padding: 18px;
   background:
-    linear-gradient(135deg, rgba(53, 208, 127, 0.28), rgba(210, 255, 225, 0.08)),
-    rgba(23, 80, 51, 0.78);
+    linear-gradient(rgba(8, 18, 13, 0.88), rgba(8, 18, 13, 0.88)) padding-box,
+    linear-gradient(135deg, rgba(53, 208, 127, 0.52), rgba(245, 230, 179, 0.24), rgba(255, 255, 255, 0.06)) border-box;
 }
 
 .dashboard-card-head {
@@ -2014,17 +2031,17 @@ textarea {
 .dashboard-net-card span,
 .dashboard-mini-card span {
   color: rgba(245, 245, 240, 0.72);
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1.2;
-  font-weight: 760;
+  font-weight: 740;
   letter-spacing: 0;
 }
 
 .dashboard-card-head strong {
   color: #e9fff0;
-  font-size: 25px;
+  font-size: 20px;
   line-height: 1;
-  font-weight: 880;
+  font-weight: 800;
 }
 
 .dashboard-progress {
@@ -2045,7 +2062,7 @@ textarea {
 .dashboard-target-card p {
   margin: 0;
   color: rgba(245, 255, 248, 0.82);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
@@ -2053,19 +2070,19 @@ textarea {
   position: relative;
   grid-row: span 2;
   overflow: hidden;
-  padding: 26px;
+  padding: 24px;
   background:
-    radial-gradient(circle at 84% 18%, rgba(53, 208, 127, 0.22), transparent 32%),
-    linear-gradient(145deg, rgba(20, 128, 78, 0.92), rgba(10, 62, 43, 0.92));
+    radial-gradient(circle at 84% 18%, rgba(53, 208, 127, 0.18), transparent 32%),
+    linear-gradient(145deg, rgba(14, 98, 60, 0.90), rgba(5, 32, 22, 0.94));
 }
 
 .dashboard-net-card strong {
   display: block;
-  margin: 26px 0 12px;
+  margin: 22px 0 12px;
   color: #ffffff;
-  font-size: clamp(42px, 5vw, 70px);
-  line-height: 0.92;
-  font-weight: 900;
+  font-size: clamp(34px, 4vw, 52px);
+  line-height: 0.98;
+  font-weight: 820;
   letter-spacing: 0;
 }
 
@@ -2101,16 +2118,16 @@ textarea {
 .dashboard-mini-card {
   display: grid;
   align-content: center;
-  gap: 10px;
-  min-height: 112px;
-  padding: 18px;
+  gap: 8px;
+  min-height: 96px;
+  padding: 16px;
 }
 
 .dashboard-mini-card strong {
   color: var(--ink);
-  font-size: clamp(23px, 2vw, 32px);
+  font-size: clamp(19px, 1.55vw, 25px);
   line-height: 1.05;
-  font-weight: 880;
+  font-weight: 780;
 }
 
 .dashboard-mini-card.warm {
@@ -2131,19 +2148,19 @@ textarea {
 .grab-day-summary,
 .cash-panel,
 .grab-stats-panel {
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   border-radius: 14px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.065), transparent 46%),
-    rgba(20, 24, 31, 0.76);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.26);
+    linear-gradient(rgba(8, 9, 11, 0.84), rgba(8, 9, 11, 0.84)) padding-box,
+    linear-gradient(135deg, rgba(245, 230, 179, 0.22), rgba(212, 175, 55, 0.08), rgba(255, 255, 255, 0.055)) border-box;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
 }
 
 .achievement-card {
   position: relative;
   min-width: 0;
   overflow: hidden;
-  padding: 18px;
+  padding: 16px;
 }
 
 .achievement-card span,
@@ -2164,9 +2181,9 @@ textarea {
   display: block;
   margin-top: 10px;
   color: var(--ink);
-  font-size: clamp(21px, 2.45vw, 34px);
+  font-size: clamp(18px, 1.8vw, 25px);
   line-height: 1.05;
-  font-weight: 880;
+  font-weight: 780;
   overflow-wrap: anywhere;
 }
 
@@ -2595,6 +2612,64 @@ textarea {
   color: var(--starlight);
 }
 
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(58px, 1fr));
+  gap: 6px;
+  width: min(560px, calc(100vw - 28px));
+  padding: 8px;
+  border: 1px solid rgba(245, 230, 179, 0.16);
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.88);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 255, 255, 0.035) inset;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: translateX(-50%);
+}
+
+.bottom-nav button {
+  display: grid;
+  min-width: 0;
+  height: 48px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  color: rgba(245, 240, 231, 0.68);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: 0;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.bottom-nav button:hover,
+.bottom-nav button.active {
+  color: var(--starlight);
+  border-color: rgba(245, 230, 179, 0.20);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.bottom-nav-add {
+  width: 54px;
+  height: 54px !important;
+  margin: -18px auto 0;
+  border-color: rgba(245, 230, 179, 0.58) !important;
+  border-radius: 999px !important;
+  color: #11100d !important;
+  background: linear-gradient(135deg, var(--gold), var(--starlight)) !important;
+  box-shadow: 0 12px 32px rgba(212, 175, 55, 0.22);
+  font-size: 24px !important;
+  line-height: 1;
+}
+
+.bottom-nav-add:hover {
+  transform: translateY(-2px);
+}
+
 @media (max-width: 980px) {
   .driver-dashboard {
     grid-template-columns: 1fr 1fr;
@@ -2696,16 +2771,16 @@ textarea {
 
   .dashboard-target-card,
   .dashboard-net-card {
-    padding: 18px;
+    padding: 16px;
   }
 
   .dashboard-mini-card {
-    min-height: 104px;
+    min-height: 88px;
     padding: 14px;
   }
 
   .dashboard-mini-card strong {
-    font-size: 21px;
+    font-size: 19px;
   }
 
   .dashboard-spark {
@@ -2734,7 +2809,7 @@ textarea {
   }
 
   .app-shell {
-    padding: 14px;
+    padding: 14px 14px 108px;
   }
 
   .topbar {
@@ -2831,6 +2906,27 @@ textarea {
 
   .grab-day-summary {
     grid-template-columns: 1fr;
+  }
+
+  .bottom-nav {
+    bottom: 12px;
+    grid-template-columns: repeat(5, 1fr);
+    width: calc(100vw - 24px);
+    padding: 7px;
+    border-radius: 20px;
+  }
+
+  .bottom-nav button {
+    height: 44px;
+    border-radius: 14px;
+    font-size: 10px;
+  }
+
+  .bottom-nav-add {
+    width: 52px;
+    height: 52px !important;
+    margin-top: -17px;
+    font-size: 22px !important;
   }
 }
 

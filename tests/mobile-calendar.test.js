@@ -116,6 +116,27 @@ test("driver dashboard shows a clean monthly operations overview", () => {
   assert.match(js, /Cost Ratio/);
 });
 
+test("bottom navigation classifies the driver workspace", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(html, /class="bottom-nav"/);
+  assert.match(html, /data-nav-target="calendarSection"/);
+  assert.match(html, /data-nav-target="entrySection"/);
+  assert.match(html, /class="bottom-nav-add"/);
+  assert.match(js, /function bindBottomNavigation/);
+  assert.match(js, /scrollIntoView\(\{ behavior: "smooth", block: "start" \}\)/);
+});
+
+test("premium dark visual system uses true black and restrained typography", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /--bg:\s*#000000/);
+  assert.match(css, /h1\s*\{[^}]*font-size:\s*clamp\(28px,\s*3vw,\s*34px\)/s);
+  assert.match(css, /\.dashboard-net-card strong\s*\{[^}]*font-size:\s*clamp\(34px,\s*4vw,\s*52px\)/s);
+  assert.match(css, /\.gradient-border-surface/);
+});
+
 test("finished grab records do not keep the driver form in edit mode", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

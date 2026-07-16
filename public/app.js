@@ -2425,9 +2425,29 @@ function render() {
   renderCalendar();
   renderSidebar();
   renderGrabStats();
+  bindBottomNavigation();
   animateCounters();
   updateLiveCountdowns();
   localizeUI();
+}
+
+function bindBottomNavigation() {
+  document.querySelectorAll("[data-nav-target]").forEach(button => {
+    if (button.dataset.navBound) return;
+    button.dataset.navBound = "true";
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.navTarget);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.querySelectorAll("[data-nav-target]").forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+      if (button.classList.contains("bottom-nav-add")) {
+        const firstInput = document.querySelector("#driverForm input, #driverForm select, #driverForm textarea");
+        setTimeout(() => firstInput?.focus({ preventScroll: true }), 260);
+      }
+    });
+  });
 }
 
 document.querySelectorAll(".mode-button").forEach(button => {

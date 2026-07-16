@@ -82,7 +82,7 @@
         <section class="achievement-strip" id="weeklyAchievements" aria-label="Weekly achievements"></section>
 
         <section class="grab-layout">
-          <section class="planning-panel grab-calendar-panel" aria-label="Grab monthly calendar">
+          <section class="planning-panel grab-calendar-panel" id="calendarSection" aria-label="Grab monthly calendar">
             <div class="planning-head">
               <div>
                 <p class="eyebrow">Grab Profit Calendar</p>
@@ -98,7 +98,7 @@
             </div>
           </section>
 
-          <section class="workspace-panel grab-entry-panel">
+          <section class="workspace-panel grab-entry-panel" id="entrySection">
             <div class="workspace-head">
               <div>
                 <p class="eyebrow">Selected Day</p>
@@ -117,6 +117,13 @@
         <section hidden id="todayTasks"></section>
         <section hidden id="todayPulse"></section>
       </main>
+      <nav class="bottom-nav" aria-label="Driver navigation">
+        <button type="button" class="active" data-nav-target="driverDashboard"><span>Dashboard</span></button>
+        <button type="button" data-nav-target="calendarSection"><span>Calendar</span></button>
+        <button type="button" class="bottom-nav-add" data-nav-target="entrySection" aria-label="Add driver record"><span>+</span></button>
+        <button type="button" data-nav-target="weeklyAchievements"><span>Records</span></button>
+        <button type="button" data-nav-target="grabStats"><span>Reports</span></button>
+      </nav>
     </div>
 
     <dialog class="os-dialog" id="recordConfirmDialog">
