@@ -95,6 +95,27 @@ test("calendar day click opens daily summary before editing", () => {
   assert.match(js, /dataset\.editSummary/);
 });
 
+test("driver UI is Grab-only and hides legacy Solar switching", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.doesNotMatch(html, /data-mode="solar"/);
+  assert.doesNotMatch(html, />Solar</);
+  assert.doesNotMatch(js, /body\.classList\.toggle\("mode-solar"/);
+});
+
+test("driver dashboard shows a clean monthly operations overview", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(html, /id="driverDashboard"/);
+  assert.match(js, /function renderDriverDashboard/);
+  assert.match(js, /renderDriverDashboard\(\)/);
+  assert.match(js, /Month Net/);
+  assert.match(js, /Online Hours/);
+  assert.match(js, /Cost Ratio/);
+});
+
 test("finished grab records do not keep the driver form in edit mode", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
@@ -189,4 +210,11 @@ test("mobile disables canvas particle animation for smoother input", () => {
   assert.match(js, /maxTouchPoints/);
   assert.match(js, /max-width:\s*980px/);
   assert.match(js, /canvas\.hidden = true/);
+});
+
+test("space particle animation is disabled before it starts for smoother operations", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const disableParticles = true/);
+  assert.match(js, /if \(disableParticles \|\| touchDevice \|\| compactViewport\)/);
 });

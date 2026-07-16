@@ -39,10 +39,7 @@ function updateLanguage(nextLanguage) {
 }
 
 function applyAccountCapabilities() {
-  const canUseSolar = Top1UI.canAccessSolar(authManager?.accountType());
-  const solarButton = document.querySelector('.mode-button[data-mode="solar"]');
-  if (solarButton) solarButton.hidden = !canUseSolar;
-  if (!canUseSolar && mode === "solar") mode = "driver";
+  mode = "driver";
 }
 
 function localizeUI() {
@@ -1514,6 +1511,41 @@ function renderPeopleToMoveToday() {
   target.innerHTML = people.length ? `<span>${people.length} people to move</span>` : `<span>No people queued</span>`;
 }
 
+function renderDriverDashboard() {
+  const target = $("#driverDashboard");
+  if (!target) return;
+  const settings = state.grabSettings || defaultGrabSettings();
+  const month = totalsForRecords(monthRecords());
+  const week = totalsForRecords(weekRecords());
+  const records = monthRecords();
+  const activeDays = new Set(records.filter(item => driverMetrics(item).net !== 0 || num(item.totalTrips) > 0).map(item => item.date)).size || 1;
+  const weeklyTarget = num(settings.carRentalTarget) + num(settings.housingLoanTarget);
+  const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
+  const remaining = Math.max(0, weeklyTarget - week.net);
+  const costRatio = month.income ? (month.cost / month.income) * 100 : 0;
+  const averageDailyNet = month.net / activeDays;
+  const avgIncomePerHour = month.hours ? month.income / month.hours : 0;
+  target.innerHTML = `
+    <article class="dashboard-target-card">
+      <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
+      <div class="dashboard-progress"><i style="width:${targetProgress}%"></i></div>
+      <p>${money.format(week.net)} / ${money.format(weeklyTarget)} · Remaining: ${money.format(remaining)}</p>
+    </article>
+    <article class="dashboard-net-card">
+      <span>Month Net</span>
+      <strong>${money.format(month.net)}</strong>
+      <small>${activeDays} active days · ${month.trips} trips</small>
+      <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    </article>
+    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong></article>
+    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${month.hours.toFixed(1)}h</strong></article>
+    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(month.cost)}</strong></article>
+    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong></article>
+    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong></article>
+    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().month)}</strong></article>
+  `;
+}
+
 function renderGrabStats() {
   const target = $("#grabStats");
   if (!target) return;
@@ -2383,12 +2415,12 @@ function render() {
   document.body.dataset.nextAction = todayOS.nextAction ? todayOS.nextAction.kind : "none";
   document.body.classList.toggle("theme-light", theme === "light");
   document.body.classList.toggle("mode-driver", mode === "driver");
-  document.body.classList.toggle("mode-solar", mode === "solar");
   $("#themeButton").textContent = theme === "dark" ? "Light" : "Dark";
   document.querySelectorAll(".mode-button").forEach(button => {
     button.classList.toggle("active", button.dataset.mode === mode);
   });
   renderWeeklyAchievements();
+  renderDriverDashboard();
   renderPeopleToMoveToday();
   renderCalendar();
   renderSidebar();
@@ -2442,9 +2474,10 @@ document.addEventListener("pointermove", event => {
 function startSpaceParticles() {
   const canvas = $("#spaceParticles");
   if (!canvas) return;
+  const disableParticles = true;
   const touchDevice = navigator.maxTouchPoints > 0;
   const compactViewport = window.matchMedia("(max-width: 980px)").matches;
-  if (touchDevice || compactViewport) {
+  if (disableParticles || touchDevice || compactViewport) {
     canvas.hidden = true;
     return;
   }
