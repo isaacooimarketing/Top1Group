@@ -3488,3 +3488,149 @@ body.theme-light .bottom-nav {
     bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
+
+/* Final mobile clarity pass: keep the light driver UI readable and contained. */
+body.theme-light {
+  font-weight: 520;
+}
+
+body.theme-light .month-controls {
+  grid-template-columns: 50px 1fr 50px;
+  align-items: center;
+  row-gap: 10px;
+}
+
+body.theme-light .topbar .language-switch {
+  display: none;
+}
+
+body.theme-light #monthLabel {
+  font-weight: 760;
+}
+
+body.theme-light .icon-button,
+body.theme-light .today-button,
+body.theme-light .logout-button,
+body.theme-light .bottom-nav button {
+  font-weight: 760;
+}
+
+body.theme-light .today-button,
+body.theme-light .logout-button {
+  width: 100%;
+  padding: 0 8px;
+  line-height: 1.08;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+body.theme-light .dashboard-target-card .dashboard-card-head span,
+body.theme-light .dashboard-target-card p {
+  color: #24473c;
+  font-weight: 650;
+}
+
+body.theme-light .dashboard-target-card strong {
+  color: #111816;
+}
+
+body.theme-light .dashboard-mini-card,
+body.theme-light .achievement-card,
+body.theme-light .stat-card {
+  min-height: 126px;
+  align-content: start;
+}
+
+body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .achievement-card:nth-child(1) {
+  background: linear-gradient(180deg, #ffffff 0%, #eaf8ef 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .achievement-card:nth-child(2) {
+  background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(5),
+body.theme-light .achievement-card:nth-child(3) {
+  background: linear-gradient(180deg, #ffffff 0%, #fff8ec 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(6),
+body.theme-light .achievement-card:nth-child(4) {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f1ff 100%);
+}
+
+body.theme-light .achievement-card.complete {
+  background: linear-gradient(180deg, #ffffff 0%, #e8f8ed 100%);
+}
+
+body.theme-light .achievement-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+body.theme-light .achievement-card {
+  min-width: 0;
+  scroll-snap-align: none;
+}
+
+body.theme-light .lunar-note {
+  color: #5f6f68;
+  font-weight: 720;
+}
+
+body.theme-light .lunar-note.active {
+  color: #a13832;
+  border-color: rgba(180, 60, 52, 0.42);
+  background: #fff3f1;
+}
+
+body.theme-light .workspace-panel,
+body.theme-light .grab-entry-panel,
+body.theme-light #sidebarBody,
+body.theme-light .grab-form,
+body.theme-light .form-grid,
+body.theme-light .form-grid > *,
+body.theme-light .workspace-panel label,
+body.theme-light .time-input-wrap,
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+body.theme-light .grab-entry-panel {
+  overflow-x: hidden;
+}
+
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light .time-input-wrap input[type="time"] {
+  width: 100%;
+}
+
+body.theme-light .bottom-nav {
+  bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 620px) {
+  body.theme-light .achievement-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  body.theme-light .achievement-card {
+    min-width: 0;
+  }
+
+  body.theme-light .bottom-nav {
+    bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}

@@ -148,7 +148,12 @@ test("light calendar and form controls stay readable on mobile", () => {
   assert.match(css, /body\.theme-light \.driver-mini\.finished\.net-gold \.net-profit\s*\{[^}]*color:\s*#8f6900;/s);
   assert.match(css, /body\.theme-light input,[\s\S]*?body\.theme-light \.time-input-wrap\s*\{[^}]*max-width:\s*100%;/s);
   assert.match(css, /body\.theme-light \.stats-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
-  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*bottom:\s*max\(8px,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*bottom:\s*max\(0px,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(css, /body\.theme-light \.topbar \.language-switch\s*\{[^}]*display:\s*none;/s);
+  assert.match(css, /body\.theme-light \.achievement-strip\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /body\.theme-light \.achievement-card\s*\{[^}]*min-width:\s*0;/s);
+  assert.match(css, /body\.theme-light \.lunar-note\s*\{[^}]*color:\s*#5f6f68;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel,[\s\S]*?body\.theme-light textarea\s*\{[^}]*box-sizing:\s*border-box;[\s\S]*?max-width:\s*100%;/s);
 });
 
 test("finished grab records do not keep the driver form in edit mode", () => {
