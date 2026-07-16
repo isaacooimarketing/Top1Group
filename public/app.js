@@ -18,7 +18,7 @@ let selectedDate = toISODate(new Date());
 let editingDriverId = null;
 let editingSolarId = null;
 let saving = false;
-let theme = localStorage.getItem("topOneGroupTheme") || "dark";
+let theme = "light";
 let todayOS = null;
 let authManager = null;
 let appStarted = false;
@@ -2476,7 +2476,7 @@ $("#todayButton").addEventListener("click", () => {
 });
 
 $("#themeButton").addEventListener("click", () => {
-  theme = theme === "dark" ? "light" : "dark";
+  theme = "light";
   localStorage.setItem("topOneGroupTheme", theme);
   render();
 });
