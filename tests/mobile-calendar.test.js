@@ -137,9 +137,18 @@ test("clean light visual system is fixed and mobile centered", () => {
   assert.match(html, /<body class="theme-light auth-locked">/);
   assert.match(js, /let theme = "light"/);
   assert.match(css, /body\s*\{[^}]*min-width:\s*0;/s);
-  assert.match(css, /body\.theme-light \.app-shell\s*\{[^}]*width:\s*min\(100%,\s*760px\)/s);
+  assert.match(css, /body\.theme-light \.app-shell\s*\{[^}]*width:\s*min\(96vw,\s*1760px\)/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.app-shell\s*\{[^}]*width:\s*100%;/s);
   assert.match(css, /body\.theme-light \.theme-button\s*\{[^}]*display:\s*none;/s);
   assert.match(css, /body\.theme-light \.dashboard-net-card\s*\{[^}]*background:\s*#11844f;/s);
+});
+
+test("desktop light layout keeps calendar wide with a right workspace", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /@media \(min-width:\s*981px\)\s*\{[\s\S]*?body\.theme-light \.grab-layout\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*7fr\)\s+minmax\(360px,\s*3fr\)/s);
+  assert.match(css, /@media \(min-width:\s*981px\)\s*\{[\s\S]*?body\.theme-light \.achievement-strip\s*\{[^}]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /@media \(min-width:\s*981px\)\s*\{[\s\S]*?body\.theme-light \.grab-entry-panel\s*\{[^}]*position:\s*sticky;[\s\S]*?overflow-y:\s*auto;/s);
 });
 
 test("light calendar and form controls stay readable on mobile", () => {

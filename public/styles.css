@@ -2685,7 +2685,7 @@ body.theme-light .app-shell::after {
 }
 
 body.theme-light .app-shell {
-  width: min(100%, 760px);
+  width: min(96vw, 1760px);
   margin: 0 auto;
   padding: 18px 18px 106px;
 }
@@ -2875,7 +2875,7 @@ body.theme-light .dashboard-progress i {
 }
 
 body.theme-light .grab-layout {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 7fr) minmax(340px, 3fr);
   gap: 16px;
 }
 
@@ -3648,5 +3648,34 @@ body.theme-light .bottom-nav {
 
   body.theme-light .bottom-nav {
     bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 981px) {
+  body.theme-light .app-shell {
+    width: min(96vw, 1760px);
+    padding: 24px 24px 120px;
+  }
+
+  body.theme-light .grab-layout {
+    grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
+    align-items: start;
+  }
+
+  body.theme-light .achievement-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.theme-light .grab-entry-panel {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body.theme-light .calendar-scroll {
+    width: 100%;
+    margin: 0;
   }
 }
