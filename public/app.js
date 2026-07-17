@@ -1537,12 +1537,12 @@ function renderDriverDashboard() {
       <small>${activeDays} active days · ${month.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong></article>
-    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${month.hours.toFixed(1)}h</strong></article>
-    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(month.cost)}</strong></article>
-    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong></article>
-    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong></article>
-    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().month)}</strong></article>
+    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong><small>This month</small></article>
+    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${month.hours.toFixed(1)}h</strong><small>This month</small></article>
+    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(month.cost)}</strong><small>This month</small></article>
+    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong><small>This month</small></article>
+    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong><small>This month</small></article>
+    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().month)}</strong><small>This month</small></article>
   `;
 }
 
@@ -1737,6 +1737,7 @@ function driverSidebar() {
     <input type="hidden" name="platform" value="Grab">
     <input type="hidden" name="driverIncomeModel" value="grab_v13">
     <div class="form-section full">Driving Sessions</div>
+    ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
     ${sessionFields(editing)}
     <div class="form-section full">Touch & Go eWallet</div>
     ${field("Starting", "tngOpening", "number", editing.tngOpening || "")}
@@ -1752,7 +1753,6 @@ function driverSidebar() {
     <div class="form-section full">Cash / Petrol / Trips</div>
     ${field("Cash Collected Today", "cashCollected", "number", editing.cashCollected || editing.cashReceived || "")}
     ${petrolFields(editing)}
-    ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
     <div class="field full"><label>Remark</label><textarea name="remark">${escapeHtml(editing.remark || "")}</textarea></div>
     <div class="action-row full">
       <button class="secondary-action" name="saveTemp" type="submit">Temporarily Save</button>

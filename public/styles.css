@@ -3520,8 +3520,13 @@ body.theme-light .logout-button {
   width: 100%;
   padding: 0 8px;
   line-height: 1.08;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  min-width: 70px;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+body.theme-light .month-controls {
+  grid-template-columns: 74px 1fr 74px;
 }
 
 body.theme-light .dashboard-target-card .dashboard-card-head span,
@@ -3539,6 +3544,13 @@ body.theme-light .achievement-card,
 body.theme-light .stat-card {
   min-height: 126px;
   align-content: start;
+}
+
+body.theme-light .dashboard-mini-card small {
+  color: #64736f;
+  font-size: 13px;
+  font-weight: 650;
+  margin-top: 8px;
 }
 
 body.theme-light .dashboard-mini-card:nth-child(3),
@@ -3563,6 +3575,10 @@ body.theme-light .achievement-card:nth-child(4) {
 
 body.theme-light .achievement-card.complete {
   background: linear-gradient(180deg, #ffffff 0%, #e8f8ed 100%);
+}
+
+body.theme-light .achievement-card.complete::after {
+  content: none;
 }
 
 body.theme-light .achievement-strip {

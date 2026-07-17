@@ -114,6 +114,7 @@ test("driver dashboard shows a clean monthly operations overview", () => {
   assert.match(js, /Month Net/);
   assert.match(js, /Online Hours/);
   assert.match(js, /Cost Ratio/);
+  assert.match(js, /<small>This month<\/small>/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -154,6 +155,21 @@ test("light calendar and form controls stay readable on mobile", () => {
   assert.match(css, /body\.theme-light \.achievement-card\s*\{[^}]*min-width:\s*0;/s);
   assert.match(css, /body\.theme-light \.lunar-note\s*\{[^}]*color:\s*#5f6f68;/s);
   assert.match(css, /body\.theme-light \.workspace-panel,[\s\S]*?body\.theme-light textarea\s*\{[^}]*box-sizing:\s*border-box;[\s\S]*?max-width:\s*100%;/s);
+  assert.match(css, /body\.theme-light \.today-button,[\s\S]*?body\.theme-light \.logout-button\s*\{[^}]*white-space:\s*nowrap;/s);
+  assert.match(css, /body\.theme-light \.achievement-card\.complete::after\s*\{[^}]*content:\s*none;/s);
+});
+
+test("driver form asks for total trips before session times", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  const formStart = js.indexOf('<div class="form-section full">Driving Sessions</div>');
+  const tripsField = js.indexOf('${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}', formStart);
+  const sessionFields = js.indexOf('${sessionFields(editing)}', formStart);
+
+  assert.notEqual(formStart, -1);
+  assert.notEqual(tripsField, -1);
+  assert.notEqual(sessionFields, -1);
+  assert.ok(tripsField < sessionFields);
 });
 
 test("finished grab records do not keep the driver form in edit mode", () => {
