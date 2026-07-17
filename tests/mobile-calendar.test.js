@@ -170,14 +170,30 @@ test("light calendar and form controls stay readable on mobile", () => {
   assert.match(css, /body\.theme-light \.driver-mini\.finished\.net-gold \.net-profit\s*\{[^}]*color:\s*#8f6900;/s);
   assert.match(css, /body\.theme-light input,[\s\S]*?body\.theme-light \.time-input-wrap\s*\{[^}]*max-width:\s*100%;/s);
   assert.match(css, /body\.theme-light \.stats-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
-  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*bottom:\s*max\(0px,\s*env\(safe-area-inset-bottom\)\)/s);
+  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*bottom:\s*calc\(max\(12px,\s*env\(safe-area-inset-bottom\)\)\s*\+\s*76px\)/s);
   assert.match(css, /body\.theme-light \.topbar \.language-switch\s*\{[^}]*display:\s*none;/s);
   assert.match(css, /body\.theme-light \.achievement-strip\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
   assert.match(css, /body\.theme-light \.achievement-card\s*\{[^}]*min-width:\s*0;/s);
   assert.match(css, /body\.theme-light \.lunar-note\s*\{[^}]*color:\s*#5f6f68;/s);
   assert.match(css, /body\.theme-light \.workspace-panel,[\s\S]*?body\.theme-light textarea\s*\{[^}]*box-sizing:\s*border-box;[\s\S]*?max-width:\s*100%;/s);
-  assert.match(css, /body\.theme-light \.today-button,[\s\S]*?body\.theme-light \.logout-button\s*\{[^}]*white-space:\s*nowrap;/s);
+  assert.match(css, /body\.theme-light \.today-button\s*\{[^}]*display:\s*none !important;/s);
   assert.match(css, /body\.theme-light \.achievement-card\.complete::after\s*\{[^}]*content:\s*none;/s);
+});
+
+test("mobile light layout keeps entry panel below calendar instead of overlapping", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /@media \(max-width:\s*980px\)\s*\{[\s\S]*?body\.theme-light \.grab-layout\s*\{[^}]*grid-template-columns:\s*1fr !important;/s);
+  assert.match(css, /@media \(max-width:\s*980px\)\s*\{[\s\S]*?body\.theme-light \.grab-entry-panel\s*\{[^}]*position:\s*relative;[\s\S]*?max-height:\s*none;/s);
+});
+
+test("light login screen uses readable product surfaces", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /body\.theme-light\.auth-locked/);
+  assert.match(css, /body\.theme-light \.auth-panel\s*\{[^}]*border-radius:\s*24px;/s);
+  assert.match(css, /body\.theme-light \.auth-product h1\s*\{[^}]*color:\s*var\(--ink-strong\)/s);
+  assert.match(css, /body\.theme-light \.auth-form input\s*\{[^}]*color:\s*var\(--ink-strong\)/s);
 });
 
 test("driver form asks for total trips before session times", () => {
