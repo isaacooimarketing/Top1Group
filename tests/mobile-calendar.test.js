@@ -48,6 +48,18 @@ test("light theme covers daily summary and breakdown panels", () => {
   assert.match(css, /body\.theme-light \.breakdown-card/);
 });
 
+test("light summary cash confirmation uses high-contrast commercial surfaces", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /Commercial light refinement/);
+  assert.match(css, /body\.theme-light \.summary-dialog/);
+  assert.match(css, /body\.theme-light \.cash-flow-summary/);
+  assert.match(css, /body\.theme-light \.pending-item/);
+  assert.match(css, /body\.theme-light \.pending-item span[\s\S]*color:\s*var\(--brand-gold-strong\)/);
+  assert.match(css, /body\.theme-light \.pending-item strong[\s\S]*color:\s*var\(--ink-strong\)/);
+  assert.match(css, /body\.theme-light \.primary-action[\s\S]*color:\s*#171407/);
+});
+
 test("mobile time fields render a visible synced display over native picker", () => {
   const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
