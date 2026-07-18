@@ -4754,6 +4754,115 @@ body.theme-light .grab-entry-panel .field.full input[type="date"] {
   background-clip: padding-box;
 }
 
+body.theme-light .workspace-panel .date-field,
+body.theme-light .grab-entry-panel .date-field {
+  padding-right: 2px;
+}
+
+body.theme-light .workspace-panel .field input[type="date"],
+body.theme-light .grab-entry-panel .field input[type="date"] {
+  display: block;
+  width: calc(100% - 2px);
+  max-width: calc(100% - 2px);
+  margin-inline: 1px;
+  box-sizing: border-box;
+  border: 1px solid rgba(31, 64, 53, 0.26);
+  outline: 1px solid rgba(31, 64, 53, 0.20);
+  outline-offset: -1px;
+  background-clip: padding-box;
+}
+
+body.theme-light .history-card {
+  margin: 18px var(--record-gutter) 0;
+  overflow: hidden;
+  border: 1px solid rgba(31, 64, 53, 0.12);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 246, 0.98) 100%);
+  box-shadow: 0 12px 26px rgba(37, 51, 43, 0.06);
+}
+
+body.theme-light .history-card details {
+  display: block;
+}
+
+body.theme-light .history-card summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 76px;
+  padding: 17px 18px;
+  color: var(--ink-1);
+  cursor: pointer;
+  list-style: none;
+}
+
+body.theme-light .history-card summary::-webkit-details-marker {
+  display: none;
+}
+
+body.theme-light .history-card summary small,
+body.theme-light .history-card summary strong,
+body.theme-light .history-card summary b {
+  display: block;
+}
+
+body.theme-light .history-card summary small {
+  color: #0f6b55;
+  font-size: 12px;
+  font-weight: 860;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+body.theme-light .history-card summary strong {
+  margin-top: 4px;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 720;
+}
+
+body.theme-light .history-card summary b {
+  color: var(--ink-1);
+  font-size: 21px;
+  font-weight: 860;
+  text-align: right;
+  white-space: nowrap;
+}
+
+body.theme-light .history-card summary::after {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: #0f6b55;
+  background: rgba(23, 128, 94, 0.10);
+  content: "+";
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+body.theme-light .history-card details[open] summary::after {
+  content: "-";
+}
+
+body.theme-light .history-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 18px 18px;
+}
+
+body.theme-light .history-card .driver-summary.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+body.theme-light .history-card .history-item,
+body.theme-light .history-card .empty-note {
+  margin: 0;
+}
+
 body.theme-light .workspace-panel > h3,
 body.theme-light .workspace-panel > .history-item,
 body.theme-light .workspace-panel > .empty-note,

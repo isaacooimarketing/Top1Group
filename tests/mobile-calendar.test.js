@@ -241,6 +241,20 @@ test("calendar rows, date borders, and record gutters stay stable on mobile", ()
   assert.match(css, /body\.theme-light \.workspace-panel > h3,[\s\S]*?body\.theme-light \.workspace-panel > \.history-item,[\s\S]*?margin-left:\s*var\(--record-gutter\);[\s\S]*?margin-right:\s*var\(--record-gutter\);/s);
 });
 
+test("ledger sections use bordered monthly drilldown cards", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(js, /bankTransferPanel\(bankTotals\)/);
+  assert.match(js, /cashHistoryPanel\(\)/);
+  assert.match(js, /class="history-card petrol-liability"/);
+  assert.match(js, /function bankTransferHistory\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /function cashHistory\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(css, /body\.theme-light \.history-card\s*\{[^}]*border:\s*1px solid rgba\(31,\s*64,\s*53,\s*0\.12\);[\s\S]*?border-radius:\s*20px;/s);
+  assert.match(css, /body\.theme-light \.history-card summary\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.field input\[type="date"\],[\s\S]*?width:\s*calc\(100% - 2px\);[\s\S]*?outline-offset:\s*-1px;/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

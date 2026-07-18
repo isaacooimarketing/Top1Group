@@ -1772,19 +1772,8 @@ function driverSidebar() {
     ${cashToolsMarkup()}
   </section>
 
-  <section class="history compact-history">
-    <h3>Bank Transfer</h3>
-    <div class="driver-summary two">
-      <span>This week ${money.format(bankTotals.week)}</span>
-      <span>This month ${money.format(bankTotals.month)}</span>
-    </div>
-    ${bankTransferHistory()}
-  </section>
-
-  <section class="history compact-history">
-    <h3>Cash History</h3>
-    ${cashHistory()}
-  </section>
+  ${bankTransferPanel(bankTotals)}
+  ${cashHistoryPanel()}
 
   ${petrolLiabilityMarkup()}`;
 }
@@ -1834,6 +1823,7 @@ function petrolLiabilityMarkup() {
   const totals = petrolTotals(entries, payments);
   const [weekStart, weekEnd] = weekRange(selectedDate);
   const month = selectedDate.slice(0, 7);
+  const monthLabel = monthFmt.format(parseDate(`${month}-01`));
   const petrolCostForRecord = record => record.driverIncomeModel === "grab_v13"
     ? grabDailyMetrics(record).petrol
     : num(record.petrolCost || record.metadata?.petrolCost);
@@ -1843,25 +1833,36 @@ function petrolLiabilityMarkup() {
   const monthCost = state.driverSessions
     .filter(record => record.date.startsWith(month))
     .reduce((sum, record) => sum + petrolCostForRecord(record), 0);
-  const history = [...payments].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 6);
-  return `<section class="history petrol-liability">
-    <div class="section-title-row"><h3>Petrol Credit Card</h3><span>${money.format(totals.cardOutstanding)} outstanding</span></div>
-    <div class="petrol-ledger-grid">
-      <div><span>Week Cost</span><strong>${money.format(weekCost)}</strong></div>
-      <div><span>Month Cost</span><strong>${money.format(monthCost)}</strong></div>
-      <div><span>Card Charged</span><strong>${money.format(totals.cardCharged)}</strong></div>
-      <div><span>Paid</span><strong>${money.format(totals.cardPaid)}</strong></div>
-    </div>
-    <form id="petrolPaymentForm" class="form-grid compact-form">
-      ${field("Payment Date", "date", "date", selectedDate)}
-      ${field("Pay Amount", "amount", "number", "")}
-      <div class="field full"><label>Note</label><input name="note" placeholder="Credit card payment"></div>
-      <button class="primary-action full" type="submit">Pay Petrol Card</button>
-    </form>
-    <div class="compact-history">
-      ${history.length ? history.map(item => `<div class="history-item"><div class="history-line"><span>${item.date} · Payment</span><strong>${money.format(num(item.amount))}</strong></div><div class="muted">${escapeHtml(item.note || "")}</div></div>`).join("") : `<div class="empty-note">No petrol card payment yet.</div>`}
-    </div>
+  const history = [...payments]
+    .filter(item => String(item.date || "").startsWith(month))
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 12);
+  return `<section class="history-card petrol-liability">
+    <details>
+      <summary>
+        <span><small>Petrol Credit Card</small><strong>${monthLabel}</strong></span>
+        <b>${money.format(monthCost)}</b>
+      </summary>
+      <div class="history-card-body">
+        <div class="petrol-ledger-grid">
+          <div><span>Week Cost</span><strong>${money.format(weekCost)}</strong></div>
+          <div><span>Month Cost</span><strong>${money.format(monthCost)}</strong></div>
+          <div><span>Card Charged</span><strong>${money.format(totals.cardCharged)}</strong></div>
+          <div><span>Outstanding</span><strong>${money.format(totals.cardOutstanding)}</strong></div>
+        </div>
+        <form id="petrolPaymentForm" class="form-grid compact-form">
+          ${field("Payment Date", "date", "date", selectedDate)}
+          ${field("Pay Amount", "amount", "number", "")}
+          <div class="field full"><label>Note</label><input name="note" placeholder="Credit card payment"></div>
+          <button class="primary-action full" type="submit">Pay Petrol Card</button>
+        </form>
+        <div class="compact-history">
+          ${history.length ? history.map(item => `<div class="history-item"><div class="history-line"><span>${item.date} · Payment</span><strong>${money.format(num(item.amount))}</strong></div><div class="muted">${escapeHtml(item.note || "")}</div></div>`).join("") : `<div class="empty-note">No petrol card payment yet.</div>`}
+        </div>
+      </div>
+    </details>
   </section>`;
+
 }
 
 function pendingItem(item) {
@@ -1925,15 +1926,67 @@ function cashToolsMarkup() {
   </details>`;
 }
 
-function bankTransferHistory() {
-  const items = [...state.bankTransfers].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+function selectedMonthKey() {
+  return selectedDate.slice(0, 7);
+}
+
+function selectedMonthLabel() {
+  return monthFmt.format(parseDate(`${selectedMonthKey()}-01`));
+}
+
+function bankTransferPanel(bankTotals) {
+  const month = selectedMonthKey();
+  const monthItems = state.bankTransfers.filter(item => String(item.date || "").startsWith(month));
+  const monthTotal = monthItems.reduce((sum, item) => sum + num(item.amount), 0);
+  return `<section class="history-card">
+    <details>
+      <summary>
+        <span><small>Bank Transfer</small><strong>${selectedMonthLabel()}</strong></span>
+        <b>${money.format(monthTotal)}</b>
+      </summary>
+      <div class="history-card-body">
+        <div class="driver-summary two">
+          <span>This week ${money.format(bankTotals.week)}</span>
+          <span>This month ${money.format(bankTotals.month)}</span>
+        </div>
+        ${bankTransferHistory(month)}
+      </div>
+    </details>
+  </section>`;
+}
+
+function cashHistoryPanel() {
+  const month = selectedMonthKey();
+  const monthItems = state.cashLedger.filter(item => String(item.date || "").startsWith(month));
+  const monthTotal = monthItems.reduce((sum, item) => sum + num(item.amount), 0);
+  return `<section class="history-card">
+    <details>
+      <summary>
+        <span><small>Cash History</small><strong>${selectedMonthLabel()}</strong></span>
+        <b>${money.format(monthTotal)}</b>
+      </summary>
+      <div class="history-card-body">
+        ${cashHistory(month)}
+      </div>
+    </details>
+  </section>`;
+}
+
+function bankTransferHistory(monthKey = selectedMonthKey()) {
+  const items = [...state.bankTransfers]
+    .filter(item => String(item.date || "").startsWith(monthKey))
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 12);
   return items.length ? items.map(item => `<div class="history-item">
     <div class="history-line"><span>${item.date} · ${item.source === "grab_wallet" ? "Grab Wallet" : "Cash Bank In"}</span><span>${money.format(item.amount)}</span></div>
   </div>`).join("") : `<div class="empty-note">No bank transfer confirmed yet.</div>`;
 }
 
-function cashHistory() {
-  const items = [...state.cashLedger].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+function cashHistory(monthKey = selectedMonthKey()) {
+  const items = [...state.cashLedger]
+    .filter(item => String(item.date || "").startsWith(monthKey))
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 12);
   return items.length ? items.map(item => `<div class="history-item">
     <div class="history-line"><span>${item.date} · ${escapeHtml(item.category || item.type)}</span><span>${money.format(item.amount)}</span></div>
     <div class="muted">${escapeHtml(item.account || `${item.fromAccount || ""} -> ${item.toAccount || ""}`)}</div>
@@ -2004,7 +2057,7 @@ function field(label, name, type, value, options) {
   if (type === "time") {
     return `<div class="field time-field"><label>${label}</label><div class="time-input-wrap"><input name="${name}" type="time" value="${escapeHtml(value)}"><span class="time-display" data-time-display="${name}">${formatTimeDisplay(value)}</span></div></div>`;
   }
-  return `<div class="field"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
+  return `<div class="field ${type === "date" ? "date-field" : ""}"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
 }
 
 function formatTimeDisplay(value) {
