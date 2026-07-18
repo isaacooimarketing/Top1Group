@@ -229,6 +229,18 @@ test("mobile form detail polish keeps date borders and history readable", () => 
   assert.match(css, /body\.theme-light \.history-line span:first-child\s*\{[^}]*line-height:\s*1\.35;/s);
 });
 
+test("calendar rows, date borders, and record gutters stay stable on mobile", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /Calendar row and record gutter stabilizer/);
+  assert.match(css, /--calendar-week-row-height:\s*154px;/);
+  assert.match(css, /body\.theme-light \.calendar-grid\s*\{[^}]*grid-auto-rows:\s*var\(--calendar-week-row-height\);/s);
+  assert.match(css, /body\.theme-light \.calendar-grid > \.week-summary-card,[\s\S]*?height:\s*var\(--calendar-week-row-height\);[\s\S]*?min-height:\s*var\(--calendar-week-row-height\);/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.field,[\s\S]*?body\.theme-light \.grab-entry-panel \.field\.full\s*\{[^}]*overflow:\s*visible;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.field\.full input\[type="date"\],[\s\S]*?outline-offset:\s*-1px;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel > h3,[\s\S]*?body\.theme-light \.workspace-panel > \.history-item,[\s\S]*?margin-left:\s*var\(--record-gutter\);[\s\S]*?margin-right:\s*var\(--record-gutter\);/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

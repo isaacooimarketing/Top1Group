@@ -4709,3 +4709,75 @@ body.theme-light .history-item .muted {
   line-height: 1.35;
 }
 
+/* Calendar row and record gutter stabilizer: fixes uneven empty weeks, clipped date borders, and tight history edges. */
+body.theme-light {
+  --calendar-week-row-height: 154px;
+  --record-gutter: 18px;
+}
+
+body.theme-light .calendar-grid {
+  grid-auto-rows: var(--calendar-week-row-height);
+}
+
+body.theme-light .calendar-grid > .week-summary-card,
+body.theme-light .calendar-grid > .day-card {
+  height: var(--calendar-week-row-height);
+  min-height: var(--calendar-week-row-height);
+}
+
+body.theme-light .calendar-grid > .day-card .mini-stack {
+  min-height: 78px;
+}
+
+body.theme-light .calendar-grid > .day-card .rest-pill,
+body.theme-light .calendar-grid > .day-card .driver-mini {
+  max-height: 94px;
+  overflow: hidden;
+}
+
+body.theme-light .workspace-panel .field,
+body.theme-light .workspace-panel .field.full,
+body.theme-light .grab-entry-panel .field,
+body.theme-light .grab-entry-panel .field.full {
+  overflow: visible;
+}
+
+body.theme-light .workspace-panel .field.full input[type="date"],
+body.theme-light .grab-entry-panel .field.full input[type="date"] {
+  display: block;
+  width: 100%;
+  margin-inline: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(31, 64, 53, 0.24);
+  outline: 1px solid rgba(31, 64, 53, 0.18);
+  outline-offset: -1px;
+  background-clip: padding-box;
+}
+
+body.theme-light .workspace-panel > h3,
+body.theme-light .workspace-panel > .history-item,
+body.theme-light .workspace-panel > .empty-note,
+body.theme-light .workspace-panel > .petrol-liability,
+body.theme-light .workspace-panel > .petrol-ledger-grid,
+body.theme-light .workspace-panel > .compact-form {
+  width: auto;
+  margin-left: var(--record-gutter);
+  margin-right: var(--record-gutter);
+}
+
+body.theme-light .workspace-panel > h3 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+body.theme-light .workspace-panel > .history-item + .history-item {
+  margin-top: 10px;
+}
+
+@media (max-width: 620px) {
+  body.theme-light {
+    --calendar-week-row-height: 154px;
+    --record-gutter: 20px;
+  }
+}
+
