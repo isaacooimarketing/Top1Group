@@ -218,6 +218,17 @@ test("commercial dashboard polish calms KPI typography and aligns date inputs", 
   assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.achievement-card strong\s*\{[^}]*font-size:\s*clamp\(20px,\s*5vw,\s*24px\)/s);
 });
 
+test("mobile form detail polish keeps date borders and history readable", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /Field and history readability pass/);
+  assert.match(css, /body\.theme-light \.workspace-panel \.field\.full input\[type="date"\],[\s\S]*?width:\s*calc\(100% - 2px\);[\s\S]*?margin-inline:\s*1px;/s);
+  assert.match(css, /body\.theme-light \.petrol-entry > strong\s*\{[^}]*color:\s*#7f5f00;[\s\S]*?font-weight:\s*860;/s);
+  assert.match(css, /body\.theme-light \.history-item\s*\{[^}]*padding:\s*15px 16px;[\s\S]*?border-radius:\s*14px;/s);
+  assert.match(css, /body\.theme-light \.history-line\s*\{[^}]*gap:\s*16px;/s);
+  assert.match(css, /body\.theme-light \.history-line span:first-child\s*\{[^}]*line-height:\s*1\.35;/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

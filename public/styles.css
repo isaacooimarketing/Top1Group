@@ -4641,3 +4641,71 @@ body.theme-light input[type="text"] {
   }
 }
 
+/* Field and history readability pass: visible borders, stronger section labels, calmer records. */
+body.theme-light .workspace-panel .field.full input[type="date"],
+body.theme-light .grab-entry-panel .field.full input[type="date"] {
+  width: calc(100% - 2px);
+  margin-inline: 1px;
+  border-color: rgba(31, 64, 53, 0.20);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.78) inset,
+    0 1px 2px rgba(20, 40, 30, 0.04);
+}
+
+body.theme-light .petrol-entry {
+  border-color: rgba(31, 64, 53, 0.12);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaf4 100%);
+}
+
+body.theme-light .petrol-entry > strong {
+  color: #7f5f00;
+  font-size: 13px;
+  font-weight: 860;
+  letter-spacing: 0.035em;
+}
+
+body.theme-light .history {
+  display: grid;
+  gap: 10px;
+}
+
+body.theme-light .history h3 {
+  margin: 14px 0 2px;
+  color: var(--ink-1);
+  line-height: 1.2;
+}
+
+body.theme-light .history-item {
+  padding: 15px 16px;
+  border-color: rgba(31, 64, 53, 0.12);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8faf6 100%);
+}
+
+body.theme-light .history-line {
+  min-height: 30px;
+  gap: 16px;
+}
+
+body.theme-light .history-line span:first-child {
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+body.theme-light .history-line span:last-child,
+body.theme-light .history-line strong {
+  color: var(--ink-1);
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 820;
+  white-space: nowrap;
+}
+
+body.theme-light .history-item .muted {
+  margin-top: 4px;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
