@@ -196,6 +196,16 @@ test("light login screen uses readable product surfaces", () => {
   assert.match(css, /body\.theme-light \.auth-form input\s*\{[^}]*color:\s*var\(--ink-strong\)/s);
 });
 
+test("commercial mobile correction locks nav and time fields inside the viewport", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /Commercial mobile correction/);
+  assert.match(css, /body\.theme-light \.bottom-nav\s*\{[^}]*position:\s*fixed !important;[\s\S]*?bottom:\s*max\(10px,\s*env\(safe-area-inset-bottom\)\) !important;/s);
+  assert.match(css, /body\.theme-light \.time-input-wrap input\[type="time"\]\s*\{[^}]*-webkit-appearance:\s*none;[\s\S]*?max-inline-size:\s*100%;/s);
+  assert.match(css, /body\.theme-light \.app-shell\s*\{[^}]*max-width:\s*100vw;[\s\S]*?overflow-x:\s*clip;/s);
+  assert.match(css, /body\.theme-light \.auth-gate\s*\{[^}]*min-height:\s*100dvh;[\s\S]*?overflow-x:\s*hidden;/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

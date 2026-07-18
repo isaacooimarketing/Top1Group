@@ -4222,3 +4222,245 @@ body.theme-light .logout-button {
   }
 }
 
+/* Commercial mobile correction: tighter viewport, fixed nav, and aligned time controls. */
+body.theme-light,
+body.theme-light * {
+  box-sizing: border-box;
+}
+
+body.theme-light {
+  --page: #f3f6ef;
+  --bg: #fffef9;
+  --panel-2: #f7faf5;
+  --border: rgba(22, 50, 39, 0.10);
+  --ink-1: #101714;
+  --ink-2: #33443d;
+  --ink-3: #60736a;
+  --accent: #12643f;
+  --accent-2: #c49a22;
+  --accent-soft: rgba(18, 100, 63, 0.10);
+  --shadow: 0 1px 3px rgba(20, 40, 30, 0.06);
+  --shadow-lg: 0 28px 72px -42px rgba(20, 40, 30, 0.34);
+  color: var(--ink-2);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(18, 100, 63, 0.08), transparent 30%),
+    linear-gradient(180deg, #fbfcf8 0%, var(--page) 100%);
+}
+
+body.theme-light .app-shell {
+  max-width: 100vw;
+  overflow-x: clip;
+}
+
+body.theme-light .dashboard-target-card,
+body.theme-light .dashboard-mini-card,
+body.theme-light .achievement-card,
+body.theme-light .planning-panel,
+body.theme-light .workspace-panel,
+body.theme-light .grab-stats-panel,
+body.theme-light .stat-card,
+body.theme-light .breakdown-card,
+body.theme-light .cash-panel,
+body.theme-light .grab-day-summary,
+body.theme-light .record-details,
+body.theme-light .auth-panel {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--panel-2) 100%);
+  box-shadow:
+    var(--shadow),
+    0 18px 46px rgba(30, 58, 45, 0.08);
+}
+
+body.theme-light .dashboard-target-card {
+  background: linear-gradient(180deg, #d9f7df 0%, #c6f1d2 100%);
+}
+
+body.theme-light .dashboard-net-card {
+  background:
+    radial-gradient(circle at 92% 20%, rgba(255, 255, 255, 0.18), transparent 26%),
+    linear-gradient(135deg, #12643f 0%, #15945a 100%);
+  box-shadow:
+    0 24px 58px rgba(18, 100, 63, 0.20),
+    0 1px 0 rgba(255, 255, 255, 0.22) inset;
+}
+
+body.theme-light .month-controls,
+body.theme-light .dashboard-grid,
+body.theme-light .achievement-strip,
+body.theme-light .grab-layout,
+body.theme-light .form-grid {
+  max-width: 100%;
+}
+
+body.theme-light .field,
+body.theme-light .time-field,
+body.theme-light .time-input-wrap,
+body.theme-light .time-input-wrap input[type="time"] {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+body.theme-light .time-input-wrap {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+body.theme-light .time-input-wrap input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  margin: 0;
+  border-radius: 14px;
+}
+
+body.theme-light .bottom-nav {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  z-index: 1000 !important;
+  transform: translate3d(-50%, 0, 0);
+  will-change: transform;
+}
+
+body.theme-light.auth-locked {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+body.theme-light .auth-gate {
+  min-height: 100dvh;
+  padding: clamp(18px, 4vw, 40px);
+  overflow-x: hidden;
+}
+
+body.theme-light .auth-stage {
+  width: min(960px, 100%);
+}
+
+@media (max-width: 620px) {
+  body.theme-light .app-shell {
+    width: 100%;
+    padding: 14px 14px 126px;
+  }
+
+  body.theme-light .topbar {
+    margin-bottom: 14px;
+  }
+
+  body.theme-light .month-controls {
+    grid-template-columns: 54px minmax(0, 1fr) 54px;
+    gap: 8px;
+  }
+
+  body.theme-light #monthLabel {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  body.theme-light .icon-button {
+    width: 48px;
+    height: 58px;
+    border-radius: 18px;
+  }
+
+  body.theme-light .dashboard-grid,
+  body.theme-light .achievement-strip,
+  body.theme-light .stats-grid,
+  body.theme-light .breakdown-grid {
+    gap: 12px;
+  }
+
+  body.theme-light .dashboard-target-card,
+  body.theme-light .dashboard-mini-card,
+  body.theme-light .achievement-card,
+  body.theme-light .stat-card,
+  body.theme-light .breakdown-card {
+    min-height: 116px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  body.theme-light .dashboard-net-card {
+    min-height: 176px;
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  body.theme-light .dashboard-net-card strong {
+    font-size: clamp(42px, 12vw, 58px);
+    line-height: 1.02;
+  }
+
+  body.theme-light .dashboard-mini-card strong,
+  body.theme-light .achievement-card strong,
+  body.theme-light .stat-card strong {
+    font-size: clamp(24px, 6.4vw, 30px);
+    line-height: 1.08;
+  }
+
+  body.theme-light .planning-panel,
+  body.theme-light .workspace-panel,
+  body.theme-light .grab-entry-panel,
+  body.theme-light .grab-stats-panel {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  body.theme-light .form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  body.theme-light input,
+  body.theme-light select,
+  body.theme-light textarea,
+  body.theme-light .time-input-wrap {
+    min-height: 58px;
+    border-radius: 14px;
+  }
+
+  body.theme-light .time-display {
+    padding: 0 18px;
+  }
+
+  body.theme-light .bottom-nav {
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    width: calc(100vw - 24px);
+    max-width: 540px;
+    padding: 8px;
+    border-radius: 24px;
+  }
+
+  body.theme-light .bottom-nav button {
+    height: 46px;
+    min-width: 0;
+  }
+
+  body.theme-light .auth-gate {
+    display: grid;
+    align-items: center;
+    min-height: 100dvh;
+    padding: 18px;
+  }
+
+  body.theme-light .auth-stage {
+    gap: 18px;
+  }
+
+  body.theme-light .auth-product h1 {
+    font-size: clamp(38px, 12vw, 52px);
+    line-height: 1;
+  }
+
+  body.theme-light .auth-signals {
+    display: none;
+  }
+}
+
