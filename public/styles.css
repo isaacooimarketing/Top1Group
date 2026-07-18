@@ -4464,3 +4464,180 @@ body.theme-light .auth-stage {
   }
 }
 
+/* Friendly commercial polish: calmer numbers, richer pastel cards, tighter input geometry. */
+body.theme-light {
+  --money-green: #12643f;
+  --money-teal: #0f7c76;
+  --money-blue: #2468a8;
+  --money-violet: #6750a4;
+  --money-amber: #9d6c06;
+  --soft-mint: #eefaf1;
+  --soft-blue: #f0f6ff;
+  --soft-amber: #fff8e8;
+  --soft-violet: #f6f2ff;
+}
+
+body.theme-light .dashboard-grid {
+  align-items: stretch;
+}
+
+body.theme-light .dashboard-net-card {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255, 255, 255, 0.20), transparent 28%),
+    linear-gradient(135deg, #11814d 0%, #159b63 100%);
+}
+
+body.theme-light .dashboard-net-card strong {
+  font-weight: 760;
+  letter-spacing: -0.03em;
+}
+
+body.theme-light .dashboard-mini-card,
+body.theme-light .achievement-card {
+  overflow: hidden;
+  color: var(--ink-2);
+}
+
+body.theme-light .dashboard-mini-card strong,
+body.theme-light .achievement-card strong {
+  display: block;
+  color: var(--ink-1);
+  font-weight: 720;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+body.theme-light .dashboard-mini-card small,
+body.theme-light .achievement-card small {
+  color: var(--ink-3);
+  font-weight: 650;
+}
+
+body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .achievement-card:nth-child(1) {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-mint) 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(3) strong,
+body.theme-light .achievement-card:nth-child(1) strong {
+  color: var(--money-green);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .achievement-card:nth-child(2) {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-blue) 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(4) strong,
+body.theme-light .achievement-card:nth-child(2) strong {
+  color: var(--money-blue);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(5),
+body.theme-light .achievement-card:nth-child(3) {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-amber) 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(5) strong,
+body.theme-light .achievement-card:nth-child(3) strong {
+  color: var(--money-amber);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(6),
+body.theme-light .achievement-card:nth-child(4) {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-violet) 100%);
+}
+
+body.theme-light .dashboard-mini-card:nth-child(6) strong,
+body.theme-light .achievement-card:nth-child(4) strong {
+  color: var(--money-violet);
+}
+
+body.theme-light .workspace-panel,
+body.theme-light .grab-entry-panel,
+body.theme-light .form-grid,
+body.theme-light .field {
+  min-width: 0;
+}
+
+body.theme-light .workspace-panel .field,
+body.theme-light .workspace-panel .field.full,
+body.theme-light .grab-entry-panel .field,
+body.theme-light .grab-entry-panel .field.full {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light input[type="date"],
+body.theme-light input[type="number"],
+body.theme-light input[type="text"] {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+@media (max-width: 620px) {
+  body.theme-light .dashboard-net-card {
+    min-height: 158px;
+    padding: 20px;
+  }
+
+  body.theme-light .dashboard-net-card strong {
+    font-size: clamp(38px, 10.4vw, 48px);
+    line-height: 1.02;
+  }
+
+  body.theme-light .dashboard-net-card small {
+    font-size: 15px;
+  }
+
+  body.theme-light .dashboard-mini-card,
+  body.theme-light .achievement-card {
+    min-height: 106px;
+    padding: 16px;
+  }
+
+  body.theme-light .dashboard-mini-card span,
+  body.theme-light .achievement-card span {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  body.theme-light .dashboard-mini-card strong {
+    font-size: clamp(21px, 5.6vw, 25px);
+    line-height: 1.08;
+  }
+
+  body.theme-light .achievement-card strong {
+    font-size: clamp(20px, 5vw, 24px);
+    line-height: 1.08;
+  }
+
+  body.theme-light .achievement-card .status-pill {
+    position: static;
+    align-self: flex-start;
+    margin-bottom: 8px;
+  }
+
+  body.theme-light .workspace-panel,
+  body.theme-light .grab-entry-panel,
+  body.theme-light .grab-stats-panel,
+  body.theme-light .planning-panel {
+    overflow-x: hidden;
+  }
+
+  body.theme-light .workspace-panel input,
+  body.theme-light .workspace-panel select,
+  body.theme-light .workspace-panel textarea,
+  body.theme-light .workspace-panel .time-input-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+

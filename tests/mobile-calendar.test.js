@@ -206,6 +206,18 @@ test("commercial mobile correction locks nav and time fields inside the viewport
   assert.match(css, /body\.theme-light \.auth-gate\s*\{[^}]*min-height:\s*100dvh;[\s\S]*?overflow-x:\s*hidden;/s);
 });
 
+test("commercial dashboard polish calms KPI typography and aligns date inputs", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /Friendly commercial polish/);
+  assert.match(css, /--money-teal:\s*#0f7c76;/);
+  assert.match(css, /body\.theme-light \.dashboard-mini-card:nth-child\(4\),[\s\S]*?background:\s*linear-gradient\(180deg,\s*#ffffff 0%,\s*var\(--soft-blue\) 100%\)/);
+  assert.match(css, /body\.theme-light \.dashboard-mini-card strong,\s*body\.theme-light \.achievement-card strong\s*\{[^}]*overflow-wrap:\s*anywhere;/s);
+  assert.match(css, /body\.theme-light input\[type="date"\],[\s\S]*?inline-size:\s*100%;[\s\S]*?max-inline-size:\s*100%;/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.dashboard-net-card strong\s*\{[^}]*font-size:\s*clamp\(38px,\s*10\.4vw,\s*48px\)/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.achievement-card strong\s*\{[^}]*font-size:\s*clamp\(20px,\s*5vw,\s*24px\)/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
