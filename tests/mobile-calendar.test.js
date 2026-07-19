@@ -116,17 +116,20 @@ test("driver UI is Grab-only and hides legacy Solar switching", () => {
   assert.doesNotMatch(js, /body\.classList\.toggle\("mode-solar"/);
 });
 
-test("driver dashboard shows a clean monthly operations overview", () => {
+test("driver dashboard shows a clean weekly operations overview", () => {
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const dashboardStart = js.indexOf("function renderDriverDashboard()");
+  const statsStart = js.indexOf("function renderGrabStats()");
+  const dashboardBlock = js.slice(dashboardStart, statsStart);
 
   assert.match(html, /id="driverDashboard"/);
   assert.match(js, /function renderDriverDashboard/);
   assert.match(js, /renderDriverDashboard\(\)/);
-  assert.match(js, /Month Net/);
-  assert.match(js, /Online Hours/);
-  assert.match(js, /Cost Ratio/);
-  assert.match(js, /<small>This month<\/small>/);
+  assert.match(dashboardBlock, /Week Net/);
+  assert.match(dashboardBlock, /Online Hours/);
+  assert.match(dashboardBlock, /Cost Ratio/);
+  assert.match(dashboardBlock, /<small>This week<\/small>/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -266,6 +269,25 @@ test("driver form asks for total trips before session times", () => {
   assert.notEqual(tripsField, -1);
   assert.notEqual(sessionFields, -1);
   assert.ok(tripsField < sessionFields);
+});
+
+test("dashboard hero uses weekly metrics and moves monthly metrics lower", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  const dashboardStart = js.indexOf("function renderDriverDashboard()");
+  const statsStart = js.indexOf("function renderGrabStats()");
+  const dashboardBlock = js.slice(dashboardStart, statsStart);
+  const statsBlock = js.slice(statsStart, js.indexOf("function statCard", statsStart));
+
+  assert.match(dashboardBlock, /<span>Week Net<\/span>/);
+  assert.match(dashboardBlock, /<small>This week<\/small>/);
+  assert.match(dashboardBlock, /bankTransferTotals\(\)\.week/);
+  assert.doesNotMatch(dashboardBlock, /<span>Month Net<\/span>/);
+  assert.doesNotMatch(dashboardBlock, /<small>This month<\/small>/);
+  assert.match(statsBlock, /Monthly Overview/);
+  assert.match(statsBlock, /<h2>This Month<\/h2>/);
+  assert.match(statsBlock, /Month Net/);
+  assert.match(statsBlock, /bank\.month/);
 });
 
 test("finished grab records do not keep the driver form in edit mode", () => {

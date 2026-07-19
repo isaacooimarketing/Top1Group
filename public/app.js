@@ -1515,16 +1515,15 @@ function renderDriverDashboard() {
   const target = $("#driverDashboard");
   if (!target) return;
   const settings = state.grabSettings || defaultGrabSettings();
-  const month = totalsForRecords(monthRecords());
   const week = totalsForRecords(weekRecords());
-  const records = monthRecords();
+  const records = weekRecords();
   const activeDays = new Set(records.filter(item => driverMetrics(item).net !== 0 || num(item.totalTrips) > 0).map(item => item.date)).size || 1;
   const weeklyTarget = num(settings.carRentalTarget) + num(settings.housingLoanTarget);
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
-  const costRatio = month.income ? (month.cost / month.income) * 100 : 0;
-  const averageDailyNet = month.net / activeDays;
-  const avgIncomePerHour = month.hours ? month.income / month.hours : 0;
+  const costRatio = week.income ? (week.cost / week.income) * 100 : 0;
+  const averageDailyNet = activeDays ? week.net / activeDays : 0;
+  const avgIncomePerHour = week.hours ? week.income / week.hours : 0;
   target.innerHTML = `
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -1532,17 +1531,17 @@ function renderDriverDashboard() {
       <p>${money.format(week.net)} / ${money.format(weeklyTarget)} · Remaining: ${money.format(remaining)}</p>
     </article>
     <article class="dashboard-net-card">
-      <span>Month Net</span>
-      <strong>${money.format(month.net)}</strong>
-      <small>${activeDays} active days · ${month.trips} trips</small>
+      <span>Week Net</span>
+      <strong>${money.format(week.net)}</strong>
+      <small>${activeDays} active days · ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong><small>This month</small></article>
-    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${month.hours.toFixed(1)}h</strong><small>This month</small></article>
-    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(month.cost)}</strong><small>This month</small></article>
-    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong><small>This month</small></article>
-    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong><small>This month</small></article>
-    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().month)}</strong><small>This month</small></article>
+    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${week.hours.toFixed(1)}h</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(week.cost)}</strong><small>This week</small></article>
+    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().week)}</strong><small>This week</small></article>
   `;
 }
 
@@ -1552,6 +1551,11 @@ function renderGrabStats() {
   const week = totalsForRecords(weekRecords());
   const month = totalsForRecords(monthRecords());
   const bank = bankTransferTotals();
+  const monthRecordsList = monthRecords();
+  const monthActiveDays = new Set(monthRecordsList.filter(item => driverMetrics(item).net !== 0 || num(item.totalTrips) > 0).map(item => item.date)).size || 1;
+  const monthIncomePerHour = month.hours ? month.income / month.hours : 0;
+  const monthCostRatio = month.income ? (month.cost / month.income) * 100 : 0;
+  const monthAverageDailyNet = month.net / monthActiveDays;
   const incomeBreakdown = weeklyBreakdown("income");
   const costBreakdown = weeklyBreakdown("cost");
   target.innerHTML = `<div class="section-heading">
@@ -1560,13 +1564,24 @@ function renderGrabStats() {
   </div>
   <div class="stats-grid">
     ${statCard("Week Net", money.format(week.net), `${week.hours.toFixed(1)}h · ${week.trips} trips`)}
-    ${statCard("Month Net", money.format(month.net), `${money.format(month.income)} income`)}
     ${statCard("Income/hour", money.format(week.hours ? week.income / week.hours : 0), "Based on total income")}
-    ${statCard("Bank Transfer", `${money.format(bank.week)} / ${money.format(bank.month)}`, "This week / this month")}
+    ${statCard("Bank Transfer", money.format(bank.week), "This week")}
   </div>
   <div class="breakdown-grid">
     ${breakdownBars("Income Breakdown", incomeBreakdown)}
     ${breakdownBars("Cost Breakdown", costBreakdown)}
+  </div>
+  <div class="section-heading monthly-stat-heading">
+    <p class="eyebrow">Monthly Overview</p>
+    <h2>This Month</h2>
+  </div>
+  <div class="stats-grid monthly-stats-grid">
+    ${statCard("Month Net", money.format(month.net), `${monthActiveDays} active days · ${month.trips} trips`)}
+    ${statCard("Month Income", money.format(month.income), `${money.format(monthIncomePerHour)}/h`)}
+    ${statCard("Online Hours", `${month.hours.toFixed(1)}h`, "This month")}
+    ${statCard("Total Cost", money.format(month.cost), `${monthCostRatio.toFixed(1)}% cost ratio`)}
+    ${statCard("Average Daily Net", money.format(monthAverageDailyNet), "This month")}
+    ${statCard("Bank Transfer", money.format(bank.month), "This month")}
   </div>`;
 }
 
