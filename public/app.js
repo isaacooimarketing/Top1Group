@@ -1155,13 +1155,8 @@ function weekRecords(dateIso = selectedDate) {
   return recordsThroughSelectedDate(state.driverSessions, dateIso);
 }
 
-function monthRecords() {
-  const y = visibleDate.getFullYear();
-  const m = visibleDate.getMonth();
-  return state.driverSessions.filter(item => {
-    const date = parseDate(item.date);
-    return date.getFullYear() === y && date.getMonth() === m;
-  });
+function monthRecords(monthKey = selectedMonthKey()) {
+  return state.driverSessions.filter(item => String(item.date || "").startsWith(monthKey));
 }
 
 function cashBalances() {
@@ -1179,6 +1174,21 @@ function cashBalances() {
     pettyCash: num(settings.pettyCashOpening),
     cashAtHome: num(settings.cashAtHomeOpening)
   });
+}
+
+function cashLedgerEffect(item = {}) {
+  const amount = num(item.amount);
+  let effect = 0;
+  if (item.account === "petty_cash" || item.account === "cash_at_home") effect += amount;
+  if (item.fromAccount === "petty_cash" || item.fromAccount === "cash_at_home") effect -= amount;
+  if (item.toAccount === "petty_cash" || item.toAccount === "cash_at_home") effect += amount;
+  return effect;
+}
+
+function cashMonthMovement(monthKey = selectedMonthKey()) {
+  return state.cashLedger
+    .filter(item => String(item.date || "").startsWith(monthKey))
+    .reduce((sum, item) => sum + cashLedgerEffect(item), 0);
 }
 
 function setCashPosition(data) {
@@ -1835,10 +1845,12 @@ function explicitPetrolEntries(records = state.driverSessions) {
 function petrolLiabilityMarkup() {
   const entries = explicitPetrolEntries();
   const payments = state.petrolCardPayments || [];
-  const totals = petrolTotals(entries, payments);
   const [weekStart, weekEnd] = weekRange(selectedDate);
   const month = selectedDate.slice(0, 7);
   const monthLabel = monthFmt.format(parseDate(`${month}-01`));
+  const monthEntries = entries.filter(entry => String(entry.date || "").startsWith(month));
+  const monthPayments = payments.filter(item => String(item.date || "").startsWith(month));
+  const monthTotals = petrolTotals(monthEntries, monthPayments);
   const petrolCostForRecord = record => record.driverIncomeModel === "grab_v13"
     ? grabDailyMetrics(record).petrol
     : num(record.petrolCost || record.metadata?.petrolCost);
@@ -1856,14 +1868,14 @@ function petrolLiabilityMarkup() {
     <details>
       <summary>
         <span><small>Petrol Credit Card</small><strong>${monthLabel}</strong></span>
-        <b>${money.format(monthCost)}</b>
+        <b>${money.format(monthTotals.cardOutstanding)}</b>
       </summary>
       <div class="history-card-body">
         <div class="petrol-ledger-grid">
           <div><span>Week Cost</span><strong>${money.format(weekCost)}</strong></div>
           <div><span>Month Cost</span><strong>${money.format(monthCost)}</strong></div>
-          <div><span>Card Charged</span><strong>${money.format(totals.cardCharged)}</strong></div>
-          <div><span>Outstanding</span><strong>${money.format(totals.cardOutstanding)}</strong></div>
+          <div><span>Card Charged</span><strong>${money.format(monthTotals.cardCharged)}</strong></div>
+          <div><span>Outstanding</span><strong>${money.format(monthTotals.cardOutstanding)}</strong></div>
         </div>
         <form id="petrolPaymentForm" class="form-grid compact-form">
           ${field("Payment Date", "date", "date", selectedDate)}
@@ -1972,15 +1984,20 @@ function bankTransferPanel(bankTotals) {
 
 function cashHistoryPanel() {
   const month = selectedMonthKey();
-  const monthItems = state.cashLedger.filter(item => String(item.date || "").startsWith(month));
-  const monthTotal = monthItems.reduce((sum, item) => sum + num(item.amount), 0);
+  const monthMovement = cashMonthMovement(month);
+  const balances = cashBalances();
+  const currentTotal = balances.pettyCash + balances.cashAtHome;
   return `<section class="history-card">
     <details>
       <summary>
-        <span><small>Cash History</small><strong>${selectedMonthLabel()}</strong></span>
-        <b>${money.format(monthTotal)}</b>
+        <span><small>Cash Movement</small><strong>${selectedMonthLabel()}</strong></span>
+        <b>${money.format(monthMovement)}</b>
       </summary>
       <div class="history-card-body">
+        <div class="driver-summary two">
+          <span>This month ${money.format(monthMovement)}</span>
+          <span>Current cash ${money.format(currentTotal)}</span>
+        </div>
         ${cashHistory(month)}
       </div>
     </details>
@@ -2003,7 +2020,7 @@ function cashHistory(monthKey = selectedMonthKey()) {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 12);
   return items.length ? items.map(item => `<div class="history-item">
-    <div class="history-line"><span>${item.date} · ${escapeHtml(item.category || item.type)}</span><span>${money.format(item.amount)}</span></div>
+    <div class="history-line"><span>${item.date} · ${escapeHtml(item.category || item.type)}</span><span>${money.format(cashLedgerEffect(item))}</span></div>
     <div class="muted">${escapeHtml(item.account || `${item.fromAccount || ""} -> ${item.toAccount || ""}`)}</div>
   </div>`).join("") : `<div class="empty-note">No cash ledger entries yet.</div>`;
 }

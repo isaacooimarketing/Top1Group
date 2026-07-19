@@ -258,6 +258,38 @@ test("ledger sections use bordered monthly drilldown cards", () => {
   assert.match(css, /body\.theme-light \.workspace-panel \.field input\[type="date"\],[\s\S]*?width:\s*calc\(100% - 2px\);[\s\S]*?outline-offset:\s*-1px;/s);
 });
 
+test("monthly record totals use selected month instead of visible calendar month", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function monthRecords\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /String\(item\.date \|\| ""\)\.startsWith\(monthKey\)/);
+  assert.doesNotMatch(js, /function monthRecords\(\)\s*\{[\s\S]*visibleDate\.getFullYear/);
+});
+
+test("cash history uses account-aware cash movement rather than raw ledger sum", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const cashPanelStart = js.indexOf("function cashHistoryPanel()");
+  const cashPanelBlock = js.slice(cashPanelStart, js.indexOf("function bankTransferHistory", cashPanelStart));
+
+  assert.match(js, /function cashLedgerEffect\(item = \{\}\)/);
+  assert.match(js, /function cashMonthMovement\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(cashPanelBlock, /const monthMovement = cashMonthMovement\(month\);/);
+  assert.match(cashPanelBlock, /Cash Movement/);
+  assert.match(js, /money\.format\(cashLedgerEffect\(item\)\)/);
+  assert.doesNotMatch(cashPanelBlock, /monthItems\.reduce\(\(sum, item\) => sum \+ num\(item\.amount\), 0\);/);
+});
+
+test("petrol credit card card shows monthly outstanding while retaining month cost detail", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const monthEntries = entries\.filter\(entry => String\(entry\.date \|\| ""\)\.startsWith\(month\)\);/);
+  assert.match(js, /const monthPayments = payments\.filter\(item => String\(item\.date \|\| ""\)\.startsWith\(month\)\);/);
+  assert.match(js, /const monthTotals = petrolTotals\(monthEntries, monthPayments\);/);
+  assert.match(js, /<b>\$\{money\.format\(monthTotals\.cardOutstanding\)\}<\/b>/);
+  assert.match(js, /Month Cost<\/span><strong>\$\{money\.format\(monthCost\)\}/);
+  assert.match(js, /Card Charged<\/span><strong>\$\{money\.format\(monthTotals\.cardCharged\)\}/);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
