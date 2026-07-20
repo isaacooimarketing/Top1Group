@@ -2067,6 +2067,18 @@ textarea {
   line-height: 1.45;
 }
 
+.dashboard-target-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.target-remaining {
+  color: #ffd86b;
+  font-weight: 800;
+}
+
 .dashboard-net-card {
   position: relative;
   grid-row: span 2;
@@ -3276,6 +3288,10 @@ body.theme-light .stat-card:nth-child(4) {
 
 body.theme-light .dashboard-target-card p {
   color: rgba(20, 55, 42, 0.72);
+}
+
+body.theme-light .dashboard-target-card .target-remaining {
+  color: #b66b00;
 }
 
 body.theme-light .planning-panel,

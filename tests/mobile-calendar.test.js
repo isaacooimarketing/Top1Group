@@ -127,8 +127,12 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.match(js, /function renderDriverDashboard/);
   assert.match(js, /renderDriverDashboard\(\)/);
   assert.match(dashboardBlock, /Week Net/);
-  assert.match(dashboardBlock, /Online Hours/);
-  assert.match(dashboardBlock, /Cost Ratio/);
+  assert.match(dashboardBlock, /Average Daily Net/);
+  assert.match(dashboardBlock, /Bank Transfer/);
+  assert.doesNotMatch(dashboardBlock, /Income \/ Hour/);
+  assert.doesNotMatch(dashboardBlock, /Online Hours/);
+  assert.doesNotMatch(dashboardBlock, /Total Cost/);
+  assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
   assert.match(dashboardBlock, /<small>This week<\/small>/);
 });
 

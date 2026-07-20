@@ -1576,14 +1576,15 @@ function renderDriverDashboard() {
   const weeklyTarget = num(settings.carRentalTarget) + num(settings.housingLoanTarget);
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
-  const costRatio = week.income ? (week.cost / week.income) * 100 : 0;
   const averageDailyNet = activeDays ? week.net / activeDays : 0;
-  const avgIncomePerHour = week.hours ? week.income / week.hours : 0;
   target.innerHTML = `
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
       <div class="dashboard-progress"><i style="width:${targetProgress}%"></i></div>
-      <p>${money.format(week.net)} / ${money.format(weeklyTarget)} · Remaining: ${money.format(remaining)}</p>
+      <p class="dashboard-target-line">
+        <span>${money.format(week.net)} / ${money.format(weeklyTarget)}</span>
+        <span class="target-remaining">Remaining: ${money.format(remaining)}</span>
+      </p>
     </article>
     <article class="dashboard-net-card">
       <span>Week Net</span>
@@ -1591,10 +1592,6 @@ function renderDriverDashboard() {
       <small>${activeDays} active days · ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>Income / Hour</span><strong>${money.format(avgIncomePerHour)}/h</strong><small>This week</small></article>
-    <article class="dashboard-mini-card"><span>Online Hours</span><strong>${week.hours.toFixed(1)}h</strong><small>This week</small></article>
-    <article class="dashboard-mini-card"><span>Total Cost</span><strong>${money.format(week.cost)}</strong><small>This week</small></article>
-    <article class="dashboard-mini-card warm"><span>Cost Ratio</span><strong>${costRatio.toFixed(1)}%</strong><small>This week</small></article>
     <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong><small>This week</small></article>
     <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().week)}</strong><small>This week</small></article>
   `;
