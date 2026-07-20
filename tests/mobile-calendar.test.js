@@ -410,6 +410,18 @@ test("grab cash wallet shortfall is not auto-counted as top-up cost", () => {
   assert.match(js, /grabWalletTopUp: 0/);
 });
 
+test("finish pending actions update changed amounts and avoid duplicate bank transfers", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /state\.pendingCashActions\[index\] = \{ \.\.\.state\.pendingCashActions\[index\], \.\.\.action, amount \};/);
+  assert.match(js, /function hasConfirmedCashForRecord\(recordId\)/);
+  assert.match(js, /function hasConfirmedGrabBankTransfer\(recordId, amount = null\)/);
+  assert.match(js, /removePending\(`pending_cash_\$\{record\.id\}`\)/);
+  assert.match(js, /removePending\(`pending_grab_bank_\$\{record\.id\}`\)/);
+  assert.match(js, /if \(!hasConfirmedGrabBankTransfer\(action\.sourceId, action\.amount\)\) \{/);
+  assert.match(js, /dedupeByKey\(Array\.isArray\(input\.bankTransfers\)/);
+});
+
 test("mobile disables canvas particle animation for smoother input", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

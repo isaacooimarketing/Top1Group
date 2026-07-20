@@ -180,6 +180,16 @@ function defaultOSState() {
   };
 }
 
+function dedupeByKey(items, keyForItem) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = keyForItem(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function defaultGrabSettings() {
   return {
     carRentalTarget: 390,
@@ -211,8 +221,8 @@ function normalizeOSState(input = {}) {
     driverAnalytics: input.driverAnalytics && typeof input.driverAnalytics === "object" ? input.driverAnalytics : {},
     grabSettings: { ...defaultGrabSettings(), ...(input.grabSettings || {}) },
     cashLedger: Array.isArray(input.cashLedger) ? input.cashLedger : [],
-    pendingCashActions: Array.isArray(input.pendingCashActions) ? input.pendingCashActions : [],
-    bankTransfers: Array.isArray(input.bankTransfers) ? input.bankTransfers : [],
+    pendingCashActions: dedupeByKey(Array.isArray(input.pendingCashActions) ? input.pendingCashActions : [], item => item.id || `${item.type}_${item.sourceId}_${item.date}_${num(item.amount).toFixed(2)}`),
+    bankTransfers: dedupeByKey(Array.isArray(input.bankTransfers) ? input.bankTransfers : [], item => `${item.sourceId || item.id}_${item.date}_${item.source}_${num(item.amount).toFixed(2)}`),
     petrolCardPayments: Array.isArray(input.petrolCardPayments) ? input.petrolCardPayments : [],
     driverSessions: Array.isArray(input.driverSessions) ? input.driverSessions : [],
     solarEvents: Array.isArray(input.solarEvents) ? input.solarEvents : []
@@ -1229,28 +1239,61 @@ function bankTransferTotals() {
 }
 
 function upsertPending(action) {
-  const exists = state.pendingCashActions.some(item => item.id === action.id);
-  if (!exists && num(action.amount) > 0) state.pendingCashActions.push(action);
+  const amount = num(action.amount);
+  const index = state.pendingCashActions.findIndex(item => item.id === action.id);
+  if (amount <= 0) {
+    if (index >= 0) state.pendingCashActions.splice(index, 1);
+    return;
+  }
+  if (index >= 0) {
+    state.pendingCashActions[index] = { ...state.pendingCashActions[index], ...action, amount };
+    return;
+  }
+  state.pendingCashActions.push({ ...action, amount });
+}
+
+function hasConfirmedCashForRecord(recordId) {
+  return state.cashLedger.some(item => item.sourceId === recordId && item.type === "cash_collected");
+}
+
+function hasConfirmedGrabBankTransfer(recordId, amount = null) {
+  return state.bankTransfers.some(item =>
+    item.sourceId === recordId
+    && item.source === "grab_wallet"
+    && (amount === null || Math.abs(num(item.amount) - num(amount)) < 0.005)
+  );
+}
+
+function removePending(id) {
+  state.pendingCashActions = state.pendingCashActions.filter(item => item.id !== id);
 }
 
 function createFinishPendingActions(record) {
   const metrics = grabDailyMetrics(record);
-  upsertPending({
-    id: `pending_cash_${record.id}`,
-    date: record.date,
-    type: "cash_collected_to_petty",
-    amount: metrics.cash,
-    label: "Add cash collected to Petty Cash",
-    sourceId: record.id
-  });
-  upsertPending({
-    id: `pending_grab_bank_${record.id}`,
-    date: record.date,
-    type: "grab_wallet_transfer_to_bank",
-    amount: metrics.transferToBank,
-    label: "Confirm Grab wallet transfer to bank",
-    sourceId: record.id
-  });
+  if (!hasConfirmedCashForRecord(record.id)) {
+    upsertPending({
+      id: `pending_cash_${record.id}`,
+      date: record.date,
+      type: "cash_collected_to_petty",
+      amount: metrics.cash,
+      label: "Add cash collected to Petty Cash",
+      sourceId: record.id
+    });
+  } else {
+    removePending(`pending_cash_${record.id}`);
+  }
+  if (!hasConfirmedGrabBankTransfer(record.id)) {
+    upsertPending({
+      id: `pending_grab_bank_${record.id}`,
+      date: record.date,
+      type: "grab_wallet_transfer_to_bank",
+      amount: metrics.transferToBank,
+      label: "Confirm Grab wallet transfer to bank",
+      sourceId: record.id
+    });
+  } else {
+    removePending(`pending_grab_bank_${record.id}`);
+  }
 }
 
 function confirmPending(id, allocation = null) {
@@ -1281,13 +1324,15 @@ function confirmPending(id, allocation = null) {
     });
   }
   if (action.type === "grab_wallet_transfer_to_bank") {
-    state.bankTransfers.push({
-      id: uid("bank"),
-      date: action.date,
-      source: "grab_wallet",
-      amount: num(action.amount),
-      sourceId: action.sourceId
-    });
+    if (!hasConfirmedGrabBankTransfer(action.sourceId, action.amount)) {
+      state.bankTransfers.push({
+        id: uid("bank"),
+        date: action.date,
+        source: "grab_wallet",
+        amount: num(action.amount),
+        sourceId: action.sourceId
+      });
+    }
   }
   state.pendingCashActions = state.pendingCashActions.filter(item => item.id !== id);
 }
