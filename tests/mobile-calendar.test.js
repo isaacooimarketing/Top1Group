@@ -130,13 +130,15 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.match(js, /function dueCarRentalPayments\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
   assert.match(dashboardBlock, /After Car Rental/);
   assert.match(dashboardBlock, /dueCarRentalPayments\(\) \* num\(settings\.carRentalTarget\)/);
-  assert.match(dashboardBlock, /Bank Transfer/);
+  assert.match(dashboardBlock, /Bank After Rental/);
+  assert.match(dashboardBlock, /bank\.month - dueRental/);
   assert.doesNotMatch(dashboardBlock, /Average Daily Net/);
+  assert.doesNotMatch(dashboardBlock, /bankTransferTotals\(\)\.week/);
   assert.doesNotMatch(dashboardBlock, /Income \/ Hour/);
   assert.doesNotMatch(dashboardBlock, /Online Hours/);
   assert.doesNotMatch(dashboardBlock, /Total Cost/);
   assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
-  assert.match(dashboardBlock, /<small>This week<\/small>/);
+  assert.match(dashboardBlock, /<small>\$\{money\.format\(bank\.month\)\} - \$\{money\.format\(dueRental\)\}<\/small>/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -320,8 +322,9 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   const statsBlock = js.slice(statsStart, js.indexOf("function statCard", statsStart));
 
   assert.match(dashboardBlock, /<span>Week Net<\/span>/);
-  assert.match(dashboardBlock, /<small>This week<\/small>/);
-  assert.match(dashboardBlock, /bankTransferTotals\(\)\.week/);
+  assert.match(dashboardBlock, /<span>After Car Rental<\/span>/);
+  assert.match(dashboardBlock, /<span>Bank After Rental<\/span>/);
+  assert.match(dashboardBlock, /bank\.month - dueRental/);
   assert.doesNotMatch(dashboardBlock, /<span>Month Net<\/span>/);
   assert.doesNotMatch(dashboardBlock, /<small>This month<\/small>/);
   assert.match(statsBlock, /Monthly Overview/);

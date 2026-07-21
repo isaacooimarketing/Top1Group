@@ -1595,6 +1595,8 @@ function renderDriverDashboard() {
   const month = totalsForRecords(monthRecords());
   const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
   const netAfterRental = month.net - dueRental;
+  const bank = bankTransferTotals();
+  const bankAfterRental = bank.month - dueRental;
   target.innerHTML = `
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -1611,7 +1613,7 @@ function renderDriverDashboard() {
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
     <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)}</small></article>
-    <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().week)}</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>Bank After Rental</span><strong>${money.format(bankAfterRental)}</strong><small>${money.format(bank.month)} - ${money.format(dueRental)}</small></article>
   `;
 }
 
