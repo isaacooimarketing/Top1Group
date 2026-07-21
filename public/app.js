@@ -1169,6 +1169,22 @@ function monthRecords(monthKey = selectedMonthKey()) {
   return state.driverSessions.filter(item => String(item.date || "").startsWith(monthKey));
 }
 
+function dueCarRentalPayments(monthKey = selectedMonthKey(), throughDate = selectedDate) {
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!year || !month) return 0;
+  const monthStart = parseDate(`${monthKey}-01`);
+  const monthEnd = new Date(year, month, 0);
+  const cutoff = String(throughDate || "").startsWith(monthKey)
+    ? parseDate(throughDate)
+    : monthEnd;
+  const end = cutoff < monthStart ? monthStart : cutoff > monthEnd ? monthEnd : cutoff;
+  let count = 0;
+  for (const day = new Date(monthStart); day <= end; day.setDate(day.getDate() + 1)) {
+    if (day.getDay() === 0) count += 1;
+  }
+  return count;
+}
+
 function cashBalances() {
   const settings = state.grabSettings || defaultGrabSettings();
   return state.cashLedger.reduce((acc, item) => {
@@ -1576,7 +1592,9 @@ function renderDriverDashboard() {
   const weeklyTarget = num(settings.carRentalTarget) + num(settings.housingLoanTarget);
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
-  const averageDailyNet = activeDays ? week.net / activeDays : 0;
+  const month = totalsForRecords(monthRecords());
+  const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
+  const netAfterRental = month.net - dueRental;
   target.innerHTML = `
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -1592,7 +1610,7 @@ function renderDriverDashboard() {
       <small>${activeDays} active days · ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>Average Daily Net</span><strong>${money.format(averageDailyNet)}</strong><small>This week</small></article>
+    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)}</small></article>
     <article class="dashboard-mini-card"><span>Bank Transfer</span><strong>${money.format(bankTransferTotals().week)}</strong><small>This week</small></article>
   `;
 }

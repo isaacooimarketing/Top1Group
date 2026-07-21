@@ -4660,8 +4660,10 @@ body.theme-light input[type="text"] {
 /* Field and history readability pass: visible borders, stronger section labels, calmer records. */
 body.theme-light .workspace-panel .field.full input[type="date"],
 body.theme-light .grab-entry-panel .field.full input[type="date"] {
-  width: calc(100% - 2px);
-  margin-inline: 1px;
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  box-sizing: border-box;
   border-color: rgba(31, 64, 53, 0.20);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.78) inset,
@@ -4772,20 +4774,48 @@ body.theme-light .grab-entry-panel .field.full input[type="date"] {
 
 body.theme-light .workspace-panel .date-field,
 body.theme-light .grab-entry-panel .date-field {
-  padding-right: 2px;
+  padding-right: 0;
+  overflow: hidden;
 }
 
 body.theme-light .workspace-panel .field input[type="date"],
 body.theme-light .grab-entry-panel .field input[type="date"] {
   display: block;
-  width: calc(100% - 2px);
-  max-width: calc(100% - 2px);
-  margin-inline: 1px;
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
   box-sizing: border-box;
   border: 1px solid rgba(31, 64, 53, 0.26);
   outline: 1px solid rgba(31, 64, 53, 0.20);
   outline-offset: -1px;
   background-clip: padding-box;
+}
+
+@media (max-width: 620px) {
+  body.theme-light .workspace-panel .field,
+  body.theme-light .workspace-panel .field.full,
+  body.theme-light .grab-entry-panel .field,
+  body.theme-light .grab-entry-panel .field.full,
+  body.theme-light .workspace-panel .date-field,
+  body.theme-light .grab-entry-panel .date-field {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    padding-inline: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  body.theme-light .workspace-panel input[type="date"],
+  body.theme-light .grab-entry-panel input[type="date"] {
+    display: block;
+    inline-size: 100%;
+    width: 100%;
+    max-inline-size: 100%;
+    max-width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    contain: layout paint;
+  }
 }
 
 body.theme-light .history-card {
