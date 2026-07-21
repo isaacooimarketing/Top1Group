@@ -4813,7 +4813,7 @@ body.theme-light .history-item .muted {
 
 /* Calendar row and record gutter stabilizer: fixes uneven empty weeks, clipped date borders, and tight history edges. */
 body.theme-light {
-  --calendar-week-row-height: 154px;
+  --calendar-week-row-height: 184px;
   --record-gutter: 18px;
 }
 
@@ -4828,13 +4828,13 @@ body.theme-light .calendar-grid > .day-card {
 }
 
 body.theme-light .calendar-grid > .day-card .mini-stack {
-  min-height: 78px;
+  min-height: 104px;
 }
 
 body.theme-light .calendar-grid > .day-card .rest-pill,
 body.theme-light .calendar-grid > .day-card .driver-mini {
-  max-height: 94px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 body.theme-light .workspace-panel .field,
@@ -4844,8 +4844,8 @@ body.theme-light .grab-entry-panel .field.full {
   overflow: visible;
 }
 
-body.theme-light .workspace-panel .field.full input[type="date"],
-body.theme-light .grab-entry-panel .field.full input[type="date"] {
+body.theme-light .workspace-panel .date-input-frame,
+body.theme-light .grab-entry-panel .date-input-frame {
   display: block;
   width: 100%;
   margin-inline: 0;
@@ -4853,25 +4853,27 @@ body.theme-light .grab-entry-panel .field.full input[type="date"] {
   border: 1px solid rgba(31, 64, 53, 0.24);
   outline: 1px solid rgba(31, 64, 53, 0.18);
   outline-offset: -1px;
+  border-radius: 14px;
+  overflow: hidden;
   background-clip: padding-box;
 }
 
 body.theme-light .workspace-panel .date-field,
 body.theme-light .grab-entry-panel .date-field {
   padding-right: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
-body.theme-light .workspace-panel .field input[type="date"],
-body.theme-light .grab-entry-panel .field input[type="date"] {
+body.theme-light .workspace-panel .date-input-frame input[type="date"],
+body.theme-light .grab-entry-panel .date-input-frame input[type="date"] {
   display: block;
   width: 100%;
   max-width: 100%;
   margin-inline: 0;
   box-sizing: border-box;
-  border: 1px solid rgba(31, 64, 53, 0.26);
-  outline: 1px solid rgba(31, 64, 53, 0.20);
-  outline-offset: -1px;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
   background-clip: padding-box;
 }
 
@@ -4881,16 +4883,25 @@ body.theme-light .grab-entry-panel .field input[type="date"] {
   body.theme-light .grab-entry-panel .field,
   body.theme-light .grab-entry-panel .field.full,
   body.theme-light .workspace-panel .date-field,
-  body.theme-light .grab-entry-panel .date-field {
+  body.theme-light .grab-entry-panel .date-field,
+  body.theme-light .workspace-panel .date-input-frame,
+  body.theme-light .grab-entry-panel .date-input-frame {
     inline-size: 100%;
     max-inline-size: 100%;
     padding-inline: 0;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
   }
 
-  body.theme-light .workspace-panel input[type="date"],
-  body.theme-light .grab-entry-panel input[type="date"] {
+  body.theme-light .workspace-panel .date-input-frame,
+  body.theme-light .grab-entry-panel .date-input-frame {
+    inline-size: calc(100% - 2px);
+    margin-inline: 1px;
+    overflow: hidden;
+  }
+
+  body.theme-light .workspace-panel .date-input-frame input[type="date"],
+  body.theme-light .grab-entry-panel .date-input-frame input[type="date"] {
     display: block;
     inline-size: 100%;
     width: 100%;
@@ -5059,7 +5070,7 @@ body.theme-light .workspace-panel > .history-item + .history-item {
 
 @media (max-width: 620px) {
   body.theme-light {
-    --calendar-week-row-height: 154px;
+    --calendar-week-row-height: 184px;
     --record-gutter: 20px;
   }
 

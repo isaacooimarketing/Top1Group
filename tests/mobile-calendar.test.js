@@ -234,7 +234,7 @@ test("mobile form detail polish keeps date borders and history readable", () => 
   const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
 
   assert.match(css, /Field and history readability pass/);
-  assert.match(css, /body\.theme-light \.workspace-panel \.field\.full input\[type="date"\],[\s\S]*?width:\s*100%;[\s\S]*?box-sizing:\s*border-box;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.date-input-frame,[\s\S]*?width:\s*100%;[\s\S]*?box-sizing:\s*border-box;/s);
   assert.match(css, /body\.theme-light \.petrol-entry > strong\s*\{[^}]*color:\s*#7f5f00;[\s\S]*?font-weight:\s*860;/s);
   assert.match(css, /body\.theme-light \.history-item\s*\{[^}]*padding:\s*15px 16px;[\s\S]*?border-radius:\s*14px;/s);
   assert.match(css, /body\.theme-light \.history-line\s*\{[^}]*gap:\s*16px;/s);
@@ -245,12 +245,13 @@ test("calendar rows, date borders, and record gutters stay stable on mobile", ()
   const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
 
   assert.match(css, /Calendar row and record gutter stabilizer/);
-  assert.match(css, /--calendar-week-row-height:\s*154px;/);
+  assert.match(css, /--calendar-week-row-height:\s*184px;/);
   assert.match(css, /body\.theme-light \.calendar-grid\s*\{[^}]*grid-auto-rows:\s*var\(--calendar-week-row-height\);/s);
   assert.match(css, /body\.theme-light \.calendar-grid > \.week-summary-card,[\s\S]*?height:\s*var\(--calendar-week-row-height\);[\s\S]*?min-height:\s*var\(--calendar-week-row-height\);/s);
   assert.match(css, /body\.theme-light \.workspace-panel \.field,[\s\S]*?body\.theme-light \.grab-entry-panel \.field\.full\s*\{[^}]*overflow:\s*visible;/s);
-  assert.match(css, /body\.theme-light \.workspace-panel \.field\.full input\[type="date"\],[\s\S]*?outline-offset:\s*-1px;/s);
-  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.workspace-panel input\[type="date"\],[\s\S]*?width:\s*100%;[\s\S]*?contain:\s*layout paint;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.date-input-frame,[\s\S]*?outline-offset:\s*-1px;/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.workspace-panel \.date-input-frame,[\s\S]*?inline-size:\s*calc\(100% - 2px\);[\s\S]*?overflow:\s*hidden;/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.workspace-panel \.date-input-frame input\[type="date"\],[\s\S]*?width:\s*100%;[\s\S]*?contain:\s*layout paint;/s);
   assert.match(css, /body\.theme-light \.workspace-panel > h3,[\s\S]*?body\.theme-light \.workspace-panel > \.history-item,[\s\S]*?margin-left:\s*var\(--record-gutter\);[\s\S]*?margin-right:\s*var\(--record-gutter\);/s);
 });
 
@@ -265,7 +266,7 @@ test("ledger sections use bordered monthly drilldown cards", () => {
   assert.match(js, /function cashHistory\(monthKey = selectedMonthKey\(\)\)/);
   assert.match(css, /body\.theme-light \.history-card\s*\{[^}]*border:\s*1px solid rgba\(31,\s*64,\s*53,\s*0\.12\);[\s\S]*?border-radius:\s*20px;/s);
   assert.match(css, /body\.theme-light \.history-card summary\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;/s);
-  assert.match(css, /body\.theme-light \.workspace-panel \.field input\[type="date"\],[\s\S]*?width:\s*100%;[\s\S]*?outline-offset:\s*-1px;/s);
+  assert.match(css, /body\.theme-light \.workspace-panel \.date-input-frame,[\s\S]*?width:\s*100%;[\s\S]*?outline-offset:\s*-1px;/s);
 });
 
 test("monthly record totals use selected month instead of visible calendar month", () => {

@@ -2225,7 +2225,10 @@ function field(label, name, type, value, options) {
   if (type === "time") {
     return `<div class="field time-field"><label>${label}</label><div class="time-input-wrap"><input name="${name}" type="time" value="${escapeHtml(value)}"><span class="time-display" data-time-display="${name}">${formatTimeDisplay(value)}</span></div></div>`;
   }
-  return `<div class="field ${type === "date" ? "date-field" : ""}"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
+  if (type === "date") {
+    return `<div class="field date-field"><label>${label}</label><div class="date-input-frame"><input name="${name}" type="date" value="${escapeHtml(value)}"></div></div>`;
+  }
+  return `<div class="field"><label>${label}</label><input name="${name}" type="${type}" value="${escapeHtml(value)}" ${type === "number" ? 'step="0.01"' : ""}></div>`;
 }
 
 function formatTimeDisplay(value) {
