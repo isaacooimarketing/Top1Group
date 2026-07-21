@@ -316,6 +316,19 @@ test("petrol credit card includes weekly paid tiles", () => {
   assert.match(css, /body\.theme-light \.petrol-week-tile\.is-paid\s*\{[^}]*background:\s*linear-gradient\(145deg,\s*#d9fff3/s);
 });
 
+test("saving keeps the current viewport instead of jumping after button actions", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function renderPreservingViewport\(\)/);
+  assert.match(js, /const x = window\.scrollX;/);
+  assert.match(js, /const y = window\.scrollY;/);
+  assert.match(js, /window\.scrollTo\(x, y\);/);
+  assert.match(js, /focus\?\.\(\{ preventScroll: true \}\)/);
+  assert.match(js, /finally\s*\{[\s\S]*?saving = false;[\s\S]*?renderPreservingViewport\(\);[\s\S]*?\}/);
+  assert.doesNotMatch(js, /await persistState\(\);\s*render\(\);/);
+  assert.doesNotMatch(js, /showDailySummary\(session, cashBefore\);\s*render\(\);/);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
@@ -357,10 +370,11 @@ test("finished grab records do not keep the driver form in edit mode", () => {
   assert.match(js, /record\.status === "In Progress"/);
 });
 
-test("finish today rerenders sidebar so completed inputs clear immediately", () => {
+test("finish today opens summary without a second full render jump", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
-  assert.match(js, /if \(status === "Finished" && saved\) \{\s*showDailySummary\(session, cashBefore\);\s*render\(\);\s*\}/);
+  assert.match(js, /if \(status === "Finished" && saved\) \{\s*showDailySummary\(session, cashBefore\);\s*\}/);
+  assert.doesNotMatch(js, /if \(status === "Finished" && saved\) \{\s*showDailySummary\(session, cashBefore\);\s*render\(\);\s*\}/);
 });
 
 test("cash confirmation can be split between petty cash and cash at home", () => {

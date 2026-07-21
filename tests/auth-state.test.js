@@ -6,6 +6,10 @@ const {
   stateQueryForUser,
   accountEmail
 } = require("../api/auth-utils");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const root = path.resolve(__dirname, "..");
 
 test("bearerToken rejects missing and malformed authorization", () => {
   assert.equal(bearerToken(undefined), "");
@@ -26,4 +30,16 @@ test("account aliases map only owner and demo to internal emails", () => {
   assert.equal(accountEmail("DEMO"), "demo@top1group.com");
   assert.equal(accountEmail("driver@example.com"), "driver@example.com");
   assert.equal(accountEmail("unknown-driver"), "");
+});
+
+test("browser auth refreshes expired sessions instead of clearing login on reload", () => {
+  const authJs = fs.readFileSync(path.join(root, "public", "auth.js"), "utf8");
+  const appJs = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(authJs, /async handleUnauthorized\(\)/);
+  assert.match(authJs, /if \(await this\.refreshSession\(\)\) return true;/);
+  assert.match(authJs, /if \(response\.status === 401\) return this\.refreshSession\(\);/);
+  assert.match(authJs, /catch\s*\{\s*return true;\s*\}/);
+  assert.match(appJs, /const recovered = await authManager\?\.handleUnauthorized\?\.\(\);/);
+  assert.match(appJs, /response = await fetch\("\/api\/state"/);
 });

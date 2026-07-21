@@ -922,13 +922,17 @@ function countValue(value, format = "number") {
 async function loadState() {
   if (hasUnsavedDriverFormEdits()) return;
   try {
-    const response = await fetch("/api/state", {
+    let response = await fetch("/api/state", {
       cache: "no-store",
       headers: authManager?.authHeaders() || {}
     });
     if (response.status === 401) {
-      await authManager?.signOut();
-      return;
+      const recovered = await authManager?.handleUnauthorized?.();
+      if (!recovered) return;
+      response = await fetch("/api/state", {
+        cache: "no-store",
+        headers: authManager?.authHeaders() || {}
+      });
     }
     if (!response.ok) throw new Error("Unable to load state");
     state = normalizeOSState(await response.json());
@@ -937,6 +941,20 @@ async function loadState() {
   }
   syncUniversalObjects();
   render();
+}
+
+function renderPreservingViewport() {
+  const x = window.scrollX;
+  const y = window.scrollY;
+  const activeName = document.activeElement?.name || "";
+  render();
+  requestAnimationFrame(() => {
+    window.scrollTo(x, y);
+    if (activeName) {
+      const safeName = window.CSS?.escape ? CSS.escape(activeName) : activeName;
+      document.querySelector(`[name="${safeName}"]`)?.focus?.({ preventScroll: true });
+    }
+  });
 }
 
 function hasUnsavedDriverFormEdits() {
@@ -951,7 +969,7 @@ async function persistState() {
   saving = true;
   let cloudSaved = false;
   try {
-    const response = await fetch("/api/state", {
+    let response = await fetch("/api/state", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -960,8 +978,16 @@ async function persistState() {
       body: JSON.stringify(state)
     });
     if (response.status === 401) {
-      await authManager?.signOut();
-      return false;
+      const recovered = await authManager?.handleUnauthorized?.();
+      if (!recovered) return false;
+      response = await fetch("/api/state", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authManager?.authHeaders() || {})
+        },
+        body: JSON.stringify(state)
+      });
     }
     if (!response.ok) throw new Error("Unable to save state");
     state = normalizeOSState(await response.json());
@@ -971,7 +997,7 @@ async function persistState() {
     // Local storage keeps the app usable if the data server is offline.
   } finally {
     saving = false;
-    render();
+    renderPreservingViewport();
   }
   return cloudSaved;
 }
@@ -2334,7 +2360,6 @@ function bindPendingConfirmControls(root = document) {
         cashAtHome: homeInput?.value || 0
       } : null);
       await persistState();
-      render();
       const record = summaryRecordId ? state.driverSessions.find(item => item.id === summaryRecordId) : null;
       if (record && $("#dailySummaryDialog")?.open) showDailySummary(record);
     });
@@ -2398,7 +2423,6 @@ function bindSidebar() {
       const saved = await persistState();
       if (status === "Finished" && saved) {
         showDailySummary(session, cashBefore);
-        render();
       }
     });
     document.querySelectorAll("[data-edit-driver]").forEach(button => {

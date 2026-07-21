@@ -178,13 +178,19 @@
       if (Number(this.session.expires_at || 0) <= Math.floor(Date.now() / 1000) + 30) {
         return this.refreshSession();
       }
-      const response = await fetch(`${this.config.supabaseUrl}/auth/v1/user`, {
-        headers: {
-          apikey: this.config.supabaseKey,
-          Authorization: `Bearer ${this.session.access_token}`
-        }
-      });
-      return response.ok;
+      try {
+        const response = await fetch(`${this.config.supabaseUrl}/auth/v1/user`, {
+          headers: {
+            apikey: this.config.supabaseKey,
+            Authorization: `Bearer ${this.session.access_token}`
+          }
+        });
+        if (response.ok) return true;
+        if (response.status === 401) return this.refreshSession();
+        return true;
+      } catch {
+        return true;
+      }
     }
 
     async refreshSession() {
@@ -205,6 +211,12 @@
       };
       localStorage.setItem(storageKey, JSON.stringify(this.session));
       return true;
+    }
+
+    async handleUnauthorized() {
+      if (await this.refreshSession()) return true;
+      await this.signOut();
+      return false;
     }
 
     authHeaders() {
