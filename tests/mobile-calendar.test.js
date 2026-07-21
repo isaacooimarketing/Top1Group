@@ -300,6 +300,22 @@ test("petrol credit card card shows monthly outstanding while retaining month co
   assert.match(js, /Card Charged<\/span><strong>\$\{money\.format\(monthTotals\.cardCharged\)\}/);
 });
 
+test("petrol credit card includes weekly paid tiles", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(js, /function petrolMonthWeekBuckets\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /const ranges = \[\s*\[\s*1,\s*7\s*\],[\s\S]*\[\s*22,\s*monthEnd\s*\]/);
+  assert.match(js, /function petrolWeekSummaryMarkup\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /class="petrol-month-card"/);
+  assert.match(js, /data-pay-petrol-week="\$\{week\.weekKey\}"/);
+  assert.match(js, /source:\s*"petrol_week"/);
+  assert.match(js, /state\.petrolCardPayments = state\.petrolCardPayments\.filter\(item => item\.id !== existing\.id\);/);
+  assert.match(css, /\.petrol-week-grid\s*\{[^}]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/s);
+  assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?\.petrol-week-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/s);
+  assert.match(css, /body\.theme-light \.petrol-week-tile\.is-paid\s*\{[^}]*background:\s*linear-gradient\(145deg,\s*#d9fff3/s);
+});
+
 test("driver form asks for total trips before session times", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

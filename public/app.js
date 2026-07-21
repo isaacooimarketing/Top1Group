@@ -1904,6 +1904,53 @@ function explicitPetrolEntries(records = state.driverSessions) {
     .map(entry => ({ ...normalizePetrolEntry(entry), date: record.date, sourceId: record.id })));
 }
 
+function petrolMonthWeekBuckets(monthKey = selectedMonthKey()) {
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!year || !month) return [];
+  const monthEnd = new Date(year, month, 0).getDate();
+  const ranges = [
+    [1, 7],
+    [8, 14],
+    [15, 21],
+    [22, monthEnd]
+  ];
+  const entries = explicitPetrolEntries()
+    .filter(entry => String(entry.date || "").startsWith(monthKey))
+    .filter(entry => entry.paymentMethod === "Credit Card");
+  return ranges.map(([startDay, endDay], index) => {
+    const start = `${monthKey}-${String(startDay).padStart(2, "0")}`;
+    const end = `${monthKey}-${String(endDay).padStart(2, "0")}`;
+    const weekKey = `${monthKey}-w${index + 1}`;
+    const amount = entries
+      .filter(entry => entry.date >= start && entry.date <= end)
+      .reduce((sum, entry) => sum + num(entry.amount), 0);
+    const payment = (state.petrolCardPayments || []).find(item => item.source === "petrol_week" && item.weekKey === weekKey);
+    return { label: `Week ${index + 1}`, weekKey, start, end, amount, payment };
+  });
+}
+
+function petrolWeekSummaryMarkup(monthKey = selectedMonthKey()) {
+  const weeks = petrolMonthWeekBuckets(monthKey);
+  const total = weeks.reduce((sum, week) => sum + week.amount, 0);
+  return `<section class="petrol-month-card">
+    <div class="petrol-month-head">
+      <span><small>Monthly Petrol</small><strong>${monthFmt.format(parseDate(`${monthKey}-01`))}</strong></span>
+      <b>${money.format(total)}</b>
+    </div>
+    <div class="petrol-week-grid">
+      ${weeks.map(week => {
+        const paid = Boolean(week.payment);
+        const disabled = week.amount <= 0;
+        return `<button class="petrol-week-tile ${paid ? "is-paid" : ""}" type="button" data-pay-petrol-week="${week.weekKey}" ${disabled ? "disabled" : ""}>
+          <span>${week.label}</span>
+          <strong>${money.format(week.amount)}</strong>
+          <small>${paid ? "Paid" : disabled ? "No petrol" : "Tap to paid"}</small>
+        </button>`;
+      }).join("")}
+    </div>
+  </section>`;
+}
+
 function petrolLiabilityMarkup() {
   const entries = explicitPetrolEntries();
   const payments = state.petrolCardPayments || [];
@@ -1933,6 +1980,7 @@ function petrolLiabilityMarkup() {
         <b>${money.format(monthTotals.cardOutstanding)}</b>
       </summary>
       <div class="history-card-body">
+        ${petrolWeekSummaryMarkup(month)}
         <div class="petrol-ledger-grid">
           <div><span>Week Cost</span><strong>${money.format(weekCost)}</strong></div>
           <div><span>Month Cost</span><strong>${money.format(monthCost)}</strong></div>
@@ -2392,6 +2440,28 @@ function bindSidebar() {
       persistState();
     });
   }
+
+  document.querySelectorAll("[data-pay-petrol-week]").forEach(button => {
+    button.addEventListener("click", () => {
+      const weekKey = button.dataset.payPetrolWeek;
+      const week = petrolMonthWeekBuckets().find(item => item.weekKey === weekKey);
+      if (!week || week.amount <= 0) return;
+      const existing = (state.petrolCardPayments || []).find(item => item.source === "petrol_week" && item.weekKey === weekKey);
+      if (existing) {
+        state.petrolCardPayments = state.petrolCardPayments.filter(item => item.id !== existing.id);
+      } else {
+        state.petrolCardPayments.push({
+          id: uid("petrol_week_payment"),
+          date: selectedDate,
+          amount: week.amount,
+          source: "petrol_week",
+          weekKey,
+          note: `${week.label} petrol paid`
+        });
+      }
+      persistState();
+    });
+  });
 
   const cashSettingsForm = $("#cashSettingsForm");
   if (cashSettingsForm) {

@@ -592,6 +592,90 @@ body.auth-locked {
   grid-template-columns: repeat(2, 1fr);
 }
 
+.petrol-month-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.petrol-month-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.petrol-month-head span {
+  display: grid;
+  gap: 4px;
+}
+
+.petrol-month-head small,
+.petrol-week-tile span {
+  color: var(--champagne);
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.petrol-month-head strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.petrol-month-head b {
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.petrol-week-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.petrol-week-tile {
+  display: grid;
+  gap: 6px;
+  min-height: 98px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.petrol-week-tile strong {
+  font-size: 18px;
+  line-height: 1.05;
+}
+
+.petrol-week-tile small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.petrol-week-tile.is-paid {
+  border-color: rgba(58, 214, 176, 0.48);
+  background: linear-gradient(145deg, rgba(58, 214, 176, 0.20), rgba(58, 214, 176, 0.08));
+}
+
+.petrol-week-tile.is-paid small {
+  color: #6ff0ce;
+}
+
+.petrol-week-tile:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
 .compact-form {
   margin-top: 12px;
 }
@@ -4900,6 +4984,50 @@ body.theme-light .history-card-body {
   padding: 0 18px 18px;
 }
 
+body.theme-light .petrol-month-card {
+  border: 1px solid rgba(31, 64, 53, 0.12);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 244, 0.86)),
+    #ffffff;
+  box-shadow: 0 12px 28px rgba(31, 64, 53, 0.08);
+}
+
+body.theme-light .petrol-month-head small,
+body.theme-light .petrol-week-tile span {
+  color: #006f53;
+}
+
+body.theme-light .petrol-month-head strong {
+  color: #52625d;
+}
+
+body.theme-light .petrol-month-head b,
+body.theme-light .petrol-week-tile strong {
+  color: #111515;
+}
+
+body.theme-light .petrol-week-tile {
+  border: 1px solid rgba(31, 64, 53, 0.12);
+  border-radius: 16px;
+  background: linear-gradient(160deg, #ffffff 0%, #f5fbf7 100%);
+  box-shadow: 0 8px 18px rgba(31, 64, 53, 0.06);
+}
+
+body.theme-light .petrol-week-tile small {
+  color: #64736d;
+}
+
+body.theme-light .petrol-week-tile.is-paid {
+  border-color: rgba(0, 128, 101, 0.34);
+  background: linear-gradient(145deg, #d9fff3 0%, #ecfff8 100%);
+  box-shadow: 0 10px 22px rgba(0, 128, 101, 0.14);
+}
+
+body.theme-light .petrol-week-tile.is-paid small {
+  color: #007a5d;
+}
+
 body.theme-light .history-card .driver-summary.two {
   grid-template-columns: 1fr 1fr;
 }
@@ -4933,6 +5061,18 @@ body.theme-light .workspace-panel > .history-item + .history-item {
   body.theme-light {
     --calendar-week-row-height: 154px;
     --record-gutter: 20px;
+  }
+
+  .petrol-week-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .petrol-month-head {
+    grid-template-columns: 1fr;
+  }
+
+  .petrol-month-head b {
+    font-size: 26px;
   }
 }
 
