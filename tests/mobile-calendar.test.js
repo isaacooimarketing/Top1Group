@@ -128,17 +128,19 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.match(js, /renderDriverDashboard\(\)/);
   assert.match(dashboardBlock, /Week Net/);
   assert.match(js, /function dueCarRentalPayments\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
+  assert.match(js, /function duePetrolCost\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
   assert.match(dashboardBlock, /After Car Rental/);
   assert.match(dashboardBlock, /dueCarRentalPayments\(\) \* num\(settings\.carRentalTarget\)/);
+  assert.match(dashboardBlock, /const duePetrol = duePetrolCost\(\);/);
   assert.match(dashboardBlock, /Bank After Rental/);
-  assert.match(dashboardBlock, /bank\.month - dueRental/);
+  assert.match(dashboardBlock, /bank\.month - dueRental - duePetrol/);
   assert.doesNotMatch(dashboardBlock, /Average Daily Net/);
   assert.doesNotMatch(dashboardBlock, /bankTransferTotals\(\)\.week/);
   assert.doesNotMatch(dashboardBlock, /Income \/ Hour/);
   assert.doesNotMatch(dashboardBlock, /Online Hours/);
   assert.doesNotMatch(dashboardBlock, /Total Cost/);
   assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
-  assert.match(dashboardBlock, /<small>\$\{money\.format\(bank\.month\)\} - \$\{money\.format\(dueRental\)\}<\/small>/);
+  assert.match(dashboardBlock, /\$\{money\.format\(bank\.month\)\} - \$\{money\.format\(dueRental\)\} rental - \$\{money\.format\(duePetrol\)\} petrol/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -336,11 +338,27 @@ test("driver form asks for total trips before session times", () => {
   const formStart = js.indexOf('<div class="form-section full">Driving Sessions</div>');
   const tripsField = js.indexOf('${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}', formStart);
   const sessionFields = js.indexOf('${sessionFields(editing)}', formStart);
+  const sessionStart = js.indexOf("function sessionFields");
+  const sessionBlock = js.slice(sessionStart, js.indexOf("function petrolFields", sessionStart));
 
   assert.notEqual(formStart, -1);
   assert.notEqual(tripsField, -1);
   assert.notEqual(sessionFields, -1);
   assert.ok(tripsField < sessionFields);
+  assert.match(sessionBlock, /startTime:\s*editing\.startTime \|\| "05:00"/);
+});
+
+test("new grab records default opening balances from previous finished endings", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const sidebarStart = js.indexOf("function driverSidebar()");
+  const sidebarBlock = js.slice(sidebarStart, js.indexOf("function sessionFields", sidebarStart));
+
+  assert.match(js, /function latestGrabEndingBefore\(dateIso = selectedDate, fieldName\)/);
+  assert.match(js, /item\.date < dateIso && item\.status === "Finished" && hasValue\(item\[fieldName\]\)/);
+  assert.match(sidebarBlock, /const defaultTngOpening = latestGrabEndingBefore\(selectedDate, "tngClosing"\);/);
+  assert.match(sidebarBlock, /const defaultSmartTagOpening = latestGrabEndingBefore\(selectedDate, "smartTagClosing"\);/);
+  assert.match(sidebarBlock, /hasValue\(editing\.tngOpening\) \? editing\.tngOpening : defaultTngOpening/);
+  assert.match(sidebarBlock, /hasValue\(editing\.smartTagOpening\) \? editing\.smartTagOpening : defaultSmartTagOpening/);
 });
 
 test("dashboard hero uses weekly metrics and moves monthly metrics lower", () => {
@@ -354,7 +372,7 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   assert.match(dashboardBlock, /<span>Week Net<\/span>/);
   assert.match(dashboardBlock, /<span>After Car Rental<\/span>/);
   assert.match(dashboardBlock, /<span>Bank After Rental<\/span>/);
-  assert.match(dashboardBlock, /bank\.month - dueRental/);
+  assert.match(dashboardBlock, /bank\.month - dueRental - duePetrol/);
   assert.doesNotMatch(dashboardBlock, /<span>Month Net<\/span>/);
   assert.doesNotMatch(dashboardBlock, /<small>This month<\/small>/);
   assert.match(statsBlock, /Monthly Overview/);

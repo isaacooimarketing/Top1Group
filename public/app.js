@@ -1211,6 +1211,25 @@ function dueCarRentalPayments(monthKey = selectedMonthKey(), throughDate = selec
   return count;
 }
 
+function duePetrolCost(monthKey = selectedMonthKey(), throughDate = selectedDate) {
+  const cutoff = String(throughDate || "").startsWith(monthKey)
+    ? throughDate
+    : `${monthKey}-31`;
+  return monthRecords(monthKey)
+    .filter(item => item.date <= cutoff)
+    .reduce((sum, item) => {
+      const metrics = item.driverIncomeModel === "grab_v13" ? grabDailyMetrics(item) : null;
+      return sum + (metrics ? metrics.petrol : num(item.petrolCost || item.metadata?.petrolCost));
+    }, 0);
+}
+
+function latestGrabEndingBefore(dateIso = selectedDate, fieldName) {
+  const records = grabRecords()
+    .filter(item => item.date < dateIso && item.status === "Finished" && hasValue(item[fieldName]))
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  return records.length ? records[0][fieldName] : "";
+}
+
 function cashBalances() {
   const settings = state.grabSettings || defaultGrabSettings();
   return state.cashLedger.reduce((acc, item) => {
@@ -1620,9 +1639,10 @@ function renderDriverDashboard() {
   const remaining = Math.max(0, weeklyTarget - week.net);
   const month = totalsForRecords(monthRecords());
   const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
-  const netAfterRental = month.net - dueRental;
+  const duePetrol = duePetrolCost();
+  const netAfterRental = month.net - dueRental - duePetrol;
   const bank = bankTransferTotals();
-  const bankAfterRental = bank.month - dueRental;
+  const bankAfterRental = bank.month - dueRental - duePetrol;
   target.innerHTML = `
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -1638,8 +1658,8 @@ function renderDriverDashboard() {
       <small>${activeDays} active days · ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)}</small></article>
-    <article class="dashboard-mini-card"><span>Bank After Rental</span><strong>${money.format(bankAfterRental)}</strong><small>${money.format(bank.month)} - ${money.format(dueRental)}</small></article>
+    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
+    <article class="dashboard-mini-card"><span>Bank After Rental</span><strong>${money.format(bankAfterRental)}</strong><small>${money.format(bank.month)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
   `;
 }
 
@@ -1837,6 +1857,8 @@ function driverSidebar() {
   const pending = state.pendingCashActions.filter(item => item.date === selectedDate);
   const bankTotals = bankTransferTotals();
   const settings = state.grabSettings || defaultGrabSettings();
+  const defaultTngOpening = latestGrabEndingBefore(selectedDate, "tngClosing");
+  const defaultSmartTagOpening = latestGrabEndingBefore(selectedDate, "smartTagClosing");
   return `${editing.id ? `<div class="existing-record-banner"><span>Existing Record</span><strong>${editing.status || "Saved"}</strong></div>` : ""}
   <section class="grab-day-summary">
     <div><span>Status</span><strong>${dayStatus(selectedDate)}</strong></div>
@@ -1853,10 +1875,10 @@ function driverSidebar() {
     ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
     ${sessionFields(editing)}
     <div class="form-section full">Touch & Go eWallet</div>
-    ${field("Starting", "tngOpening", "number", editing.tngOpening || "")}
+    ${field("Starting", "tngOpening", "number", hasValue(editing.tngOpening) ? editing.tngOpening : defaultTngOpening)}
     ${field("Ending", "tngClosing", "number", editing.tngClosing || "")}
     <div class="form-section full">SmartTAG / TNG Card</div>
-    ${field("Starting", "smartTagOpening", "number", editing.smartTagOpening || "")}
+    ${field("Starting", "smartTagOpening", "number", hasValue(editing.smartTagOpening) ? editing.smartTagOpening : defaultSmartTagOpening)}
     ${field("Ending", "smartTagClosing", "number", editing.smartTagClosing || "")}
     <div class="form-section full">Grab Cash Wallet Balance</div>
     ${field("Starting", "grabCashWalletOpening", "number", hasValue(editing.grabCashWalletOpening) ? editing.grabCashWalletOpening : editing.id ? "" : settings.grabWalletBase)}
@@ -1894,7 +1916,7 @@ function driverSidebar() {
 function sessionFields(editing) {
   const sessions = Array.isArray(editing.drivingSessions) && editing.drivingSessions.length
     ? editing.drivingSessions
-    : [{ startTime: editing.startTime || "", endTime: editing.endTime || "" }, { startTime: "", endTime: "" }];
+    : [{ startTime: editing.startTime || "05:00", endTime: editing.endTime || "" }, { startTime: "", endTime: "" }];
   return [0, 1, 2].map(index => {
     const item = sessions[index] || {};
     return `${field(`Session ${index + 1} Start`, `sessionStart${index + 1}`, "time", item.startTime || "")}
