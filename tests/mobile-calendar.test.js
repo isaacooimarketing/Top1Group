@@ -279,17 +279,22 @@ test("monthly record totals use selected month instead of visible calendar month
   assert.doesNotMatch(js, /function monthRecords\(\)\s*\{[\s\S]*visibleDate\.getFullYear/);
 });
 
-test("cash history uses account-aware cash movement rather than raw ledger sum", () => {
+test("cash history summarizes monthly cash usage by category", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
   const cashPanelStart = js.indexOf("function cashHistoryPanel()");
   const cashPanelBlock = js.slice(cashPanelStart, js.indexOf("function bankTransferHistory", cashPanelStart));
 
   assert.match(js, /function cashLedgerEffect\(item = \{\}\)/);
-  assert.match(js, /function cashMonthMovement\(monthKey = selectedMonthKey\(\)\)/);
-  assert.match(cashPanelBlock, /const monthMovement = cashMonthMovement\(month\);/);
-  assert.match(cashPanelBlock, /Cash Movement/);
+  assert.match(js, /function cashUsageTotals\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /item\.type === "cash_withdrawal"/);
+  assert.match(cashPanelBlock, /const usage = cashUsageTotals\(month\);/);
+  assert.match(cashPanelBlock, /Cash Usage/);
+  assert.match(cashPanelBlock, /Pocket money/);
+  assert.match(js, /function cashUsageBreakdown\(usage\)/);
   assert.match(js, /money\.format\(cashLedgerEffect\(item\)\)/);
-  assert.doesNotMatch(cashPanelBlock, /monthItems\.reduce\(\(sum, item\) => sum \+ num\(item\.amount\), 0\);/);
+  assert.match(js, /Bank In From Cash At Home/);
+  assert.match(js, /Use Cash At Home/);
+  assert.match(js, /const isBankIn = action\.startsWith\("Bank In"\);/);
 });
 
 test("petrol credit card card shows monthly outstanding while retaining month cost detail", () => {

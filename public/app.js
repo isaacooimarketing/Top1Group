@@ -1262,6 +1262,20 @@ function cashMonthMovement(monthKey = selectedMonthKey()) {
     .reduce((sum, item) => sum + cashLedgerEffect(item), 0);
 }
 
+function cashUsageTotals(monthKey = selectedMonthKey()) {
+  return state.cashLedger
+    .filter(item => String(item.date || "").startsWith(monthKey) && item.type === "cash_withdrawal")
+    .reduce((acc, item) => {
+      const category = String(item.category || "uncategorized").trim() || "uncategorized";
+      const amount = num(item.amount);
+      acc.total += amount;
+      acc.byCategory[category] = (acc.byCategory[category] || 0) + amount;
+      if (category.toLowerCase() === "pocket money") acc.pocketMoney += amount;
+      if (category.toLowerCase() === "bank in") acc.bankIn += amount;
+      return acc;
+    }, { total: 0, pocketMoney: 0, bankIn: 0, byCategory: {} });
+}
+
 function setCashPosition(data) {
   const current = cashBalances();
   const targetPetty = num(data.pettyCashCurrent);
@@ -2082,6 +2096,7 @@ function cashToolsMarkup() {
   const settings = state.grabSettings || defaultGrabSettings();
   const balances = cashBalances();
   const categories = settings.cashCategories.map(item => `<option value="${escapeHtml(item)}"></option>`).join("");
+  const cashActions = ["Move Petty Cash to Home", "Bank In From Cash At Home", "Bank In From Petty Cash", "Use Cash At Home", "Use Petty Cash"];
   return `<details class="record-details cash-tools">
     <summary>Cash Tools</summary>
     <form id="cashPositionForm" class="form-grid">
@@ -2102,8 +2117,8 @@ function cashToolsMarkup() {
     <form id="cashMoveForm" class="form-grid">
       <div class="form-section full">Move / Withdraw Cash</div>
       ${field("Amount", "amount", "number", "")}
-      ${field("Action", "action", "select", "Move Petty Cash to Home", ["Move Petty Cash to Home", "Withdraw From Petty Cash", "Withdraw From Cash At Home"])}
-      <div class="field"><label>Category</label><input name="category" list="cashCategoryList" value="bank in"></div>
+      ${field("Action", "action", "select", "Use Cash At Home", cashActions)}
+      <div class="field"><label>Category</label><input name="category" list="cashCategoryList" value="pocket money"></div>
       <datalist id="cashCategoryList">${categories}</datalist>
       <div class="field"><label>Remark</label><input name="remark" type="text"></div>
       <div class="action-row full"><button class="primary-action" type="submit">Record Cash Action</button></div>
@@ -2142,24 +2157,32 @@ function bankTransferPanel(bankTotals) {
 
 function cashHistoryPanel() {
   const month = selectedMonthKey();
-  const monthMovement = cashMonthMovement(month);
+  const usage = cashUsageTotals(month);
   const balances = cashBalances();
   const currentTotal = balances.pettyCash + balances.cashAtHome;
   return `<section class="history-card">
     <details>
       <summary>
-        <span><small>Cash Movement</small><strong>${selectedMonthLabel()}</strong></span>
-        <b>${money.format(monthMovement)}</b>
+        <span><small>Cash Usage</small><strong>${selectedMonthLabel()}</strong></span>
+        <b>${money.format(usage.pocketMoney)}</b>
       </summary>
       <div class="history-card-body">
         <div class="driver-summary two">
-          <span>This month ${money.format(monthMovement)}</span>
+          <span>Pocket money ${money.format(usage.pocketMoney)}</span>
           <span>Current cash ${money.format(currentTotal)}</span>
         </div>
+        ${cashUsageBreakdown(usage)}
         ${cashHistory(month)}
       </div>
     </details>
   </section>`;
+}
+
+function cashUsageBreakdown(usage) {
+  const entries = Object.entries(usage.byCategory).sort((a, b) => b[1] - a[1]);
+  return entries.length ? `<div class="driver-summary two cash-usage-breakdown">
+    ${entries.map(([category, amount]) => `<span>${escapeHtml(category)} ${money.format(amount)}</span>`).join("")}
+  </div>` : `<div class="empty-note">No cash usage recorded this month.</div>`;
 }
 
 function bankTransferHistory(monthKey = selectedMonthKey()) {
@@ -2628,7 +2651,9 @@ function buildGrabV13Record(data, existing, status) {
 function recordCashAction(data) {
   const amount = num(data.amount);
   if (!amount) return;
-  const category = String(data.category || "cash action").trim();
+  const action = String(data.action || "").trim();
+  const isBankIn = action.startsWith("Bank In");
+  const category = isBankIn ? "bank in" : String(data.category || "pocket money").trim();
   const settings = state.grabSettings || defaultGrabSettings();
   if (category && !settings.cashCategories.includes(category)) {
     state.grabSettings = {
@@ -2643,13 +2668,13 @@ function recordCashAction(data) {
     category,
     remark: data.remark || ""
   };
-  if (data.action === "Move Petty Cash to Home") {
+  if (action === "Move Petty Cash to Home") {
     state.cashLedger.push({ ...base, type: "cash_move", fromAccount: "petty_cash", toAccount: "cash_at_home" });
     return;
   }
-  const fromAccount = data.action === "Withdraw From Petty Cash" ? "petty_cash" : "cash_at_home";
+  const fromAccount = action.includes("Petty Cash") ? "petty_cash" : "cash_at_home";
   state.cashLedger.push({ ...base, type: "cash_withdrawal", fromAccount });
-  if (category.toLowerCase() === "bank in") {
+  if (isBankIn || category.toLowerCase() === "bank in") {
     state.bankTransfers.push({
       id: uid("bank"),
       date: selectedDate,
