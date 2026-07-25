@@ -1187,6 +1187,22 @@ function totalsForRecords(records) {
   }, { income: 0, cost: 0, net: 0, hours: 0, trips: 0, petrol: 0, toll: 0 });
 }
 
+function driverAccountingAdjustments() {
+  const analytics = state.driverAnalytics || {};
+  const rawRecords = Array.isArray(state.driverRawRecords) ? state.driverRawRecords : [];
+  const preGrabExpenses = hasValue(analytics.preGrabExpenses?.total)
+    ? num(analytics.preGrabExpenses.total)
+    : rawRecords
+        .filter(item => item.type === "pre_grab_expense")
+        .reduce((sum, item) => sum + num(item.amount), 0);
+  const refunds = hasValue(analytics.refundsAndReimbursements?.total)
+    ? num(analytics.refundsAndReimbursements.total)
+    : rawRecords
+        .filter(item => item.type === "refund_reimbursement" || String(item.id || "").startsWith("refund_grab_"))
+        .reduce((sum, item) => sum + num(item.amount), 0);
+  return { preGrabExpenses, refunds };
+}
+
 function weekRecords(dateIso = selectedDate) {
   return recordsThroughSelectedDate(state.driverSessions, dateIso);
 }
@@ -1653,6 +1669,9 @@ function renderDriverDashboard() {
   const remaining = Math.max(0, weeklyTarget - week.net);
   const month = totalsForRecords(monthRecords());
   const allTime = totalsForRecords(state.driverSessions);
+  const allTimeAdjustments = driverAccountingAdjustments();
+  const allTimeCost = allTime.cost + allTimeAdjustments.preGrabExpenses;
+  const allTimeNet = allTime.income - allTimeCost;
   const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
   const duePetrol = duePetrolCost();
   const netAfterRental = month.net - dueRental;
@@ -1660,8 +1679,8 @@ function renderDriverDashboard() {
   target.innerHTML = `
     <article class="dashboard-alltime-card">
       <span>All-Time Net Profit</span>
-      <strong>${money.format(allTime.net)}</strong>
-      <small>${money.format(allTime.income)} income - ${money.format(allTime.cost)} costing</small>
+      <strong>${money.format(allTimeNet)}</strong>
+      <small>${money.format(allTime.income)} income - ${money.format(allTimeCost)} costing${allTimeAdjustments.refunds ? ` · ${money.format(allTimeAdjustments.refunds)} refund separate` : ""}</small>
     </article>
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>

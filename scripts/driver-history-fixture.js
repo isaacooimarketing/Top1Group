@@ -40,7 +40,24 @@ const daily = [
   record("2026-06-27", "Grab", 138.87, 48.91, 89.96, 5, 13, 44.81, 4.1, 0, 45, 5.5, "Summary cost excludes insurance"),
   record("2026-06-28", "Grab", 244.17, 40.57, 203.6, 5, 20, 40.57, 0, 0, 131, 5.5, "Wallet ending corrected to RM612.48; insurance excluded"),
   record("2026-06-30", "Grab", 371.55, 42.86, 328.69, 12.5, 29, 42.86, 0, 0, 82, 5.5, "Summary cost excludes insurance"),
-  record("2026-07-02", "Grab", 328.99, 53.79, 275.2, 10, 23, 51.79, 2, 0, 123, 5.5, "Summary cost excludes insurance")
+  record("2026-07-02", "Grab", 328.99, 53.79, 275.2, 10, 23, 51.79, 2, 0, 123, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-03", "Grab", 440.38, 77.71, 362.67, 14, 34, 72.46, 5.25, 0, 175, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-04", "Grab", 343.01, 52.54, 290.47, 12, 30, 51.37, 1.17, 0, 135, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-07", "Grab", 466.36, 65.49, 400.87, 12, 26, 57.37, 8.12, 0, 107, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-08", "Grab", 453.11, 67.24, 385.87, 13, 32, 58.06, 9.18, 0, 142, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-09", "Grab", 331.92, 52.04, 279.88, 10.5, 30, 46.57, 5.47, 0, 130, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-10", "Grab", 425.91, 60.29, 365.62, 13.5, 27, 59.72, 0.57, 0, 142, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-12", "Grab", 327.33, 51.34, 275.99, 10, 27, 47.89, 3.45, 0, 264, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-15", "Grab", 546.66, 55.44, 491.22, 13, 27, 55.44, 0, 0, 82, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-16", "Grab", 354.46, 48.42, 306.04, 11, 27, 48.42, 0, 0, 70, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-17", "Grab", 389.59, 78.37, 311.22, 14, 24, 68.86, 9.51, 0, 304, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-18", "Grab", 239.51, 44.28, 195.23, 8, 17, 32.98, 11.3, 0, 81, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-19", "Grab", 437.23, 68.45, 368.78, 13, 33, 61.15, 7.3, 0, 347, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-20", "Grab", 267.66, 36.97, 230.69, 4, 4, 32.05, 4.92, 0, 95, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-21", "Grab", 408.14, 92.88, 315.26, 12, 25, 67.61, 25.27, 0, 123, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-22", "Grab", 487.29, 80.99, 406.3, 14.5, 35, 57.71, 23.28, 0, 63, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-23", "Grab", 415.73, 57.07, 358.66, 13, 33, 55.75, 1.32, 0, 132, 5.5, "Summary cost excludes insurance"),
+  record("2026-07-24", "Grab", 335.52, 100.62, 234.9, 11, 23, 56.77, 43.85, 0, 200, 5.5, "Summary cost excludes insurance")
 ];
 
 const setupExpenses = [
@@ -81,7 +98,24 @@ const bankTransfers = [
   transfer("2026-06-30", "grab_wallet", 62.82),
   transfer("2026-06-30", "grab_wallet", 221.84),
   transfer("2026-07-01", "cash_at_home_bank_in", 1000),
-  transfer("2026-07-02", "grab_wallet", 156.55)
+  transfer("2026-07-02", "grab_wallet", 156.55),
+  transfer("2026-07-03", "grab_wallet", 256.08),
+  transfer("2026-07-04", "grab_wallet", 193.82),
+  transfer("2026-07-07", "grab_wallet", 286.91),
+  transfer("2026-07-08", "grab_wallet", 245.34),
+  transfer("2026-07-09", "grab_wallet", 165.22),
+  transfer("2026-07-10", "grab_wallet", 168.16),
+  transfer("2026-07-12", "grab_wallet", 63.33),
+  transfer("2026-07-15", "grab_wallet", 414.76),
+  transfer("2026-07-16", "grab_wallet", 284.06),
+  transfer("2026-07-17", "grab_wallet", 45.19),
+  transfer("2026-07-18", "grab_wallet", 158.51),
+  transfer("2026-07-19", "grab_wallet", 42.26),
+  transfer("2026-07-20", "grab_wallet", 133.52),
+  transfer("2026-07-21", "grab_wallet", 238.2),
+  transfer("2026-07-22", "grab_wallet", 424.29),
+  transfer("2026-07-23", "grab_wallet", 255.89),
+  transfer("2026-07-24", "grab_wallet", 135.52)
 ];
 
 const cashWithdrawals = [
@@ -91,7 +125,9 @@ const cashWithdrawals = [
   cash("2026-06-20", "cash_at_home", 200, "pocket money"),
   cash("2026-06-28", "cash_at_home", 400, "pocket money"),
   cash("2026-07-01", "cash_at_home", 1000, "bank in"),
-  cash("2026-07-01", "cash_at_home", 300, "loose cash")
+  cash("2026-07-01", "cash_at_home", 300, "loose cash"),
+  cash("2026-07-05", "cash_at_home", 200, "pocket money"),
+  cash("2026-07-18", "cash_at_home", 200, "pocket money")
 ];
 
 const refund = { id: "refund_grab_2026_05_13", date: "2026-05-13", amount: 170, type: "refund_reimbursement", source: "Grab" };
@@ -125,7 +161,7 @@ const baseTotals = daily.reduce((acc, item) => {
 
 const preGrabExpensesTotal = setupExpenses.reduce((sum, item) => sum + item.amount, 0);
 const timelineTotals = {
-  scope: "timeline_import_2026_05_07_to_2026_07_02",
+  scope: "timeline_import_2026_05_07_to_2026_07_24",
   operatingSales: round(baseTotals.operatingSales),
   salesWithRefunds: round(baseTotals.operatingSales + refund.amount),
   operatingCost: round(baseTotals.operatingCost),
