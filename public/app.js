@@ -1652,12 +1652,17 @@ function renderDriverDashboard() {
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
   const month = totalsForRecords(monthRecords());
+  const allTime = totalsForRecords(state.driverSessions);
   const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
   const duePetrol = duePetrolCost();
-  const netAfterRental = month.net - dueRental - duePetrol;
-  const bank = bankTransferTotals();
-  const bankAfterRental = bank.month - dueRental - duePetrol;
+  const netAfterRental = month.net - dueRental;
+  const netAfterRentalAndPetrol = month.net - dueRental - duePetrol;
   target.innerHTML = `
+    <article class="dashboard-alltime-card">
+      <span>All-Time Net Profit</span>
+      <strong>${money.format(allTime.net)}</strong>
+      <small>${money.format(allTime.income)} income - ${money.format(allTime.cost)} costing</small>
+    </article>
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
       <div class="dashboard-progress"><i style="width:${targetProgress}%"></i></div>
@@ -1672,8 +1677,8 @@ function renderDriverDashboard() {
       <small>${activeDays} active days · ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
-    <article class="dashboard-mini-card"><span>Bank After Rental</span><strong>${money.format(bankAfterRental)}</strong><small>${money.format(bank.month)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
+    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental</small></article>
+    <article class="dashboard-mini-card"><span>After Rental + Petrol</span><strong>${money.format(netAfterRentalAndPetrol)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
   `;
 }
 

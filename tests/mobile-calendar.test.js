@@ -130,17 +130,19 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.match(js, /function dueCarRentalPayments\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
   assert.match(js, /function duePetrolCost\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
   assert.match(dashboardBlock, /After Car Rental/);
+  assert.match(dashboardBlock, /All-Time Net Profit/);
   assert.match(dashboardBlock, /dueCarRentalPayments\(\) \* num\(settings\.carRentalTarget\)/);
   assert.match(dashboardBlock, /const duePetrol = duePetrolCost\(\);/);
-  assert.match(dashboardBlock, /Bank After Rental/);
-  assert.match(dashboardBlock, /bank\.month - dueRental - duePetrol/);
+  assert.match(dashboardBlock, /After Rental \+ Petrol/);
+  assert.match(dashboardBlock, /const netAfterRental = month\.net - dueRental;/);
+  assert.match(dashboardBlock, /const netAfterRentalAndPetrol = month\.net - dueRental - duePetrol;/);
+  assert.doesNotMatch(dashboardBlock, /bank\.month - dueRental/);
   assert.doesNotMatch(dashboardBlock, /Average Daily Net/);
   assert.doesNotMatch(dashboardBlock, /bankTransferTotals\(\)\.week/);
   assert.doesNotMatch(dashboardBlock, /Income \/ Hour/);
   assert.doesNotMatch(dashboardBlock, /Online Hours/);
   assert.doesNotMatch(dashboardBlock, /Total Cost/);
   assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
-  assert.match(dashboardBlock, /\$\{money\.format\(bank\.month\)\} - \$\{money\.format\(dueRental\)\} rental - \$\{money\.format\(duePetrol\)\} petrol/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -225,7 +227,7 @@ test("commercial dashboard polish calms KPI typography and aligns date inputs", 
 
   assert.match(css, /Friendly commercial polish/);
   assert.match(css, /--money-teal:\s*#0f7c76;/);
-  assert.match(css, /body\.theme-light \.dashboard-mini-card:nth-child\(4\),[\s\S]*?background:\s*linear-gradient\(180deg,\s*#ffffff 0%,\s*var\(--soft-blue\) 100%\)/);
+  assert.match(css, /body\.theme-light \.dashboard-mini-card:nth-child\(5\),[\s\S]*?background:\s*linear-gradient\(180deg,\s*#ffffff 0%,\s*var\(--soft-blue\) 100%\)/);
   assert.match(css, /body\.theme-light \.dashboard-mini-card strong,\s*body\.theme-light \.achievement-card strong\s*\{[^}]*overflow-wrap:\s*anywhere;/s);
   assert.match(css, /body\.theme-light input\[type="date"\],[\s\S]*?inline-size:\s*100%;[\s\S]*?max-inline-size:\s*100%;/s);
   assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.dashboard-net-card strong\s*\{[^}]*font-size:\s*clamp\(38px,\s*10\.4vw,\s*48px\)/s);
@@ -375,9 +377,11 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   const statsBlock = js.slice(statsStart, js.indexOf("function statCard", statsStart));
 
   assert.match(dashboardBlock, /<span>Week Net<\/span>/);
+  assert.match(dashboardBlock, /<span>All-Time Net Profit<\/span>/);
   assert.match(dashboardBlock, /<span>After Car Rental<\/span>/);
-  assert.match(dashboardBlock, /<span>Bank After Rental<\/span>/);
-  assert.match(dashboardBlock, /bank\.month - dueRental - duePetrol/);
+  assert.match(dashboardBlock, /<span>After Rental \+ Petrol<\/span>/);
+  assert.match(dashboardBlock, /netAfterRentalAndPetrol/);
+  assert.doesNotMatch(dashboardBlock, /bank\.month - dueRental/);
   assert.doesNotMatch(dashboardBlock, /<span>Month Net<\/span>/);
   assert.doesNotMatch(dashboardBlock, /<small>This month<\/small>/);
   assert.match(statsBlock, /Monthly Overview/);

@@ -2077,6 +2077,7 @@ textarea {
   align-items: stretch;
 }
 
+.dashboard-alltime-card,
 .dashboard-target-card,
 .dashboard-net-card,
 .dashboard-mini-card {
@@ -2113,6 +2114,7 @@ textarea {
 }
 
 .dashboard-card-head span,
+.dashboard-alltime-card span,
 .dashboard-net-card span,
 .dashboard-mini-card span {
   color: rgba(245, 245, 240, 0.72);
@@ -2161,6 +2163,32 @@ textarea {
 .target-remaining {
   color: #ffd86b;
   font-weight: 800;
+}
+
+.dashboard-alltime-card {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 10px;
+  min-height: 132px;
+  padding: 22px 24px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(245, 230, 179, 0.18), transparent 28%),
+    linear-gradient(135deg, rgba(9, 54, 36, 0.94), rgba(5, 20, 15, 0.96));
+}
+
+.dashboard-alltime-card strong {
+  display: block;
+  color: #ffffff;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 0.98;
+  font-weight: 820;
+  letter-spacing: 0;
+}
+
+.dashboard-alltime-card small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .dashboard-net-card {
@@ -3332,6 +3360,7 @@ body.theme-light {
   --line-strong: rgba(31, 64, 53, 0.20);
 }
 
+body.theme-light .dashboard-alltime-card,
 body.theme-light .dashboard-target-card,
 body.theme-light .dashboard-mini-card,
 body.theme-light .achievement-card,
@@ -3354,12 +3383,12 @@ body.theme-light .dashboard-target-card {
   background: linear-gradient(135deg, #b7f4c6 0%, #dff9e6 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .dashboard-mini-card:nth-child(4),
 body.theme-light .stat-card:nth-child(1) {
   background: linear-gradient(180deg, #ffffff, #eef8f1);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .dashboard-mini-card:nth-child(5),
 body.theme-light .stat-card:nth-child(2) {
   background: linear-gradient(180deg, #ffffff, #f5fbf7);
 }
@@ -3653,22 +3682,22 @@ body.theme-light .dashboard-mini-card small {
   margin-top: 8px;
 }
 
-body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .dashboard-mini-card:nth-child(4),
 body.theme-light .achievement-card:nth-child(1) {
   background: linear-gradient(180deg, #ffffff 0%, #eaf8ef 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .dashboard-mini-card:nth-child(5),
 body.theme-light .achievement-card:nth-child(2) {
   background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(5),
+body.theme-light .dashboard-mini-card:nth-child(6),
 body.theme-light .achievement-card:nth-child(3) {
   background: linear-gradient(180deg, #ffffff 0%, #fff8ec 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(6),
+body.theme-light .dashboard-mini-card:nth-child(7),
 body.theme-light .achievement-card:nth-child(4) {
   background: linear-gradient(180deg, #ffffff 0%, #f4f1ff 100%);
 }
@@ -4352,6 +4381,7 @@ body.theme-light .app-shell {
   overflow-x: clip;
 }
 
+body.theme-light .dashboard-alltime-card,
 body.theme-light .dashboard-target-card,
 body.theme-light .dashboard-mini-card,
 body.theme-light .achievement-card,
@@ -4373,6 +4403,22 @@ body.theme-light .auth-panel {
 
 body.theme-light .dashboard-target-card {
   background: linear-gradient(180deg, #d9f7df 0%, #c6f1d2 100%);
+}
+
+body.theme-light .dashboard-alltime-card {
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 92% 20%, rgba(255, 255, 255, 0.18), transparent 26%),
+    linear-gradient(135deg, #0f6b44 0%, #16a064 100%);
+  box-shadow:
+    0 24px 58px rgba(18, 100, 63, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.22) inset;
+}
+
+body.theme-light .dashboard-alltime-card span,
+body.theme-light .dashboard-alltime-card strong,
+body.theme-light .dashboard-alltime-card small {
+  color: #ffffff;
 }
 
 body.theme-light .dashboard-net-card {
@@ -4613,42 +4659,42 @@ body.theme-light .achievement-card small {
   font-weight: 650;
 }
 
-body.theme-light .dashboard-mini-card:nth-child(3),
+body.theme-light .dashboard-mini-card:nth-child(4),
 body.theme-light .achievement-card:nth-child(1) {
   background: linear-gradient(180deg, #ffffff 0%, var(--soft-mint) 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(3) strong,
+body.theme-light .dashboard-mini-card:nth-child(4) strong,
 body.theme-light .achievement-card:nth-child(1) strong {
   color: var(--money-green);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(4),
+body.theme-light .dashboard-mini-card:nth-child(5),
 body.theme-light .achievement-card:nth-child(2) {
   background: linear-gradient(180deg, #ffffff 0%, var(--soft-blue) 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(4) strong,
+body.theme-light .dashboard-mini-card:nth-child(5) strong,
 body.theme-light .achievement-card:nth-child(2) strong {
   color: var(--money-blue);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(5),
+body.theme-light .dashboard-mini-card:nth-child(6),
 body.theme-light .achievement-card:nth-child(3) {
   background: linear-gradient(180deg, #ffffff 0%, var(--soft-amber) 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(5) strong,
+body.theme-light .dashboard-mini-card:nth-child(6) strong,
 body.theme-light .achievement-card:nth-child(3) strong {
   color: var(--money-amber);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(6),
+body.theme-light .dashboard-mini-card:nth-child(7),
 body.theme-light .achievement-card:nth-child(4) {
   background: linear-gradient(180deg, #ffffff 0%, var(--soft-violet) 100%);
 }
 
-body.theme-light .dashboard-mini-card:nth-child(6) strong,
+body.theme-light .dashboard-mini-card:nth-child(7) strong,
 body.theme-light .achievement-card:nth-child(4) strong {
   color: var(--money-violet);
 }
