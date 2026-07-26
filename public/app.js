@@ -1343,8 +1343,25 @@ function upsertPending(action) {
   state.pendingCashActions.push({ ...action, amount });
 }
 
-function hasConfirmedCashForRecord(recordId) {
-  return state.cashLedger.some(item => item.sourceId === recordId && item.type === "cash_collected");
+function confirmedCashAmountForRecord(recordId) {
+  return state.cashLedger
+    .filter(item => item.sourceId === recordId && item.type === "cash_collected")
+    .reduce((sum, item) => sum + cashLedgerEffect(item), 0);
+}
+
+function hasConfirmedCashForRecord(recordId, amount = null) {
+  const matched = state.cashLedger.filter(item => item.sourceId === recordId && item.type === "cash_collected");
+  if (!matched.length) return false;
+  if (amount === null) return true;
+  return Math.abs(confirmedCashAmountForRecord(recordId) - num(amount)) < 0.005;
+}
+
+function removeConfirmedCashForRecord(recordId) {
+  state.cashLedger = state.cashLedger.filter(item => !(item.sourceId === recordId && item.type === "cash_collected"));
+}
+
+function hasAnyGrabBankTransferForRecord(recordId) {
+  return state.bankTransfers.some(item => item.sourceId === recordId && item.source === "grab_wallet");
 }
 
 function hasConfirmedGrabBankTransfer(recordId, amount = null) {
@@ -1355,13 +1372,20 @@ function hasConfirmedGrabBankTransfer(recordId, amount = null) {
   );
 }
 
+function removeConfirmedGrabBankTransferForRecord(recordId) {
+  state.bankTransfers = state.bankTransfers.filter(item => !(item.sourceId === recordId && item.source === "grab_wallet"));
+}
+
 function removePending(id) {
   state.pendingCashActions = state.pendingCashActions.filter(item => item.id !== id);
 }
 
 function createFinishPendingActions(record) {
   const metrics = grabDailyMetrics(record);
-  if (!hasConfirmedCashForRecord(record.id)) {
+  if (hasConfirmedCashForRecord(record.id) && !hasConfirmedCashForRecord(record.id, metrics.cash)) {
+    removeConfirmedCashForRecord(record.id);
+  }
+  if (!hasConfirmedCashForRecord(record.id, metrics.cash)) {
     upsertPending({
       id: `pending_cash_${record.id}`,
       date: record.date,
@@ -1373,7 +1397,10 @@ function createFinishPendingActions(record) {
   } else {
     removePending(`pending_cash_${record.id}`);
   }
-  if (!hasConfirmedGrabBankTransfer(record.id)) {
+  if (hasAnyGrabBankTransferForRecord(record.id) && !hasConfirmedGrabBankTransfer(record.id, metrics.transferToBank)) {
+    removeConfirmedGrabBankTransferForRecord(record.id);
+  }
+  if (!hasConfirmedGrabBankTransfer(record.id, metrics.transferToBank)) {
     upsertPending({
       id: `pending_grab_bank_${record.id}`,
       date: record.date,

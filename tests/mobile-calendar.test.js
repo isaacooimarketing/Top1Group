@@ -483,8 +483,13 @@ test("finish pending actions update changed amounts and avoid duplicate bank tra
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
   assert.match(js, /state\.pendingCashActions\[index\] = \{ \.\.\.state\.pendingCashActions\[index\], \.\.\.action, amount \};/);
-  assert.match(js, /function hasConfirmedCashForRecord\(recordId\)/);
+  assert.match(js, /function confirmedCashAmountForRecord\(recordId\)/);
+  assert.match(js, /function hasConfirmedCashForRecord\(recordId, amount = null\)/);
+  assert.match(js, /function removeConfirmedCashForRecord\(recordId\)/);
+  assert.match(js, /removeConfirmedCashForRecord\(record\.id\)/);
   assert.match(js, /function hasConfirmedGrabBankTransfer\(recordId, amount = null\)/);
+  assert.match(js, /function removeConfirmedGrabBankTransferForRecord\(recordId\)/);
+  assert.match(js, /removeConfirmedGrabBankTransferForRecord\(record\.id\)/);
   assert.match(js, /removePending\(`pending_cash_\$\{record\.id\}`\)/);
   assert.match(js, /removePending\(`pending_grab_bank_\$\{record\.id\}`\)/);
   assert.match(js, /if \(!hasConfirmedGrabBankTransfer\(action\.sourceId, action\.amount\)\) \{/);
