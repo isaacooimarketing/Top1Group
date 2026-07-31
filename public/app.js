@@ -2014,12 +2014,6 @@ function renderDriverDashboard() {
     </article>
     <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental</small></article>
     <article class="dashboard-mini-card"><span>After Rental + Petrol</span><strong>${money.format(netAfterRentalAndPetrol)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
-    <article class="dashboard-mini-card forecast-link-card">
-      <span>Forecast Planner</span>
-      <strong>${money.format(forecastSummary(selectedMonthKey()).totalNet)}</strong>
-      <small>Standalone planning - does not affect real Grab data.</small>
-      <button class="secondary-action compact-action" type="button" data-scroll-target="forecastSection">Open Forecast</button>
-    </article>
   `;
 }
 
@@ -3391,7 +3385,6 @@ function render() {
   renderSidebar();
   renderGrabStats();
   bindBottomNavigation();
-  bindScrollTargets();
   animateCounters();
   updateLiveCountdowns();
   localizeUI();
@@ -3412,18 +3405,6 @@ function bindBottomNavigation() {
         const firstInput = document.querySelector("#driverForm input, #driverForm select, #driverForm textarea");
         setTimeout(() => firstInput?.focus({ preventScroll: true }), 260);
       }
-    });
-  });
-}
-
-function bindScrollTargets() {
-  document.querySelectorAll("[data-scroll-target]").forEach(button => {
-    if (button.dataset.scrollBound) return;
-    button.dataset.scrollBound = "true";
-    button.addEventListener("click", () => {
-      const target = document.getElementById(button.dataset.scrollTarget);
-      if (!target) return;
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }

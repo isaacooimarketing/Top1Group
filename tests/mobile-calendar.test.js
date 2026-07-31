@@ -525,8 +525,12 @@ test("forecast planner is standalone and can export a landscape plan image", () 
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+  const grabLayoutIndex = html.indexOf('class="grab-layout"');
+  const forecastIndex = html.indexOf('id="forecastSection"');
 
   assert.match(html, /id="forecastSection"/);
+  assert.ok(grabLayoutIndex > 0);
+  assert.ok(forecastIndex > grabLayoutIndex);
   assert.match(js, /driverAnalytics:\s*\{\}/);
   assert.match(js, /function forecastPlans\(\)/);
   assert.match(js, /function forecastPlansForMonth\(monthKey = selectedMonthKey\(\)\)/);
@@ -536,9 +540,9 @@ test("forecast planner is standalone and can export a landscape plan image", () 
   assert.match(js, /function generateForecastImage\(monthKey = selectedMonthKey\(\)\)/);
   assert.match(js, /canvas\.width = 1920/);
   assert.match(js, /canvas\.height = 1080/);
-  assert.match(js, /Standalone planning - does not affect real Grab data/);
-  assert.match(js, /data-scroll-target="forecastSection"/);
-  assert.match(js, /function bindScrollTargets\(\)/);
+  assert.match(js, /Standalone Tool/);
+  assert.doesNotMatch(js, /forecast-link-card/);
+  assert.doesNotMatch(js, /data-scroll-target="forecastSection"/);
   assert.doesNotMatch(js, /data-nav-target="forecastSection"/);
   assert.match(js, /renderForecastPlanner\(\)/);
   assert.doesNotMatch(js, /state\.driverSessions\.push\([^)]*forecast/i);

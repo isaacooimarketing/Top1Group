@@ -5508,17 +5508,6 @@ body.theme-light .forecast-quick-row {
   gap: 10px;
 }
 
-body.theme-light .forecast-link-card {
-  position: relative;
-  border-color: rgba(47, 107, 79, 0.16);
-  background: linear-gradient(180deg, #fffef9 0%, #eaf7f0 100%);
-}
-
-body.theme-light .forecast-link-card .compact-action {
-  width: fit-content;
-  margin-top: 10px;
-}
-
 @media (max-width: 980px) {
   body.theme-light .forecast-panel {
     padding: 18px;
