@@ -470,6 +470,119 @@ test("pending cash confirmation reads inputs from the clicked confirmation card"
   assert.doesNotMatch(js, /const pettyInput = document\.querySelector\(`\[data-pending-petty="\$\{safeId\}"\]`\)/);
 });
 
+test("pending cash confirmation can correct stale cash baseline first", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function setCashPosition\(data, dateIso = selectedDate\)/);
+  assert.match(js, /date: dateIso/);
+  assert.match(js, /data-pending-current-petty/);
+  assert.match(js, /data-pending-current-home/);
+  assert.match(js, /currentPettyCash: currentPettyInput\?\.value/);
+  assert.match(js, /currentCashAtHome: currentHomeInput\?\.value/);
+  assert.match(js, /setCashPosition\(\{\s*pettyCashCurrent:/);
+  assert.match(js, /\}, action\.date\)/);
+});
+
+test("owner stale cash baseline is corrected before rendering pending cash", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function applyOwnerCashBaselineCorrections\(\)/);
+  assert.match(js, /accountType\?\.\(\) !== "owner"/);
+  assert.match(js, /Math\.abs\(balances\.cashAtHome - 2150\)/);
+  assert.match(js, /const targetPetty = stalePettyBeforeToday \? 244 : 269/);
+  assert.match(js, /const targetHome = 2550/);
+  assert.match(js, /Correct cash baseline before 2026-07-27/);
+  assert.match(js, /if \(correctedCashBaseline \|\| reconciledManualTotals\) await persistState\(\);/);
+});
+
+test("static assets are versioned so mobile browsers do not reuse old cash code", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
+
+  assert.match(html, /app\.js\?v=20260801-forecast/);
+  assert.match(html, /styles\.css\?v=20260801-forecast/);
+  assert.match(vercelJson, /"Cache-Control"/);
+  assert.match(vercelJson, /"no-store"/);
+});
+
+test("monthly commitments are a standalone planning tool", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const statsStart = js.indexOf("function renderGrabStats()");
+  const statsBlock = js.slice(statsStart, js.indexOf("function weeklyBreakdown", statsStart));
+
+  assert.match(js, /function monthlyCommitments\(\)/);
+  assert.match(js, /function monthlyCommitmentTotal\(\)/);
+  assert.match(js, /function addMonthlyCommitment\(data\)/);
+  assert.match(js, /function removeMonthlyCommitment\(id\)/);
+  assert.match(statsBlock, /Monthly Commitments/);
+  assert.match(statsBlock, /Personal planning only - not included in Grab profit or costing/);
+  assert.match(statsBlock, /monthlyCommitmentsMarkup\(commitmentTotal\)/);
+  assert.doesNotMatch(js, /acc\.cost \+= .*monthlyCommitment/);
+  assert.doesNotMatch(js, /month\.cost \+ commitmentTotal/);
+});
+
+test("forecast planner is standalone and can export a landscape plan image", () => {
+  const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(html, /id="forecastSection"/);
+  assert.match(js, /driverAnalytics:\s*\{\}/);
+  assert.match(js, /function forecastPlans\(\)/);
+  assert.match(js, /function forecastPlansForMonth\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /function saveForecastPlan\(dateIso, data = \{\}\)/);
+  assert.match(js, /function removeForecastPlan\(dateIso\)/);
+  assert.match(js, /function renderForecastPlanner\(\)/);
+  assert.match(js, /function generateForecastImage\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /canvas\.width = 1920/);
+  assert.match(js, /canvas\.height = 1080/);
+  assert.match(js, /Standalone planning - does not affect real Grab data/);
+  assert.match(js, /data-scroll-target="forecastSection"/);
+  assert.match(js, /function bindScrollTargets\(\)/);
+  assert.doesNotMatch(js, /data-nav-target="forecastSection"/);
+  assert.match(js, /renderForecastPlanner\(\)/);
+  assert.doesNotMatch(js, /state\.driverSessions\.push\([^)]*forecast/i);
+  assert.match(css, /body\.theme-light \.forecast-panel/);
+  assert.match(css, /body\.theme-light \.forecast-grid/);
+});
+
+test("monthly calendar renders only weeks that intersect the visible month", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const calendarStart = js.indexOf("function renderCalendar()");
+  const calendarBlock = js.slice(calendarStart, js.indexOf("function weekSummaryMarkup", calendarStart));
+
+  assert.match(js, /function monthWeekStarts\(monthDate = visibleDate\)/);
+  assert.match(calendarBlock, /monthWeekStarts\(visibleDate\)\.forEach/);
+  assert.doesNotMatch(calendarBlock, /week < 6/);
+});
+
+test("all-time dashboard can follow manual notepad reconciliation totals", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /function applyOwnerManualTotalReconciliation\(\)/);
+  assert.match(js, /manualAllTimeReconciliation/);
+  assert.match(js, /income: 18970\.42/);
+  assert.match(js, /cost: 4496\.64/);
+  assert.match(js, /net: 14473\.78/);
+  assert.match(js, /adjustmentLoss: 280\.05/);
+  assert.match(js, /adjustment loss/);
+  assert.match(js, /allTimeFinancialSummary\(\)/);
+  assert.match(js, /money\.format\(allTime\.net\)/);
+});
+
+test("cash bank-in action keeps typed categories and can save new ones", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+
+  assert.match(js, /const typedCategory = String\(data\.category \|\| ""\)\.trim\(\)/);
+  assert.match(js, /const category = typedCategory \|\| \(isBankIn \? "bank in" : "pocket money"\)/);
+  assert.match(js, /select name="categoryPreset"/);
+  assert.match(js, /New Category/);
+  assert.match(js, /data\.category = String\(data\.category \|\| ""\)\.trim\(\) \|\| data\.categoryPreset/);
+  assert.match(js, /Add "\$\{category\}" as a saved cash category\?/);
+  assert.match(js, /"money bank in"/);
+  assert.doesNotMatch(js, /const category = isBankIn \? "bank in" : String/);
+});
+
 test("grab cash wallet shortfall is not auto-counted as top-up cost", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 

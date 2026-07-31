@@ -10,6 +10,17 @@
       "use": "@vercel/static"
     }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
   "routes": [
     {
       "src": "/api/state",

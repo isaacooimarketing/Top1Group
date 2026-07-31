@@ -1,6 +1,5 @@
-.vercel
+.npm-cache
 node_modules
 .env
 .env.*
 *.log
-.npm-cache

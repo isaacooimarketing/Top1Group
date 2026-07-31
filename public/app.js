@@ -24,6 +24,7 @@ let authManager = null;
 let appStarted = false;
 let driverFormDirty = false;
 let summaryRecordId = null;
+let selectedForecastDate = selectedDate;
 const { recordChanges, resolvedDrivingHours, resolvedStatus } = Top1RecordUtils;
 const { buildDailySummary } = Top1SummaryUtils;
 const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
@@ -890,11 +891,11 @@ function formatActionMeta(action) {
   if (!action) {
     const pulse = todayOS?.todayPulse || {};
     const analytics = driverAnalytics();
-    return `Current net ${money.format(analytics.totals.net)} · Average ${money.format(analytics.averageIncomePerHour)}/hour · ${analytics.totals.trips} trips imported`;
+    return `Current net ${money.format(analytics.totals.net)} - Average ${money.format(analytics.averageIncomePerHour)}/hour - ${analytics.totals.trips} trips imported`;
   }
   const item = action.item;
   const time = action.kind === "task" ? item.dueTime : item.startTime;
-  return `${displayTime(time)} · ${businessName(item.businessId)} · ${item.priority || "normal"} priority`;
+  return `${displayTime(time)} - ${businessName(item.businessId)} - ${item.priority || "normal"} priority`;
 }
 
 function actionTime(action) {
@@ -921,6 +922,8 @@ function countValue(value, format = "number") {
 
 async function loadState() {
   if (hasUnsavedDriverFormEdits()) return;
+  let correctedCashBaseline = false;
+  let reconciledManualTotals = false;
   try {
     let response = await fetch("/api/state", {
       cache: "no-store",
@@ -936,11 +939,16 @@ async function loadState() {
     }
     if (!response.ok) throw new Error("Unable to load state");
     state = normalizeOSState(await response.json());
+    correctedCashBaseline = applyOwnerCashBaselineCorrections();
+    reconciledManualTotals = applyOwnerManualTotalReconciliation();
   } catch {
     state = normalizeOSState(JSON.parse(localStorage.getItem("topOneGroupState") || JSON.stringify(state)));
+    correctedCashBaseline = applyOwnerCashBaselineCorrections();
+    reconciledManualTotals = applyOwnerManualTotalReconciliation();
   }
   syncUniversalObjects();
   render();
+  if (correctedCashBaseline || reconciledManualTotals) await persistState();
 }
 
 function renderPreservingViewport() {
@@ -1052,7 +1060,7 @@ function renderKpis() {
     const remainingDays = Math.max(1, Math.floor((weekEndDate - today) / 86400000) + 1);
     const perDay = remaining / remainingDays;
     strip.innerHTML = [
-      kpi("Total Earning", money.format(monthTotals.income), `Grab ${money.format(monthTotals.grab)} · Bolt ${money.format(monthTotals.bolt)}`),
+      kpi("Total Earning", money.format(monthTotals.income), `Grab ${money.format(monthTotals.grab)} - Bolt ${money.format(monthTotals.bolt)}`),
       kpi("Total Costing", money.format(monthTotals.cost), "This visible month"),
       kpi("Net Profit", money.format(monthTotals.net), "Income minus cost"),
       kpi("Weekly Target", `${Math.min(100, Math.round((weekTotals.net / target) * 100))}%`, `${money.format(weekTotals.net)} / ${money.format(target)}`),
@@ -1203,6 +1211,252 @@ function driverAccountingAdjustments() {
   return { preGrabExpenses, refunds };
 }
 
+function applyOwnerManualTotalReconciliation() {
+  if (authManager?.accountType?.() !== "owner") return false;
+  const analytics = state.driverAnalytics || {};
+  const existing = analytics.manualAllTimeReconciliation;
+  let changed = false;
+  const target = {
+    asOf: "2026-07-30",
+    boltSales: 3231.46,
+    grabSales: 15568.96,
+    refund: 170,
+    income: 18970.42,
+    cost: 4496.64,
+    net: 14473.78,
+    adjustmentLoss: 280.05,
+    label: "adjustment loss"
+  };
+  if (!state.grabSettings?.cashCategories?.includes("money bank in")) {
+    state.grabSettings = {
+      ...(state.grabSettings || defaultGrabSettings()),
+      cashCategories: [...(state.grabSettings?.cashCategories || defaultGrabSettings().cashCategories), "money bank in"]
+    };
+    changed = true;
+  }
+
+  if (
+    existing &&
+    Number(existing.income) === target.income &&
+    Number(existing.cost) === target.cost &&
+    Number(existing.net) === target.net &&
+    Number(existing.adjustmentLoss) === target.adjustmentLoss
+  ) {
+    return changed;
+  }
+
+  state.driverAnalytics = {
+    ...analytics,
+    manualAllTimeReconciliation: target
+  };
+  changed = true;
+  const adjustmentId = "raw_adjustment_loss_2026_07_30_manual_reconciliation";
+  if (!state.driverRawRecords.some(item => item.id === adjustmentId)) {
+    state.driverRawRecords.push({
+      id: adjustmentId,
+      date: "2026-07-30",
+      type: "adjustment_loss",
+      amount: target.adjustmentLoss,
+      category: "adjustment loss",
+      remark: "Manual Notepad total reconciliation difference"
+    });
+  }
+  return changed;
+}
+
+function allTimeFinancialSummary() {
+  const totals = totalsForRecords(state.driverSessions);
+  const adjustments = driverAccountingAdjustments();
+  const systemCost = totals.cost + adjustments.preGrabExpenses;
+  const systemNet = totals.income - systemCost;
+  const manual = state.driverAnalytics?.manualAllTimeReconciliation;
+  if (manual && hasValue(manual.net)) {
+    return {
+      income: num(manual.income),
+      cost: num(manual.cost),
+      net: num(manual.net),
+      refund: num(manual.refund),
+      adjustmentLoss: num(manual.adjustmentLoss || (systemNet - num(manual.net))),
+      systemIncome: totals.income,
+      systemCost,
+      systemNet,
+      manual: true
+    };
+  }
+  return {
+    income: totals.income,
+    cost: systemCost,
+    net: systemNet,
+    refund: adjustments.refunds,
+    adjustmentLoss: 0,
+    systemIncome: totals.income,
+    systemCost,
+    systemNet,
+    manual: false
+  };
+}
+
+function monthlyCommitments() {
+  const analytics = state.driverAnalytics || {};
+  return Array.isArray(analytics.monthlyCommitments)
+    ? analytics.monthlyCommitments
+    : [];
+}
+
+function monthlyCommitmentTotal() {
+  return monthlyCommitments()
+    .filter(item => item.active !== false)
+    .reduce((sum, item) => sum + num(item.amount), 0);
+}
+
+function addMonthlyCommitment(data) {
+  const name = String(data.name || "").trim();
+  const amount = num(data.amount);
+  if (!name || amount <= 0) return;
+  state.driverAnalytics = {
+    ...(state.driverAnalytics || {}),
+    monthlyCommitments: [
+      ...monthlyCommitments(),
+      {
+        id: uid("commitment"),
+        name,
+        amount,
+        remark: String(data.remark || "").trim(),
+        active: true
+      }
+    ]
+  };
+}
+
+function removeMonthlyCommitment(id) {
+  state.driverAnalytics = {
+    ...(state.driverAnalytics || {}),
+    monthlyCommitments: monthlyCommitments().filter(item => item.id !== id)
+  };
+}
+
+const forecastPresets = {
+  full_work: { label: "Full Work", title: "Grab full day", hours: 13.5, gross: 350, cost: 55, net: 295, color: "#148d5b" },
+  half_day: { label: "Half Day", title: "Grab half day", hours: 6, gross: 180, cost: 30, net: 150, color: "#1c9ba0" },
+  rest: { label: "Rest", title: "Rest", hours: 0, gross: 0, cost: 0, net: 0, color: "#8a948d" },
+  shooting: { label: "Shooting", title: "Shooting", hours: 0, gross: 0, cost: 0, net: 0, color: "#8562d6" },
+  marketing: { label: "Marketing", title: "Marketing job", hours: 0, gross: 0, cost: 0, net: 0, color: "#c57924" },
+  webinar: { label: "Webinar", title: "Webinar", hours: 0, gross: 0, cost: 0, net: 0, color: "#2f72b8" },
+  custom: { label: "Custom", title: "Custom plan", hours: 0, gross: 0, cost: 0, net: 0, color: "#b38b16" }
+};
+
+function forecastPlans() {
+  const analytics = state.driverAnalytics || {};
+  return analytics.forecastPlans && typeof analytics.forecastPlans === "object"
+    ? analytics.forecastPlans
+    : {};
+}
+
+function forecastPlansForMonth(monthKey = selectedMonthKey()) {
+  const allPlans = forecastPlans();
+  return allPlans[monthKey] && typeof allPlans[monthKey] === "object" ? allPlans[monthKey] : {};
+}
+
+function forecastPlanForDate(dateIso) {
+  const monthKey = String(dateIso || "").slice(0, 7);
+  return forecastPlansForMonth(monthKey)[dateIso] || null;
+}
+
+function normalizeForecastPlan(dateIso, data = {}) {
+  const type = forecastPresets[data.type] ? data.type : "custom";
+  const preset = forecastPresets[type];
+  const gross = hasValue(data.gross) ? num(data.gross) : preset.gross;
+  const cost = hasValue(data.cost) ? num(data.cost) : preset.cost;
+  const net = hasValue(data.net) ? num(data.net) : gross - cost;
+  return {
+    date: dateIso,
+    type,
+    title: String(data.title || preset.title).trim(),
+    hours: hasValue(data.hours) ? num(data.hours) : preset.hours,
+    gross,
+    cost,
+    net,
+    note: String(data.note || "").trim(),
+    color: data.color || preset.color
+  };
+}
+
+function saveForecastPlan(dateIso, data = {}) {
+  if (!dateIso) return;
+  const monthKey = dateIso.slice(0, 7);
+  const currentMonth = forecastPlansForMonth(monthKey);
+  state.driverAnalytics = {
+    ...(state.driverAnalytics || {}),
+    forecastPlans: {
+      ...forecastPlans(),
+      [monthKey]: {
+        ...currentMonth,
+        [dateIso]: normalizeForecastPlan(dateIso, data)
+      }
+    }
+  };
+}
+
+function removeForecastPlan(dateIso) {
+  if (!dateIso) return;
+  const monthKey = dateIso.slice(0, 7);
+  const currentMonth = { ...forecastPlansForMonth(monthKey) };
+  delete currentMonth[dateIso];
+  state.driverAnalytics = {
+    ...(state.driverAnalytics || {}),
+    forecastPlans: {
+      ...forecastPlans(),
+      [monthKey]: currentMonth
+    }
+  };
+}
+
+function monthWeekStarts(monthDate = visibleDate) {
+  const first = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+  const startOffset = (first.getDay() + 6) % 7;
+  const start = new Date(first);
+  start.setDate(first.getDate() - startOffset);
+  const weeks = [];
+  for (const weekStart = new Date(start); weekStart <= monthEnd; weekStart.setDate(weekStart.getDate() + 7)) {
+    weeks.push(new Date(weekStart));
+  }
+  return weeks;
+}
+
+function forecastSummary(monthKey = selectedMonthKey()) {
+  const plans = Object.values(forecastPlansForMonth(monthKey));
+  return plans.reduce((acc, plan) => {
+    const isGrab = plan.type === "full_work" || plan.type === "half_day";
+    if (isGrab) acc.grabNet += num(plan.net);
+    else acc.otherNet += num(plan.net);
+    acc.totalNet += num(plan.net);
+    acc.gross += num(plan.gross);
+    acc.cost += num(plan.cost);
+    acc.hours += num(plan.hours);
+    if (plan.type === "rest") acc.restDays += 1;
+    if (num(plan.net) !== 0 || num(plan.hours) > 0) acc.activeDays += 1;
+    return acc;
+  }, { grabNet: 0, otherNet: 0, totalNet: 0, gross: 0, cost: 0, hours: 0, activeDays: 0, restDays: 0 });
+}
+
+function forecastWeekNet(weekStartDate) {
+  let total = 0;
+  for (let weekday = 0; weekday < 7; weekday += 1) {
+    const day = new Date(weekStartDate);
+    day.setDate(weekStartDate.getDate() + weekday);
+    const plan = forecastPlanForDate(toISODate(day));
+    total += plan ? num(plan.net) : 0;
+  }
+  return total;
+}
+
+function forecastOptions(selectedType = "full_work") {
+  return Object.entries(forecastPresets).map(([value, preset]) =>
+    `<option value="${value}" ${value === selectedType ? "selected" : ""}>${preset.label}</option>`
+  ).join("");
+}
+
 function weekRecords(dateIso = selectedDate) {
   return recordsThroughSelectedDate(state.driverSessions, dateIso);
 }
@@ -1263,6 +1517,43 @@ function cashBalances() {
   });
 }
 
+function applyOwnerCashBaselineCorrections() {
+  if (authManager?.accountType?.() !== "owner") return false;
+  if (state.cashLedger.some(item => item.id === "cash_manual_baseline_2026_07_26_home_2550")) return false;
+
+  const balances = cashBalances();
+  const staleHome = Math.abs(balances.cashAtHome - 2150) < 0.01;
+  const stalePettyBeforeToday = Math.abs(balances.pettyCash - 165) < 0.01;
+  const stalePettyAfterToday = Math.abs(balances.pettyCash - 190) < 0.01;
+  if (!staleHome || (!stalePettyBeforeToday && !stalePettyAfterToday)) return false;
+
+  const targetPetty = stalePettyBeforeToday ? 244 : 269;
+  const targetHome = 2550;
+  [
+    {
+      id: `cash_manual_baseline_2026_07_26_petty_${targetPetty}`,
+      account: "petty_cash",
+      amount: targetPetty - balances.pettyCash
+    },
+    {
+      id: "cash_manual_baseline_2026_07_26_home_2550",
+      account: "cash_at_home",
+      amount: targetHome - balances.cashAtHome
+    }
+  ].filter(item => Math.abs(item.amount) > 0.004).forEach(item => {
+    state.cashLedger.push({
+      id: item.id,
+      date: "2026-07-26",
+      type: "cash_adjustment",
+      account: item.account,
+      amount: item.amount,
+      category: "manual cash position update",
+      remark: "Correct cash baseline before 2026-07-27"
+    });
+  });
+  return true;
+}
+
 function cashLedgerEffect(item = {}) {
   const amount = num(item.amount);
   let effect = 0;
@@ -1292,7 +1583,7 @@ function cashUsageTotals(monthKey = selectedMonthKey()) {
     }, { total: 0, pocketMoney: 0, bankIn: 0, byCategory: {} });
 }
 
-function setCashPosition(data) {
+function setCashPosition(data, dateIso = selectedDate) {
   const current = cashBalances();
   const targetPetty = num(data.pettyCashCurrent);
   const targetHome = num(data.cashAtHomeCurrent);
@@ -1302,7 +1593,7 @@ function setCashPosition(data) {
   ].filter(item => Math.abs(item.amount) > 0.004).forEach(item => {
     state.cashLedger.push({
       id: uid("cash"),
-      date: selectedDate,
+      date: dateIso,
       type: "cash_adjustment",
       account: item.account,
       amount: item.amount,
@@ -1419,6 +1710,13 @@ function confirmPending(id, allocation = null) {
   if (!action) return;
   if (action.type === "cash_collected_to_petty") {
     const total = num(action.amount);
+    if (allocation && (hasValue(allocation.currentPettyCash) || hasValue(allocation.currentCashAtHome))) {
+      const baseline = cashBalances();
+      setCashPosition({
+        pettyCashCurrent: hasValue(allocation.currentPettyCash) ? allocation.currentPettyCash : baseline.pettyCash,
+        cashAtHomeCurrent: hasValue(allocation.currentCashAtHome) ? allocation.currentCashAtHome : baseline.cashAtHome
+      }, action.date);
+    }
     const current = cashBalances();
     const availablePettyCash = current.pettyCash + total;
     const requestedHome = allocation && hasValue(allocation.cashAtHome) ? num(allocation.cashAtHome) : 0;
@@ -1467,7 +1765,7 @@ function renderWeeklyAchievements() {
     achievementCard("Car Rental", car, carTarget, "First weekly achievement"),
     achievementCard("Housing Loan", housing, housingTarget, "Second achievement"),
     `<article class="achievement-card pocket"><span>Pocket Money</span><strong>${money.format(pocket)}</strong><small>After weekly achievements</small></article>`,
-    `<article class="achievement-card"><span>Weekly Net</span><strong>${money.format(totals.net)}</strong><small>${totals.hours.toFixed(1)}h · ${totals.trips} trips</small></article>`
+    `<article class="achievement-card"><span>Weekly Net</span><strong>${money.format(totals.net)}</strong><small>${totals.hours.toFixed(1)}h - ${totals.trips} trips</small></article>`
   ].join("");
 }
 
@@ -1484,16 +1782,10 @@ function achievementCard(label, value, target, detail) {
 function renderCalendar() {
   $("#monthLabel").textContent = monthFmt.format(visibleDate);
   const grid = $("#calendarGrid");
-  const first = new Date(visibleDate.getFullYear(), visibleDate.getMonth(), 1);
-  const startOffset = (first.getDay() + 6) % 7;
-  const start = new Date(first);
-  start.setDate(first.getDate() - startOffset);
   const todayIso = toISODate(new Date());
   const cards = [];
 
-  for (let week = 0; week < 6; week += 1) {
-    const weekStartDate = new Date(start);
-    weekStartDate.setDate(start.getDate() + (week * 7));
+  monthWeekStarts(visibleDate).forEach(weekStartDate => {
     cards.push(weekSummaryMarkup(weekStartDate));
 
     for (let weekday = 0; weekday < 7; weekday += 1) {
@@ -1511,7 +1803,7 @@ function renderCalendar() {
         <div class="mini-stack">${calendarIndicatorMarkup(indicators, iso)}</div>
       </button>`);
     }
-  }
+  });
   grid.innerHTML = cards.join("");
   grid.querySelectorAll(".day-card").forEach(card => {
     card.addEventListener("click", () => {
@@ -1573,10 +1865,10 @@ function driverDayMarkup(date) {
   const statusClassName = status.toLowerCase().replace(/\s+/g, "-");
   const platforms = [...new Set(sessions.map(s => s.platform).filter(Boolean))].join(" + ");
   return `<div class="driver-mini ${platformClass} ${resultClass} ${tierClass} ${statusClassName}">
-    <div class="day-status">${status}${platforms ? ` · ${platforms}` : ""}</div>
+    <div class="day-status">${status}${platforms ? ` - ${platforms}` : ""}</div>
     <div class="net-profit">${moneyCompact.format(totals.net)}</div>
     <div>${moneyCompact.format(iph)}/h income</div>
-    <div>${totals.hours.toFixed(1)}h · ${totals.trips || 0} trips</div>
+    <div>${totals.hours.toFixed(1)}h - ${totals.trips || 0} trips</div>
   </div>`;
 }
 
@@ -1633,7 +1925,7 @@ function renderTodaySchedule() {
         <time>${displayTime(event.startTime)}</time>
         <div>
           <strong>${escapeHtml(event.title)}</strong>
-          <span>${businessName(event.businessId)} · ${escapeHtml(event.status || "scheduled")}</span>
+          <span>${businessName(event.businessId)} - ${escapeHtml(event.status || "scheduled")}</span>
         </div>
       </article>`).join("")}</div>`
     : `<div class="empty-note">No scheduled events for this day.</div>`;
@@ -1647,7 +1939,7 @@ function renderTodayTasks() {
         <span class="task-dot"></span>
         <div>
           <strong>${escapeHtml(task.title)}</strong>
-          <span>${displayTime(task.dueTime)} · ${businessName(task.businessId)}</span>
+          <span>${displayTime(task.dueTime)} - ${businessName(task.businessId)}</span>
         </div>
       </article>`).join("")}</div>`
     : `<div class="empty-note">Nothing incomplete for this day.</div>`;
@@ -1695,10 +1987,7 @@ function renderDriverDashboard() {
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
   const month = totalsForRecords(monthRecords());
-  const allTime = totalsForRecords(state.driverSessions);
-  const allTimeAdjustments = driverAccountingAdjustments();
-  const allTimeCost = allTime.cost + allTimeAdjustments.preGrabExpenses;
-  const allTimeNet = allTime.income - allTimeCost;
+  const allTime = allTimeFinancialSummary();
   const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
   const duePetrol = duePetrolCost();
   const netAfterRental = month.net - dueRental;
@@ -1706,8 +1995,8 @@ function renderDriverDashboard() {
   target.innerHTML = `
     <article class="dashboard-alltime-card">
       <span>All-Time Net Profit</span>
-      <strong>${money.format(allTimeNet)}</strong>
-      <small>${money.format(allTime.income)} income - ${money.format(allTimeCost)} costing${allTimeAdjustments.refunds ? ` · ${money.format(allTimeAdjustments.refunds)} refund separate` : ""}</small>
+      <strong>${money.format(allTime.net)}</strong>
+      <small>${money.format(allTime.income)} income - ${money.format(allTime.cost)} costing${allTime.refund ? ` · ${money.format(allTime.refund)} refund included` : ""}${allTime.adjustmentLoss ? ` · ${money.format(allTime.adjustmentLoss)} adjustment loss` : ""}</small>
     </article>
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -1720,12 +2009,278 @@ function renderDriverDashboard() {
     <article class="dashboard-net-card">
       <span>Week Net</span>
       <strong>${money.format(week.net)}</strong>
-      <small>${activeDays} active days · ${week.trips} trips</small>
+      <small>${activeDays} active days - ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
     <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental</small></article>
     <article class="dashboard-mini-card"><span>After Rental + Petrol</span><strong>${money.format(netAfterRentalAndPetrol)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
+    <article class="dashboard-mini-card forecast-link-card">
+      <span>Forecast Planner</span>
+      <strong>${money.format(forecastSummary(selectedMonthKey()).totalNet)}</strong>
+      <small>Standalone planning - does not affect real Grab data.</small>
+      <button class="secondary-action compact-action" type="button" data-scroll-target="forecastSection">Open Forecast</button>
+    </article>
   `;
+}
+
+function renderForecastPlanner() {
+  const target = $("#forecastSection");
+  if (!target) return;
+  const monthKey = selectedMonthKey();
+  const monthLabel = monthFmt.format(parseDate(`${monthKey}-01`));
+  if (!String(selectedForecastDate || "").startsWith(monthKey)) {
+    selectedForecastDate = `${monthKey}-01`;
+  }
+  const summary = forecastSummary(monthKey);
+  const selectedPlan = forecastPlanForDate(selectedForecastDate) || normalizeForecastPlan(selectedForecastDate, { type: "full_work" });
+  const cards = [];
+  const todayIso = toISODate(new Date());
+  monthWeekStarts(visibleDate).forEach(weekStartDate => {
+    const weekNet = forecastWeekNet(weekStartDate);
+    cards.push(`<div class="forecast-week-summary"><span>Week Forecast</span><strong>${moneyCompact.format(weekNet)}</strong></div>`);
+    for (let weekday = 0; weekday < 7; weekday += 1) {
+      const day = new Date(weekStartDate);
+      day.setDate(weekStartDate.getDate() + weekday);
+      const iso = toISODate(day);
+      const plan = forecastPlanForDate(iso);
+      const type = plan?.type || "empty";
+      const outside = day.getMonth() !== visibleDate.getMonth() ? " outside" : "";
+      const selected = iso === selectedForecastDate ? " selected" : "";
+      const color = plan?.color || "#cbd4cc";
+      cards.push(`<button class="forecast-day ${type}${outside}${selected}" type="button" data-forecast-date="${iso}" style="--forecast-color:${color}">
+        <span class="forecast-day-number ${iso === todayIso ? "today-dot" : ""}">${day.getDate()}</span>
+        ${plan ? `<strong>${escapeHtml(plan.title)}</strong><small>${moneyCompact.format(plan.net)} - ${num(plan.hours).toFixed(1)}h</small>` : `<strong>Plan</strong><small>Tap to set</small>`}
+      </button>`);
+    }
+  });
+
+  target.innerHTML = `<div class="section-heading forecast-heading">
+    <div>
+      <p class="eyebrow">Standalone Tool</p>
+      <h2>Forecast Planner</h2>
+    </div>
+    <button class="primary-action forecast-export-action" type="button" id="generateForecastImage">Generate Photo</button>
+  </div>
+  <div class="forecast-summary-grid">
+    ${statCard("Grab Forecast", money.format(summary.grabNet), `${summary.activeDays} planned active days`)}
+    ${statCard("Other Jobs", money.format(summary.otherNet), "Shooting, marketing, webinar, custom")}
+    ${statCard("Total Forecast", money.format(summary.totalNet), `${summary.hours.toFixed(1)} planned hours`)}
+  </div>
+  <div class="forecast-workbench">
+    <section class="forecast-calendar-card">
+      <div class="forecast-calendar-head">
+        <div><span>${monthLabel}</span><strong>Planning Calendar</strong></div>
+        <small>Only planning data. Real income remains unchanged.</small>
+      </div>
+      <div class="forecast-calendar-scroll">
+        <div class="forecast-weekday-row">
+          <span>Week</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="forecast-grid">${cards.join("")}</div>
+      </div>
+    </section>
+    <section class="forecast-editor-card">
+      <div><p class="eyebrow">Selected Plan</p><h3>${dateFmt.format(parseDate(selectedForecastDate))}</h3></div>
+      <form id="forecastForm" class="forecast-form">
+        <input type="hidden" name="date" value="${selectedForecastDate}">
+        <div class="field full"><label>Plan Type</label><select name="type">${forecastOptions(selectedPlan.type)}</select></div>
+        <div class="field full"><label>Title</label><input name="title" value="${escapeHtml(selectedPlan.title)}" placeholder="Grab full day, Shooting, Rest"></div>
+        <div class="field"><label>Gross Income</label><input name="gross" type="number" step="0.01" value="${selectedPlan.gross}"></div>
+        <div class="field"><label>Cost</label><input name="cost" type="number" step="0.01" value="${selectedPlan.cost}"></div>
+        <div class="field"><label>Net</label><input name="net" type="number" step="0.01" value="${selectedPlan.net}"></div>
+        <div class="field"><label>Hours</label><input name="hours" type="number" step="0.1" value="${selectedPlan.hours}"></div>
+        <div class="field full"><label>Note</label><textarea name="note" placeholder="Streak, shooting, webinar, rest reason">${escapeHtml(selectedPlan.note)}</textarea></div>
+        <div class="forecast-quick-row full">
+          <button class="secondary-action compact-action" data-forecast-quick="weekdays" type="button">Weekdays Full</button>
+          <button class="secondary-action compact-action" data-forecast-quick="weekend" type="button">Weekend Plan</button>
+          <button class="secondary-action compact-action" data-forecast-quick="rest" type="button">Mark Rest</button>
+        </div>
+        <div class="action-row full">
+          <button class="primary-action" type="submit">Save Forecast</button>
+          <button class="secondary-action" id="clearForecastDay" type="button">Clear Day</button>
+        </div>
+      </form>
+    </section>
+  </div>`;
+  bindForecastPlanner(target);
+}
+
+function bindForecastPlanner(root = document) {
+  root.querySelectorAll("[data-forecast-date]").forEach(button => {
+    button.addEventListener("click", () => {
+      selectedForecastDate = button.dataset.forecastDate;
+      renderPreservingViewport();
+    });
+  });
+  const form = root.querySelector("#forecastForm");
+  if (form) {
+    form.elements.type.addEventListener("change", () => {
+      const preset = forecastPresets[form.elements.type.value] || forecastPresets.custom;
+      if (!form.elements.title.value || Object.values(forecastPresets).some(item => item.title === form.elements.title.value)) {
+        form.elements.title.value = preset.title;
+      }
+      form.elements.gross.value = preset.gross;
+      form.elements.cost.value = preset.cost;
+      form.elements.net.value = preset.net;
+      form.elements.hours.value = preset.hours;
+    });
+    form.elements.gross.addEventListener("input", () => {
+      form.elements.net.value = (num(form.elements.gross.value) - num(form.elements.cost.value)).toFixed(2);
+    });
+    form.elements.cost.addEventListener("input", () => {
+      form.elements.net.value = (num(form.elements.gross.value) - num(form.elements.cost.value)).toFixed(2);
+    });
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      saveForecastPlan(data.date, data);
+      renderPreservingViewport();
+      persistState();
+    });
+  }
+  root.querySelector("#clearForecastDay")?.addEventListener("click", () => {
+    removeForecastPlan(selectedForecastDate);
+    renderPreservingViewport();
+    persistState();
+  });
+  root.querySelectorAll("[data-forecast-quick]").forEach(button => {
+    button.addEventListener("click", () => {
+      applyForecastQuickPlan(button.dataset.forecastQuick);
+      renderPreservingViewport();
+      persistState();
+    });
+  });
+  root.querySelector("#generateForecastImage")?.addEventListener("click", () => {
+    generateForecastImage(selectedMonthKey());
+  });
+}
+
+function applyForecastQuickPlan(kind) {
+  const monthKey = selectedMonthKey();
+  monthWeekStarts(visibleDate).forEach(weekStartDate => {
+    for (let weekday = 0; weekday < 7; weekday += 1) {
+      const day = new Date(weekStartDate);
+      day.setDate(weekStartDate.getDate() + weekday);
+      const iso = toISODate(day);
+      if (!iso.startsWith(monthKey)) continue;
+      if (kind === "weekdays" && weekday < 4) saveForecastPlan(iso, { type: "full_work" });
+      if (kind === "weekend" && weekday === 5) saveForecastPlan(iso, { type: "half_day", title: "Saturday streak" });
+      if (kind === "weekend" && weekday === 6) saveForecastPlan(iso, { type: "full_work", title: "Sunday streak" });
+    }
+  });
+  if (kind === "rest") saveForecastPlan(selectedForecastDate, { type: "rest" });
+}
+
+function generateForecastImage(monthKey = selectedMonthKey()) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1920;
+  canvas.height = 1080;
+  const ctx = canvas.getContext("2d");
+  const summary = forecastSummary(monthKey);
+  const monthDate = parseDate(`${monthKey}-01`);
+  const title = monthFmt.format(monthDate);
+  ctx.fillStyle = "#eef3ed";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, "#ffffff");
+  gradient.addColorStop(1, "#e2f0e7");
+  roundRect(ctx, 46, 42, 1828, 996, 42, gradient, "rgba(18, 100, 63, 0.10)");
+  ctx.fillStyle = "#102018";
+  ctx.font = "800 54px Segoe UI, Arial, sans-serif";
+  ctx.fillText(`${title} Forecast Plan`, 92, 128);
+  drawForecastPhotoStat(ctx, "Grab Forecast", summary.grabNet, 92, 168, "#15784e");
+  drawForecastPhotoStat(ctx, "Other Jobs", summary.otherNet, 430, 168, "#7c5ac8");
+  drawForecastPhotoStat(ctx, "Total Forecast", summary.totalNet, 768, 168, "#b47d12");
+  ctx.font = "700 22px Segoe UI, Arial, sans-serif";
+  ctx.fillStyle = "#5c6f64";
+  ctx.fillText(`${summary.activeDays} active days - ${summary.hours.toFixed(1)} planned hours - standalone forecast only`, 1104, 214);
+
+  const left = 92;
+  const top = 280;
+  const weekWidth = 190;
+  const dayWidth = 222;
+  const rowHeight = 142;
+  const headers = ["Week", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  ctx.font = "800 18px Segoe UI, Arial, sans-serif";
+  headers.forEach((label, index) => {
+    ctx.fillStyle = "#60736a";
+    ctx.fillText(label, left + (index === 0 ? 22 : weekWidth + ((index - 1) * dayWidth) + 18), top - 22);
+  });
+  monthWeekStarts(monthDate).forEach((weekStartDate, row) => {
+    const y = top + (row * rowHeight);
+    const weekNet = forecastWeekNet(weekStartDate);
+    roundRect(ctx, left, y, weekWidth - 12, rowHeight - 14, 22, "#e3f3eb", "rgba(18,100,63,.10)");
+    ctx.fillStyle = "#176c4e";
+    ctx.font = "800 18px Segoe UI, Arial, sans-serif";
+    ctx.fillText("Week Net", left + 20, y + 36);
+    ctx.font = "900 32px Segoe UI, Arial, sans-serif";
+    ctx.fillText(moneyCompact.format(weekNet), left + 20, y + 78);
+    for (let weekday = 0; weekday < 7; weekday += 1) {
+      const day = new Date(weekStartDate);
+      day.setDate(weekStartDate.getDate() + weekday);
+      const iso = toISODate(day);
+      const plan = forecastPlanForDate(iso);
+      const outside = day.getMonth() !== monthDate.getMonth();
+      const x = left + weekWidth + (weekday * dayWidth);
+      roundRect(ctx, x, y, dayWidth - 12, rowHeight - 14, 20, outside ? "#f4f6f2" : "#fffef9", "rgba(20,32,26,.08)");
+      ctx.fillStyle = outside ? "#97a39b" : "#14201a";
+      ctx.font = "900 26px Segoe UI, Arial, sans-serif";
+      ctx.fillText(String(day.getDate()), x + 18, y + 34);
+      if (plan) {
+        ctx.fillStyle = plan.color || "#148d5b";
+        ctx.fillRect(x + 18, y + 48, 6, 56);
+        ctx.fillStyle = "#263c33";
+        ctx.font = "800 21px Segoe UI, Arial, sans-serif";
+        ctx.fillText(truncateCanvasText(ctx, plan.title, dayWidth - 54), x + 34, y + 62);
+        ctx.fillStyle = "#5d6f65";
+        ctx.font = "700 18px Segoe UI, Arial, sans-serif";
+        ctx.fillText(`${moneyCompact.format(plan.net)} - ${num(plan.hours).toFixed(1)}h`, x + 34, y + 92);
+        if (plan.note) ctx.fillText(truncateCanvasText(ctx, plan.note, dayWidth - 54), x + 34, y + 118);
+      }
+    }
+  });
+
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `${monthKey}-forecast-plan.png`;
+  link.click();
+}
+
+function drawForecastPhotoStat(ctx, label, value, x, y, color) {
+  roundRect(ctx, x, y, 300, 84, 22, "#fffef9", "rgba(20,32,26,.08)");
+  ctx.fillStyle = "#60736a";
+  ctx.font = "700 18px Segoe UI, Arial, sans-serif";
+  ctx.fillText(label, x + 22, y + 30);
+  ctx.fillStyle = color;
+  ctx.font = "900 32px Segoe UI, Arial, sans-serif";
+  ctx.fillText(money.format(value), x + 22, y + 66);
+}
+
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + width, y, x + width, y + height, radius);
+  ctx.arcTo(x + width, y + height, x, y + height, radius);
+  ctx.arcTo(x, y + height, x, y, radius);
+  ctx.arcTo(x, y, x + width, y, radius);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function truncateCanvasText(ctx, text, maxWidth) {
+  const source = String(text || "");
+  if (ctx.measureText(source).width <= maxWidth) return source;
+  let output = source;
+  while (output.length > 1 && ctx.measureText(`${output}...`).width > maxWidth) output = output.slice(0, -1);
+  return `${output}...`;
 }
 
 function renderGrabStats() {
@@ -1739,6 +2294,7 @@ function renderGrabStats() {
   const monthIncomePerHour = month.hours ? month.income / month.hours : 0;
   const monthCostRatio = month.income ? (month.cost / month.income) * 100 : 0;
   const monthAverageDailyNet = month.net / monthActiveDays;
+  const commitmentTotal = monthlyCommitmentTotal();
   const incomeBreakdown = weeklyBreakdown("income");
   const costBreakdown = weeklyBreakdown("cost");
   target.innerHTML = `<div class="section-heading">
@@ -1746,7 +2302,7 @@ function renderGrabStats() {
     <h2>Grab Intelligence</h2>
   </div>
   <div class="stats-grid">
-    ${statCard("Week Net", money.format(week.net), `${week.hours.toFixed(1)}h · ${week.trips} trips`)}
+    ${statCard("Week Net", money.format(week.net), `${week.hours.toFixed(1)}h - ${week.trips} trips`)}
     ${statCard("Income/hour", money.format(week.hours ? week.income / week.hours : 0), "Based on total income")}
     ${statCard("Bank Transfer", money.format(bank.week), "This week")}
   </div>
@@ -1759,17 +2315,66 @@ function renderGrabStats() {
     <h2>This Month</h2>
   </div>
   <div class="stats-grid monthly-stats-grid">
-    ${statCard("Month Net", money.format(month.net), `${monthActiveDays} active days · ${month.trips} trips`)}
+    ${statCard("Month Net", money.format(month.net), `${monthActiveDays} active days - ${month.trips} trips`)}
     ${statCard("Month Income", money.format(month.income), `${money.format(monthIncomePerHour)}/h`)}
     ${statCard("Online Hours", `${month.hours.toFixed(1)}h`, "This month")}
     ${statCard("Total Cost", money.format(month.cost), `${monthCostRatio.toFixed(1)}% cost ratio`)}
     ${statCard("Average Daily Net", money.format(monthAverageDailyNet), "This month")}
     ${statCard("Bank Transfer", money.format(bank.month), "This month")}
-  </div>`;
+  </div>
+  ${monthlyCommitmentsMarkup(commitmentTotal)}`;
+  bindMonthlyCommitments(target);
 }
 
 function statCard(label, value, detail) {
   return `<article class="stat-card"><span>${label}</span><strong>${value}</strong><small>${detail}</small></article>`;
+}
+
+function monthlyCommitmentsMarkup(total = monthlyCommitmentTotal()) {
+  const commitments = monthlyCommitments();
+  return `<section class="commitment-panel">
+    <div class="section-heading compact-heading">
+      <p class="eyebrow">Standalone Tool</p>
+      <h2>Monthly Commitments</h2>
+    </div>
+    <article class="commitment-summary-card">
+      <span>Total Monthly Commitment</span>
+      <strong>${money.format(total)}</strong>
+      <small>Personal planning only - not included in Grab profit or costing.</small>
+    </article>
+    <div class="commitment-list">
+      ${commitments.length ? commitments.map(item => `<article class="commitment-item">
+        <div>
+          <strong>${escapeHtml(item.name)}</strong>
+          ${item.remark ? `<small>${escapeHtml(item.remark)}</small>` : ""}
+        </div>
+        <span>${money.format(num(item.amount))}</span>
+        <button class="secondary-action compact-action" data-delete-commitment="${item.id}" type="button">Delete</button>
+      </article>`).join("") : `<div class="empty-note">No monthly commitment recorded yet.</div>`}
+    </div>
+    <form class="commitment-form" id="monthlyCommitmentForm">
+      <div class="field"><label>Name</label><input name="name" type="text" placeholder="Car loan, rental, phone bill"></div>
+      <div class="field"><label>Amount</label><input name="amount" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="field full"><label>Remark</label><input name="remark" type="text" placeholder="Optional note"></div>
+      <div class="action-row full"><button class="primary-action" type="submit">Add Commitment</button></div>
+    </form>
+  </section>`;
+}
+
+function bindMonthlyCommitments(root = document) {
+  root.querySelector("#monthlyCommitmentForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    addMonthlyCommitment(Object.fromEntries(new FormData(event.currentTarget).entries()));
+    renderPreservingViewport();
+    persistState();
+  });
+  root.querySelectorAll("[data-delete-commitment]").forEach(button => {
+    button.addEventListener("click", () => {
+      removeMonthlyCommitment(button.dataset.deleteCommitment);
+      renderPreservingViewport();
+      persistState();
+    });
+  });
 }
 
 function weeklyBreakdown(type) {
@@ -1864,7 +2469,7 @@ function driverConsoleMarkup(date) {
     <div class="console-head">
       <div>
         <p class="eyebrow">Driver Console</p>
-        <h3>${consoleData.sourceDate === date ? "Selected day" : "Latest record"} · ${escapeHtml(consoleData.platform)}</h3>
+        <h3>${consoleData.sourceDate === date ? "Selected day" : "Latest record"} - ${escapeHtml(consoleData.platform)}</h3>
       </div>
       <span>${consoleData.sourceDate}</span>
     </div>
@@ -2107,7 +2712,7 @@ function petrolLiabilityMarkup() {
           <button class="primary-action full" type="submit">Pay Petrol Card</button>
         </form>
         <div class="compact-history">
-          ${history.length ? history.map(item => `<div class="history-item"><div class="history-line"><span>${item.date} · Payment</span><strong>${money.format(num(item.amount))}</strong></div><div class="muted">${escapeHtml(item.note || "")}</div></div>`).join("") : `<div class="empty-note">No petrol card payment yet.</div>`}
+          ${history.length ? history.map(item => `<div class="history-item"><div class="history-line"><span>${item.date} - Payment</span><strong>${money.format(num(item.amount))}</strong></div><div class="muted">${escapeHtml(item.note || "")}</div></div>`).join("") : `<div class="empty-note">No petrol card payment yet.</div>`}
         </div>
       </div>
     </details>
@@ -2122,6 +2727,14 @@ function pendingItem(item) {
     return `<article class="pending-item split-pending-item">
       <div><strong>Set today's cash position</strong><span>${money.format(availablePettyCash)}</span></div>
       <small>Petty Cash ${money.format(balances.pettyCash)} + Cash Collected ${money.format(num(item.amount))}</small>
+      <div class="pending-baseline">
+        <strong>Cash before today</strong>
+        <small>Update this first if the current cash total is old.</small>
+        <div class="pending-split">
+          <label>Current Petty Cash <input data-pending-current-petty="${item.id}" type="number" step="0.01" value="${balances.pettyCash.toFixed(2)}"></label>
+          <label>Current Cash At Home <input data-pending-current-home="${item.id}" type="number" step="0.01" value="${balances.cashAtHome.toFixed(2)}"></label>
+        </div>
+      </div>
       <div class="pending-split">
         <label>Final Petty Cash <input data-pending-petty="${item.id}" type="number" step="0.01" value="${availablePettyCash.toFixed(2)}"></label>
         <label>Put At Home <input data-pending-home="${item.id}" type="number" step="0.01" placeholder="0.00"></label>
@@ -2146,7 +2759,7 @@ function summaryPendingMarkup(record) {
 function cashToolsMarkup() {
   const settings = state.grabSettings || defaultGrabSettings();
   const balances = cashBalances();
-  const categories = settings.cashCategories.map(item => `<option value="${escapeHtml(item)}"></option>`).join("");
+  const categories = settings.cashCategories.map(item => `<option value="${escapeHtml(item)}"${item === "pocket money" ? " selected" : ""}>${escapeHtml(item)}</option>`).join("");
   const cashActions = ["Move Petty Cash to Home", "Bank In From Cash At Home", "Bank In From Petty Cash", "Use Cash At Home", "Use Petty Cash"];
   return `<details class="record-details cash-tools">
     <summary>Cash Tools</summary>
@@ -2169,8 +2782,8 @@ function cashToolsMarkup() {
       <div class="form-section full">Move / Withdraw Cash</div>
       ${field("Amount", "amount", "number", "")}
       ${field("Action", "action", "select", "Use Cash At Home", cashActions)}
-      <div class="field"><label>Category</label><input name="category" list="cashCategoryList" value="pocket money"></div>
-      <datalist id="cashCategoryList">${categories}</datalist>
+      <div class="field"><label>Category</label><select name="categoryPreset">${categories}</select></div>
+      <div class="field"><label>New Category</label><input name="category" type="text" placeholder="Type new category"></div>
       <div class="field"><label>Remark</label><input name="remark" type="text"></div>
       <div class="action-row full"><button class="primary-action" type="submit">Record Cash Action</button></div>
     </form>
@@ -2242,7 +2855,7 @@ function bankTransferHistory(monthKey = selectedMonthKey()) {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 12);
   return items.length ? items.map(item => `<div class="history-item">
-    <div class="history-line"><span>${item.date} · ${item.source === "grab_wallet" ? "Grab Wallet" : "Cash Bank In"}</span><span>${money.format(item.amount)}</span></div>
+    <div class="history-line"><span>${item.date} - ${item.source === "grab_wallet" ? "Grab Wallet" : "Cash Bank In"}</span><span>${money.format(item.amount)}</span></div>
   </div>`).join("") : `<div class="empty-note">No bank transfer confirmed yet.</div>`;
 }
 
@@ -2252,7 +2865,7 @@ function cashHistory(monthKey = selectedMonthKey()) {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 12);
   return items.length ? items.map(item => `<div class="history-item">
-    <div class="history-line"><span>${item.date} · ${escapeHtml(item.category || item.type)}</span><span>${money.format(cashLedgerEffect(item))}</span></div>
+    <div class="history-line"><span>${item.date} - ${escapeHtml(item.category || item.type)}</span><span>${money.format(cashLedgerEffect(item))}</span></div>
     <div class="muted">${escapeHtml(item.account || `${item.fromAccount || ""} -> ${item.toAccount || ""}`)}</div>
   </div>`).join("") : `<div class="empty-note">No cash ledger entries yet.</div>`;
 }
@@ -2261,9 +2874,9 @@ function driverHistoryItem(item) {
   const metrics = driverMetrics(item);
   const iph = metrics.hours ? metrics.income / metrics.hours : 0;
   return `<div class="history-item">
-    <div class="history-line"><span>${item.platform} · ${item.status}</span><span>${money.format(metrics.net)}</span></div>
-    <div class="muted">${item.startTime || "--:--"} - ${item.endTime || "--:--"} · ${metrics.hours.toFixed(1)}h · ${item.totalTrips || 0} trips</div>
-    <div class="muted">Income ${money.format(metrics.income)} · Cost ${money.format(metrics.cost)} · ${money.format(iph)}/hr</div>
+    <div class="history-line"><span>${item.platform} - ${item.status}</span><span>${money.format(metrics.net)}</span></div>
+    <div class="muted">${item.startTime || "--:--"} - ${item.endTime || "--:--"} - ${metrics.hours.toFixed(1)}h - ${item.totalTrips || 0} trips</div>
+    <div class="muted">Income ${money.format(metrics.income)} - Cost ${money.format(metrics.cost)} - ${money.format(iph)}/hr</div>
     <div class="muted">${escapeHtml(item.remark || "")}</div>
     <div class="action-row">
       <button class="secondary-action" data-edit-driver="${item.id}" type="button">Edit</button>
@@ -2303,7 +2916,7 @@ function solarSidebar() {
 function solarHistoryItem(item) {
   return `<div class="history-item">
     <div class="history-line"><span>${escapeHtml(item.customerName || "Unnamed")}</span><span class="status-dot ${statusClass(item.status)}">${item.status}</span></div>
-    <div class="muted">${item.appointmentDate} ${item.appointmentTime || ""} · ${escapeHtml(item.phone || "")}</div>
+    <div class="muted">${item.appointmentDate} ${item.appointmentTime || ""} - ${escapeHtml(item.phone || "")}</div>
     <div class="muted">${escapeHtml(item.remark || "")}</div>
     <div class="action-row">
       <button class="secondary-action" data-edit-solar="${item.id}" type="button">Edit</button>
@@ -2358,7 +2971,7 @@ function confirmRecordUpdate(changes, date) {
   const dialog = $("#recordConfirmDialog");
   $("#recordConfirmTitle").textContent = `Update ${dateFmt.format(parseDate(date))}?`;
   $("#recordChangeList").innerHTML = changes.length
-    ? changes.map(change => `<div class="change-row"><span>${escapeHtml(change.label)}</span><strong>${escapeHtml(formatChangeValue(change.before, change.format))} → ${escapeHtml(formatChangeValue(change.after, change.format))}</strong></div>`).join("")
+    ? changes.map(change => `<div class="change-row"><span>${escapeHtml(change.label)}</span><strong>${escapeHtml(formatChangeValue(change.before, change.format))} -> ${escapeHtml(formatChangeValue(change.after, change.format))}</strong></div>`).join("")
     : `<div class="empty-note">The save status will be updated.</div>`;
   dialog.showModal();
   return new Promise(resolve => {
@@ -2454,7 +3067,11 @@ function bindPendingConfirmControls(root = document) {
       const pendingCard = button.closest(".pending-item") || root;
       const pettyInput = pendingCard.querySelector(`[data-pending-petty="${safeId}"]`);
       const homeInput = pendingCard.querySelector(`[data-pending-home="${safeId}"]`);
-      confirmPending(id, pettyInput || homeInput ? {
+      const currentPettyInput = pendingCard.querySelector(`[data-pending-current-petty="${safeId}"]`);
+      const currentHomeInput = pendingCard.querySelector(`[data-pending-current-home="${safeId}"]`);
+      confirmPending(id, pettyInput || homeInput || currentPettyInput || currentHomeInput ? {
+        currentPettyCash: currentPettyInput?.value,
+        currentCashAtHome: currentHomeInput?.value,
         pettyCash: pettyInput?.value || 0,
         cashAtHome: homeInput?.value || 0
       } : null);
@@ -2611,6 +3228,7 @@ function bindSidebar() {
     cashMoveForm.addEventListener("submit", event => {
       event.preventDefault();
       const data = Object.fromEntries(new FormData(cashMoveForm).entries());
+      data.category = String(data.category || "").trim() || data.categoryPreset;
       recordCashAction(data);
       persistState();
     });
@@ -2704,13 +3322,17 @@ function recordCashAction(data) {
   if (!amount) return;
   const action = String(data.action || "").trim();
   const isBankIn = action.startsWith("Bank In");
-  const category = isBankIn ? "bank in" : String(data.category || "pocket money").trim();
+  const typedCategory = String(data.category || "").trim();
+  const category = typedCategory || (isBankIn ? "bank in" : "pocket money");
   const settings = state.grabSettings || defaultGrabSettings();
   if (category && !settings.cashCategories.includes(category)) {
-    state.grabSettings = {
-      ...settings,
-      cashCategories: [...settings.cashCategories, category]
-    };
+    const shouldSaveCategory = window.confirm(`Add "${category}" as a saved cash category?`);
+    if (shouldSaveCategory) {
+      state.grabSettings = {
+        ...settings,
+        cashCategories: [...settings.cashCategories, category]
+      };
+    }
   }
   const base = {
     id: uid("cash"),
@@ -2763,11 +3385,13 @@ function render() {
   });
   renderWeeklyAchievements();
   renderDriverDashboard();
+  renderForecastPlanner();
   renderPeopleToMoveToday();
   renderCalendar();
   renderSidebar();
   renderGrabStats();
   bindBottomNavigation();
+  bindScrollTargets();
   animateCounters();
   updateLiveCountdowns();
   localizeUI();
@@ -2788,6 +3412,18 @@ function bindBottomNavigation() {
         const firstInput = document.querySelector("#driverForm input, #driverForm select, #driverForm textarea");
         setTimeout(() => firstInput?.focus({ preventScroll: true }), 260);
       }
+    });
+  });
+}
+
+function bindScrollTargets() {
+  document.querySelectorAll("[data-scroll-target]").forEach(button => {
+    if (button.dataset.scrollBound) return;
+    button.dataset.scrollBound = "true";
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.scrollTarget);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }
