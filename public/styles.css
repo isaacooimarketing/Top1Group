@@ -736,6 +736,9 @@ body.theme-light .grab-stats-panel,
 body.theme-light .achievement-card,
 body.theme-light .stat-card,
 body.theme-light .breakdown-card,
+body.theme-light .commitment-panel,
+body.theme-light .commitment-summary-card,
+body.theme-light .commitment-item,
 body.theme-light .grab-day-summary,
 body.theme-light .history,
 body.theme-light .cash-panel,
@@ -2723,6 +2726,50 @@ textarea {
 .commitment-form {
   grid-template-columns: minmax(0, 1.2fr) minmax(110px, 0.8fr);
   padding-top: 4px;
+}
+
+body.theme-light .commitment-panel {
+  color: #18211d;
+  border: 1px solid rgba(21, 117, 77, 0.14);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(45, 180, 116, 0.10), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 251, 247, 0.96));
+  box-shadow: 0 24px 68px -42px rgba(22, 62, 44, 0.34);
+}
+
+body.theme-light .commitment-panel .compact-heading h2 {
+  color: #111815;
+}
+
+body.theme-light .commitment-summary-card,
+body.theme-light .commitment-item {
+  border: 1px solid rgba(18, 24, 32, 0.10);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 248, 242, 0.92)) padding-box,
+    linear-gradient(135deg, rgba(28, 143, 93, 0.20), rgba(212, 175, 55, 0.12)) border-box;
+  box-shadow: 0 14px 36px -26px rgba(26, 50, 38, 0.28);
+}
+
+body.theme-light .commitment-summary-card span,
+body.theme-light .commitment-item small {
+  color: #4f6058;
+}
+
+body.theme-light .commitment-summary-card strong {
+  color: #137a4f;
+  text-shadow: none;
+}
+
+body.theme-light .commitment-summary-card small {
+  color: #59655f;
+}
+
+body.theme-light .commitment-item strong {
+  color: #14201a;
+}
+
+body.theme-light .commitment-item span {
+  color: #137a4f;
 }
 
 .split-pending-item {

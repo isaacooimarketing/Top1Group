@@ -499,8 +499,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260801-forecast/);
-  assert.match(html, /styles\.css\?v=20260801-forecast/);
+  assert.match(html, /app\.js\?v=20260801-commitment/);
+  assert.match(html, /styles\.css\?v=20260801-commitment/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });
@@ -534,6 +534,11 @@ test("forecast planner is standalone and can export a landscape plan image", () 
   assert.match(js, /driverAnalytics:\s*\{\}/);
   assert.match(js, /function forecastPlans\(\)/);
   assert.match(js, /function forecastPlansForMonth\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /function forecastDefaultPlanForDate\(dateIso\)/);
+  assert.match(js, /function forecastPlansForMonthWithDefaults\(monthKey = selectedMonthKey\(\)\)/);
+  assert.match(js, /forecastPlansForMonthWithDefaults\(monthKey\)/);
+  assert.match(js, /Reset to Default/);
+  assert.doesNotMatch(js, /Tap to set/);
   assert.match(js, /function saveForecastPlan\(dateIso, data = \{\}\)/);
   assert.match(js, /function removeForecastPlan\(dateIso\)/);
   assert.match(js, /function renderForecastPlanner\(\)/);
@@ -548,6 +553,16 @@ test("forecast planner is standalone and can export a landscape plan image", () 
   assert.doesNotMatch(js, /state\.driverSessions\.push\([^)]*forecast/i);
   assert.match(css, /body\.theme-light \.forecast-panel/);
   assert.match(css, /body\.theme-light \.forecast-grid/);
+});
+
+test("monthly commitments stay readable in light theme", () => {
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+
+  assert.match(css, /body\.theme-light \.commitment-panel/);
+  assert.match(css, /body\.theme-light \.commitment-summary-card/);
+  assert.match(css, /body\.theme-light \.commitment-item/);
+  assert.match(css, /body\.theme-light \.commitment-summary-card strong/);
+  assert.match(css, /color: #137a4f/);
 });
 
 test("monthly calendar renders only weeks that intersect the visible month", () => {

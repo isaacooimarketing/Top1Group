@@ -1357,9 +1357,25 @@ function forecastPlansForMonth(monthKey = selectedMonthKey()) {
   return allPlans[monthKey] && typeof allPlans[monthKey] === "object" ? allPlans[monthKey] : {};
 }
 
+function forecastDefaultPlanForDate(dateIso) {
+  return normalizeForecastPlan(dateIso, { type: "full_work" });
+}
+
 function forecastPlanForDate(dateIso) {
   const monthKey = String(dateIso || "").slice(0, 7);
-  return forecastPlansForMonth(monthKey)[dateIso] || null;
+  return forecastPlansForMonth(monthKey)[dateIso] || forecastDefaultPlanForDate(dateIso);
+}
+
+function forecastPlansForMonthWithDefaults(monthKey = selectedMonthKey()) {
+  const monthDate = parseDate(`${monthKey}-01`);
+  const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const iso = `${monthKey}-${String(index + 1).padStart(2, "0")}`;
+    return [iso, forecastPlanForDate(iso)];
+  }).reduce((acc, [iso, plan]) => {
+    acc[iso] = plan;
+    return acc;
+  }, {});
 }
 
 function normalizeForecastPlan(dateIso, data = {}) {
@@ -1425,7 +1441,7 @@ function monthWeekStarts(monthDate = visibleDate) {
 }
 
 function forecastSummary(monthKey = selectedMonthKey()) {
-  const plans = Object.values(forecastPlansForMonth(monthKey));
+  const plans = Object.values(forecastPlansForMonthWithDefaults(monthKey));
   return plans.reduce((acc, plan) => {
     const isGrab = plan.type === "full_work" || plan.type === "half_day";
     if (isGrab) acc.grabNet += num(plan.net);
@@ -2026,7 +2042,7 @@ function renderForecastPlanner() {
     selectedForecastDate = `${monthKey}-01`;
   }
   const summary = forecastSummary(monthKey);
-  const selectedPlan = forecastPlanForDate(selectedForecastDate) || normalizeForecastPlan(selectedForecastDate, { type: "full_work" });
+  const selectedPlan = forecastPlanForDate(selectedForecastDate);
   const cards = [];
   const todayIso = toISODate(new Date());
   monthWeekStarts(visibleDate).forEach(weekStartDate => {
@@ -2043,7 +2059,7 @@ function renderForecastPlanner() {
       const color = plan?.color || "#cbd4cc";
       cards.push(`<button class="forecast-day ${type}${outside}${selected}" type="button" data-forecast-date="${iso}" style="--forecast-color:${color}">
         <span class="forecast-day-number ${iso === todayIso ? "today-dot" : ""}">${day.getDate()}</span>
-        ${plan ? `<strong>${escapeHtml(plan.title)}</strong><small>${moneyCompact.format(plan.net)} - ${num(plan.hours).toFixed(1)}h</small>` : `<strong>Plan</strong><small>Tap to set</small>`}
+        <strong>${escapeHtml(plan.title)}</strong><small>${moneyCompact.format(plan.net)} - ${num(plan.hours).toFixed(1)}h</small>
       </button>`);
     }
   });
@@ -2091,7 +2107,7 @@ function renderForecastPlanner() {
         </div>
         <div class="action-row full">
           <button class="primary-action" type="submit">Save Forecast</button>
-          <button class="secondary-action" id="clearForecastDay" type="button">Clear Day</button>
+          <button class="secondary-action" id="clearForecastDay" type="button">Reset to Default</button>
         </div>
       </form>
     </section>
