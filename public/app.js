@@ -31,6 +31,30 @@ const { normalizePetrolEntry, petrolTotals } = Top1PetrolUtils;
 
 const $ = selector => document.querySelector(selector);
 
+function monthKeyFromDate(date = visibleDate) {
+  const safeDate = date instanceof Date && !Number.isNaN(date.getTime()) ? date : new Date();
+  return `${safeDate.getFullYear()}-${String(safeDate.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthEndISO(monthKey = selectedMonthKey()) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return toISODate(new Date(year, month, 0));
+}
+
+function dashboardMonthCutoff(monthKey = selectedMonthKey()) {
+  const todayIso = toISODate(new Date());
+  const todayMonth = todayIso.slice(0, 7);
+  if (monthKey === todayMonth) return todayIso;
+  return monthEndISO(monthKey);
+}
+
+function syncSelectedDateToVisibleMonth() {
+  const current = parseDate(selectedDate);
+  const desiredDay = current instanceof Date && !Number.isNaN(current.getTime()) ? current.getDate() : 1;
+  const lastDay = new Date(visibleDate.getFullYear(), visibleDate.getMonth() + 1, 0).getDate();
+  selectedDate = toISODate(new Date(visibleDate.getFullYear(), visibleDate.getMonth(), Math.min(desiredDay, lastDay)));
+}
+
 function updateLanguage(nextLanguage) {
   language = Top1UI.normalizeLanguage(nextLanguage);
   localStorage.setItem("top1groupLanguage", language);
@@ -1621,7 +1645,7 @@ function setCashPosition(data, dateIso = selectedDate) {
 
 function bankTransferTotals() {
   const [weekStart, weekEnd] = weekRange(selectedDate);
-  const month = selectedDate.slice(0, 7);
+  const month = selectedMonthKey();
   return state.bankTransfers.reduce((acc, item) => {
     const amount = num(item.amount);
     if (item.date >= weekStart && item.date <= weekEnd) {
@@ -2002,10 +2026,12 @@ function renderDriverDashboard() {
   const weeklyTarget = num(settings.carRentalTarget) + num(settings.housingLoanTarget);
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
-  const month = totalsForRecords(monthRecords());
+  const monthKey = selectedMonthKey();
+  const cutoffDate = dashboardMonthCutoff(monthKey);
+  const month = totalsForRecords(monthRecords(monthKey));
   const allTime = allTimeFinancialSummary();
-  const dueRental = dueCarRentalPayments() * num(settings.carRentalTarget);
-  const duePetrol = duePetrolCost();
+  const dueRental = dueCarRentalPayments(monthKey, cutoffDate) * num(settings.carRentalTarget);
+  const duePetrol = duePetrolCost(monthKey, cutoffDate);
   const netAfterRental = month.net - dueRental;
   const netAfterRentalAndPetrol = month.net - dueRental - duePetrol;
   target.innerHTML = `
@@ -2697,7 +2723,7 @@ function petrolLiabilityMarkup() {
   const entries = explicitPetrolEntries();
   const payments = state.petrolCardPayments || [];
   const [weekStart, weekEnd] = weekRange(selectedDate);
-  const month = selectedDate.slice(0, 7);
+  const month = selectedMonthKey();
   const monthLabel = monthFmt.format(parseDate(`${month}-01`));
   const monthEntries = entries.filter(entry => String(entry.date || "").startsWith(month));
   const monthPayments = payments.filter(item => String(item.date || "").startsWith(month));
@@ -2815,7 +2841,7 @@ function cashToolsMarkup() {
 }
 
 function selectedMonthKey() {
-  return selectedDate.slice(0, 7);
+  return monthKeyFromDate(visibleDate);
 }
 
 function selectedMonthLabel() {
@@ -3450,11 +3476,13 @@ document.querySelectorAll(".mode-button").forEach(button => {
 
 $("#prevMonth").addEventListener("click", () => {
   visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() - 1, 1);
+  syncSelectedDateToVisibleMonth();
   render();
 });
 
 $("#nextMonth").addEventListener("click", () => {
   visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() + 1, 1);
+  syncSelectedDateToVisibleMonth();
   render();
 });
 

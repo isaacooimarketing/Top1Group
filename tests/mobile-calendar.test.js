@@ -131,8 +131,10 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.match(js, /function duePetrolCost\(monthKey = selectedMonthKey\(\), throughDate = selectedDate\)/);
   assert.match(dashboardBlock, /After Car Rental/);
   assert.match(dashboardBlock, /All-Time Net Profit/);
-  assert.match(dashboardBlock, /dueCarRentalPayments\(\) \* num\(settings\.carRentalTarget\)/);
-  assert.match(dashboardBlock, /const duePetrol = duePetrolCost\(\);/);
+  assert.match(dashboardBlock, /const monthKey = selectedMonthKey\(\);/);
+  assert.match(dashboardBlock, /const cutoffDate = dashboardMonthCutoff\(monthKey\);/);
+  assert.match(dashboardBlock, /dueCarRentalPayments\(monthKey, cutoffDate\) \* num\(settings\.carRentalTarget\)/);
+  assert.match(dashboardBlock, /const duePetrol = duePetrolCost\(monthKey, cutoffDate\);/);
   assert.match(dashboardBlock, /After Rental \+ Petrol/);
   assert.match(dashboardBlock, /const netAfterRental = month\.net - dueRental;/);
   assert.match(dashboardBlock, /const netAfterRentalAndPetrol = month\.net - dueRental - duePetrol;/);
@@ -273,12 +275,16 @@ test("ledger sections use bordered monthly drilldown cards", () => {
   assert.match(css, /body\.theme-light \.workspace-panel \.date-input-frame,[\s\S]*?width:\s*100%;[\s\S]*?outline-offset:\s*-1px;/s);
 });
 
-test("monthly record totals use selected month instead of visible calendar month", () => {
+test("monthly record totals follow the visible dashboard month", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
+  assert.match(js, /function selectedMonthKey\(\)\s*\{\s*return monthKeyFromDate\(visibleDate\);/);
   assert.match(js, /function monthRecords\(monthKey = selectedMonthKey\(\)\)/);
   assert.match(js, /String\(item\.date \|\| ""\)\.startsWith\(monthKey\)/);
-  assert.doesNotMatch(js, /function monthRecords\(\)\s*\{[\s\S]*visibleDate\.getFullYear/);
+  assert.match(js, /function bankTransferTotals\(\)\s*\{[\s\S]*const month = selectedMonthKey\(\);/);
+  assert.match(js, /const month = selectedMonthKey\(\);[\s\S]*const monthLabel = monthFmt\.format\(parseDate\(`\$\{month\}-01`\)\);/);
+  assert.match(js, /\$\(\"\#prevMonth\"\)\.addEventListener\(\"click\", \(\) => \{[\s\S]*syncSelectedDateToVisibleMonth\(\);/);
+  assert.match(js, /\$\(\"\#nextMonth\"\)\.addEventListener\(\"click\", \(\) => \{[\s\S]*syncSelectedDateToVisibleMonth\(\);/);
 });
 
 test("cash history summarizes monthly cash usage by category", () => {
@@ -533,8 +539,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260803-auth/);
-  assert.match(html, /styles\.css\?v=20260803-auth/);
+  assert.match(html, /app\.js\?v=20260803-month-sync/);
+  assert.match(html, /styles\.css\?v=20260803-month-sync/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });
