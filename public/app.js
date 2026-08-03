@@ -55,24 +55,6 @@ function syncSelectedDateToVisibleMonth() {
   selectedDate = toISODate(new Date(visibleDate.getFullYear(), visibleDate.getMonth(), Math.min(desiredDay, lastDay)));
 }
 
-function latestRecordDateForVisibleMonth() {
-  const monthKey = selectedMonthKey();
-  return [...state.driverSessions]
-    .map(item => item.date)
-    .filter(date => String(date || "").startsWith(monthKey))
-    .sort((a, b) => String(b).localeCompare(String(a)))[0] || "";
-}
-
-function alignSelectedDateWithVisibleMonth() {
-  const monthKey = selectedMonthKey();
-  if (!String(selectedDate || "").startsWith(monthKey)) {
-    syncSelectedDateToVisibleMonth();
-  }
-  if (sessionsForDate(selectedDate).length) return;
-  const latestRecordDate = latestRecordDateForVisibleMonth();
-  if (latestRecordDate) selectedDate = latestRecordDate;
-}
-
 function updateLanguage(nextLanguage) {
   language = Top1UI.normalizeLanguage(nextLanguage);
   localStorage.setItem("top1groupLanguage", language);
@@ -3443,7 +3425,6 @@ function statusClass(status) {
 
 function render() {
   applyAccountCapabilities();
-  if (mode === "driver") alignSelectedDateWithVisibleMonth();
   todayOS = buildDerivedTodayData(selectedDate);
   document.body.dataset.nextAction = todayOS.nextAction ? todayOS.nextAction.kind : "none";
   document.body.classList.toggle("theme-light", theme === "light");

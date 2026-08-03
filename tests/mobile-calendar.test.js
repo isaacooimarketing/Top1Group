@@ -279,10 +279,9 @@ test("monthly record totals follow the visible dashboard month", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
   assert.match(js, /function selectedMonthKey\(\)\s*\{\s*return monthKeyFromDate\(visibleDate\);/);
-  assert.match(js, /function alignSelectedDateWithVisibleMonth\(\)/);
-  assert.match(js, /const latestRecordDate = latestRecordDateForVisibleMonth\(\);/);
-  assert.match(js, /if \(latestRecordDate\) selectedDate = latestRecordDate;/);
-  assert.match(js, /if \(mode === "driver"\) alignSelectedDateWithVisibleMonth\(\);/);
+  assert.doesNotMatch(js, /function alignSelectedDateWithVisibleMonth\(\)/);
+  assert.doesNotMatch(js, /latestRecordDateForVisibleMonth/);
+  assert.doesNotMatch(js, /if \(latestRecordDate\) selectedDate = latestRecordDate;/);
   assert.match(js, /function monthRecords\(monthKey = selectedMonthKey\(\)\)/);
   assert.match(js, /String\(item\.date \|\| ""\)\.startsWith\(monthKey\)/);
   assert.match(js, /function bankTransferTotals\(\)\s*\{[\s\S]*const month = selectedMonthKey\(\);/);
@@ -543,8 +542,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260803-month-record/);
-  assert.match(html, /styles\.css\?v=20260803-month-record/);
+  assert.match(html, /app\.js\?v=20260803-week-correct/);
+  assert.match(html, /styles\.css\?v=20260803-week-correct/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });
