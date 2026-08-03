@@ -2298,6 +2298,7 @@ function renderGrabStats() {
   if (!target) return;
   const week = totalsForRecords(weekRecords());
   const month = totalsForRecords(monthRecords());
+  const allTime = allTimeFinancialSummary();
   const bank = bankTransferTotals();
   const monthRecordsList = monthRecords();
   const monthActiveDays = new Set(monthRecordsList.filter(item => driverMetrics(item).net !== 0 || num(item.totalTrips) > 0).map(item => item.date)).size || 1;
@@ -2308,9 +2309,21 @@ function renderGrabStats() {
   const incomeBreakdown = weeklyBreakdown("income");
   const costBreakdown = weeklyBreakdown("cost");
   target.innerHTML = `<div class="section-heading">
-    <p class="eyebrow">Weekly Statistics</p>
-    <h2>Grab Intelligence</h2>
+    <p class="eyebrow">Reports</p>
+    <h2>Income Summary</h2>
   </div>
+  <section class="report-answer-card">
+    <div>
+      <span>${selectedMonthLabel()} Net Profit</span>
+      <strong>${money.format(month.net)}</strong>
+      <small>${money.format(month.income)} income - ${money.format(month.cost)} cost = ${money.format(month.net)} net</small>
+    </div>
+    <div class="report-answer-grid">
+      <span><small>This Week</small><b>${money.format(week.net)}</b></span>
+      <span><small>Bank Transfer</small><b>${money.format(bank.month)}</b></span>
+      <span><small>All-Time Net</small><b>${money.format(allTime.net)}</b></span>
+    </div>
+  </section>
   <div class="stats-grid">
     ${statCard("Week Net", money.format(week.net), `${week.hours.toFixed(1)}h - ${week.trips} trips`)}
     ${statCard("Income/hour", money.format(week.hours ? week.income / week.hours : 0), "Based on total income")}

@@ -2728,6 +2728,104 @@ textarea {
   padding-top: 4px;
 }
 
+.report-answer-card {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 22px;
+}
+
+.report-answer-card span,
+.report-answer-card small {
+  display: block;
+}
+
+.report-answer-card > div > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 820;
+}
+
+.report-answer-card strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1;
+  font-weight: 820;
+}
+
+.report-answer-card > div > small {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.report-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.report-answer-grid span {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.report-answer-grid small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+}
+
+.report-answer-grid b {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: clamp(16px, 2vw, 22px);
+  line-height: 1.05;
+  font-weight: 820;
+  overflow-wrap: anywhere;
+}
+
+body.theme-light .report-answer-card {
+  color: #12201a;
+  border: 1px solid rgba(18, 132, 79, 0.18);
+  background:
+    radial-gradient(circle at 92% 4%, rgba(255, 226, 114, 0.24), transparent 30%),
+    linear-gradient(135deg, #ffffff 0%, #e9f8ef 100%);
+  box-shadow: 0 22px 58px -36px rgba(18, 90, 60, 0.34);
+}
+
+body.theme-light .report-answer-card > div > span {
+  color: #0f754c;
+}
+
+body.theme-light .report-answer-card strong {
+  color: #0f8c58;
+}
+
+body.theme-light .report-answer-card > div > small {
+  color: #50645a;
+}
+
+body.theme-light .report-answer-grid span {
+  border: 1px solid rgba(18, 24, 32, 0.08);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+body.theme-light .report-answer-grid small {
+  color: #5b6861;
+}
+
+body.theme-light .report-answer-grid b {
+  color: #16201b;
+}
+
 body.theme-light .commitment-panel {
   color: #18211d;
   border: 1px solid rgba(21, 117, 77, 0.14);

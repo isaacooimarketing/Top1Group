@@ -409,6 +409,21 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   assert.match(statsBlock, /bank\.month/);
 });
 
+test("reports begin with a direct monthly income answer", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "public", "styles.css"), "utf8");
+  const statsStart = js.indexOf("function renderGrabStats()");
+  const statsBlock = js.slice(statsStart, js.indexOf("function statCard", statsStart));
+
+  assert.match(statsBlock, /<p class="eyebrow">Reports<\/p>/);
+  assert.match(statsBlock, /<h2>Income Summary<\/h2>/);
+  assert.match(statsBlock, /class="report-answer-card"/);
+  assert.match(statsBlock, /\$\{selectedMonthLabel\(\)\} Net Profit/);
+  assert.match(statsBlock, /income - \$\{money\.format\(month\.cost\)\} cost =/);
+  assert.match(statsBlock, /All-Time Net/);
+  assert.match(css, /body\.theme-light \.report-answer-card/);
+});
+
 test("finished grab records do not keep the driver form in edit mode", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
 
