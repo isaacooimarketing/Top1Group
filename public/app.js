@@ -2554,19 +2554,20 @@ function driverSidebar() {
     <div class="form-section full">Driving Sessions</div>
     ${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}
     ${sessionFields(editing)}
+    <div class="form-section full">Grab Cash Wallet Balance</div>
+    ${field("Starting", "grabCashWalletOpening", "number", hasValue(editing.grabCashWalletOpening) ? editing.grabCashWalletOpening : editing.id ? "" : settings.grabWalletBase)}
+    ${field("Ending Before Withdrawal", "grabCashWalletEnding", "number", editing.grabCashWalletEnding || "")}
+    ${field("Wallet Base", "grabWalletBase", "number", editing.grabWalletBase || settings.grabWalletBase)}
+    <div class="field"><label>Auto Transfer To Bank</label><input disabled value="${moneySafe(metrics.transferToBank)}"></div>
+    <div class="form-section full">Cash Collected</div>
+    ${field("Cash Collected Today", "cashCollected", "number", editing.cashCollected || editing.cashReceived || "")}
     <div class="form-section full">Touch & Go eWallet</div>
     ${field("Starting", "tngOpening", "number", hasValue(editing.tngOpening) ? editing.tngOpening : defaultTngOpening)}
     ${field("Ending", "tngClosing", "number", editing.tngClosing || "")}
     <div class="form-section full">SmartTAG / TNG Card</div>
     ${field("Starting", "smartTagOpening", "number", hasValue(editing.smartTagOpening) ? editing.smartTagOpening : defaultSmartTagOpening)}
     ${field("Ending", "smartTagClosing", "number", editing.smartTagClosing || "")}
-    <div class="form-section full">Grab Cash Wallet Balance</div>
-    ${field("Starting", "grabCashWalletOpening", "number", hasValue(editing.grabCashWalletOpening) ? editing.grabCashWalletOpening : editing.id ? "" : settings.grabWalletBase)}
-    ${field("Ending Before Withdrawal", "grabCashWalletEnding", "number", editing.grabCashWalletEnding || "")}
-    ${field("Wallet Base", "grabWalletBase", "number", editing.grabWalletBase || settings.grabWalletBase)}
-    <div class="field"><label>Auto Transfer To Bank</label><input disabled value="${moneySafe(metrics.transferToBank)}"></div>
-    <div class="form-section full">Cash / Petrol / Trips</div>
-    ${field("Cash Collected Today", "cashCollected", "number", editing.cashCollected || editing.cashReceived || "")}
+    <div class="form-section full">Petrol</div>
     ${petrolFields(editing)}
     <div class="field full"><label>Remark</label><textarea name="remark">${escapeHtml(editing.remark || "")}</textarea></div>
     <div class="action-row full">

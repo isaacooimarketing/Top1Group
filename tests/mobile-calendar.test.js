@@ -355,6 +355,25 @@ test("driver form asks for total trips before session times", () => {
   assert.match(sessionBlock, /startTime:\s*editing\.startTime \|\| "05:00"/);
 });
 
+test("grab input order follows daily entry workflow", () => {
+  const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+  const sidebarStart = js.indexOf("function driverSidebar()");
+  const sidebarBlock = js.slice(sidebarStart, js.indexOf("function sessionFields", sidebarStart));
+  const order = [
+    '${field("Date", "date", "date", editing.date || selectedDate)}',
+    '${field("Total Trips", "totalTrips", "number", editing.totalTrips || "")}',
+    '${sessionFields(editing)}',
+    '<div class="form-section full">Grab Cash Wallet Balance</div>',
+    '<div class="form-section full">Cash Collected</div>',
+    '<div class="form-section full">Touch & Go eWallet</div>',
+    '<div class="form-section full">SmartTAG / TNG Card</div>',
+    '<div class="form-section full">Petrol</div>'
+  ].map(token => sidebarBlock.indexOf(token));
+
+  order.forEach(index => assert.notEqual(index, -1));
+  assert.deepEqual([...order].sort((a, b) => a - b), order);
+});
+
 test("new grab records default opening balances from previous finished endings", () => {
   const js = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
   const sidebarStart = js.indexOf("function driverSidebar()");
