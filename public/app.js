@@ -931,7 +931,7 @@ async function loadState() {
     });
     if (response.status === 401) {
       const recovered = await authManager?.handleUnauthorized?.();
-      if (!recovered) return;
+      if (!recovered) throw new Error("Cloud session unavailable");
       response = await fetch("/api/state", {
         cache: "no-store",
         headers: authManager?.authHeaders() || {}
@@ -987,7 +987,7 @@ async function persistState() {
     });
     if (response.status === 401) {
       const recovered = await authManager?.handleUnauthorized?.();
-      if (!recovered) return false;
+      if (!recovered) throw new Error("Cloud session unavailable");
       response = await fetch("/api/state", {
         method: "POST",
         headers: {

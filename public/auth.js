@@ -44,11 +44,12 @@
       }
 
       this.session = this.readSession();
-      if (this.session && await this.verifySession()) {
+      if (this.session) {
+        const verified = await this.verifySession();
+        if (!verified) this.markLocalSession();
         await this.enterApp();
         return;
       }
-      this.clearSession();
       this.showAuth();
     }
 
@@ -215,7 +216,7 @@
 
     async handleUnauthorized() {
       if (await this.refreshSession()) return true;
-      await this.signOut();
+      this.markLocalSession();
       return false;
     }
 
@@ -270,6 +271,12 @@
     clearSession() {
       this.session = null;
       localStorage.removeItem(storageKey);
+    }
+
+    markLocalSession() {
+      if (!this.session) return;
+      this.session.localOnly = true;
+      localStorage.setItem(storageKey, JSON.stringify(this.session));
     }
 
     setMessage(message, tone = "") {

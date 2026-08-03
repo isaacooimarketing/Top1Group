@@ -533,8 +533,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260801-commitment/);
-  assert.match(html, /styles\.css\?v=20260801-commitment/);
+  assert.match(html, /app\.js\?v=20260803-auth/);
+  assert.match(html, /styles\.css\?v=20260803-auth/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });

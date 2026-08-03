@@ -40,6 +40,11 @@ test("browser auth refreshes expired sessions instead of clearing login on reloa
   assert.match(authJs, /if \(await this\.refreshSession\(\)\) return true;/);
   assert.match(authJs, /if \(response\.status === 401\) return this\.refreshSession\(\);/);
   assert.match(authJs, /catch\s*\{\s*return true;\s*\}/);
+  assert.match(authJs, /if \(this\.session\) \{/);
+  assert.match(authJs, /if \(!verified\) this\.markLocalSession\(\);/);
+  assert.match(authJs, /markLocalSession\(\)/);
+  assert.doesNotMatch(authJs, /await this\.signOut\(\);\s*return false;/);
   assert.match(appJs, /const recovered = await authManager\?\.handleUnauthorized\?\.\(\);/);
+  assert.match(appJs, /if \(!recovered\) throw new Error\("Cloud session unavailable"\);/);
   assert.match(appJs, /response = await fetch\("\/api\/state"/);
 });
