@@ -145,10 +145,10 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.doesNotMatch(dashboardBlock, /Online Hours/);
   assert.doesNotMatch(dashboardBlock, /Total Cost/);
   assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
-  assert.match(dashboardBlock, /This Month Net Profit/);
+  assert.match(dashboardBlock, /This Month After Rental \+ Petrol/);
   assert.match(dashboardBlock, /const monthLabel = monthFmt\.format\(parseDate\(`\$\{monthKey\}-01`\)\);/);
   assert.match(dashboardBlock, /netAfterRentalAndPetrol/);
-  assert.match(dashboardBlock, /Month Net/);
+  assert.match(dashboardBlock, /Before Rental\/Petrol/);
   assert.match(dashboardBlock, /Rental/);
   assert.match(dashboardBlock, /Petrol/);
 });
@@ -414,8 +414,8 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   assert.match(dashboardBlock, /<span>All-Time Net Profit<\/span>/);
   assert.match(dashboardBlock, /<span>After Car Rental<\/span>/);
   assert.match(dashboardBlock, /<span>After Rental \+ Petrol<\/span>/);
-  assert.match(dashboardBlock, /<span>This Month Net Profit<\/span>/);
-  assert.match(dashboardBlock, /<b><span>Month Net<\/span><strong>\$\{money\.format\(month\.net\)\}<\/strong><\/b>/);
+  assert.match(dashboardBlock, /<span>This Month After Rental \+ Petrol<\/span>/);
+  assert.match(dashboardBlock, /<b><span>Before Rental\/Petrol<\/span><strong>\$\{money\.format\(month\.net\)\}<\/strong><\/b>/);
   assert.match(dashboardBlock, /netAfterRentalAndPetrol/);
   assert.doesNotMatch(dashboardBlock, /bank\.month - dueRental/);
   assert.doesNotMatch(dashboardBlock, /<article class="dashboard-net-card">[\s\S]*?<span>Month Net<\/span>/);
@@ -550,8 +550,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260804-month-profit/);
-  assert.match(html, /styles\.css\?v=20260804-month-profit/);
+  assert.match(html, /app\.js\?v=20260804-net-labels/);
+  assert.match(html, /styles\.css\?v=20260804-net-labels/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });

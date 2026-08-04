@@ -2043,12 +2043,12 @@ function renderDriverDashboard() {
     </article>
     <article class="dashboard-month-card">
       <div>
-        <span>This Month Net Profit</span>
+        <span>This Month After Rental + Petrol</span>
         <strong>${money.format(netAfterRentalAndPetrol)}</strong>
-        <small>${monthLabel} - ${money.format(month.net)} month net - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small>
+        <small>${monthLabel} - ${money.format(month.net)} before rental/petrol - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small>
       </div>
       <div class="month-profit-lines">
-        <b><span>Month Net</span><strong>${money.format(month.net)}</strong></b>
+        <b><span>Before Rental/Petrol</span><strong>${money.format(month.net)}</strong></b>
         <b><span>Rental</span><strong>${money.format(dueRental)}</strong></b>
         <b><span>Petrol</span><strong>${money.format(duePetrol)}</strong></b>
       </div>
