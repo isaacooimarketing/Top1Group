@@ -2081,6 +2081,7 @@ textarea {
 }
 
 .dashboard-alltime-card,
+.dashboard-month-card,
 .dashboard-target-card,
 .dashboard-net-card,
 .dashboard-mini-card {
@@ -2118,6 +2119,7 @@ textarea {
 
 .dashboard-card-head span,
 .dashboard-alltime-card span,
+.dashboard-month-card span,
 .dashboard-net-card span,
 .dashboard-mini-card span {
   color: rgba(245, 245, 240, 0.72);
@@ -2192,6 +2194,66 @@ textarea {
   color: rgba(255, 255, 255, 0.72);
   font-size: 15px;
   font-weight: 650;
+}
+
+.dashboard-month-card {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 20px;
+}
+
+.dashboard-month-card > div:first-child {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.dashboard-month-card strong {
+  display: block;
+  color: #f4fff8;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1;
+  font-weight: 820;
+  letter-spacing: 0;
+}
+
+.dashboard-month-card small {
+  color: rgba(245, 255, 248, 0.72);
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.month-profit-lines {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.month-profit-lines b {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  font-style: normal;
+}
+
+.month-profit-lines b span {
+  color: rgba(245, 255, 248, 0.66);
+  font-size: 11px;
+}
+
+.month-profit-lines b strong {
+  color: #ffffff;
+  font-size: clamp(17px, 1.45vw, 22px);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
 }
 
 .dashboard-net-card {
@@ -3292,6 +3354,7 @@ body.theme-light .bottom-nav-add {
   }
 
   .dashboard-target-card,
+  .dashboard-month-card,
   .dashboard-net-card {
     grid-column: 1 / -1;
   }
@@ -3380,14 +3443,30 @@ body.theme-light .bottom-nav-add {
   }
 
   .dashboard-target-card,
+  .dashboard-month-card,
   .dashboard-net-card,
   .dashboard-mini-card {
     border-radius: 14px;
   }
 
   .dashboard-target-card,
+  .dashboard-month-card,
   .dashboard-net-card {
     padding: 16px;
+  }
+
+  .dashboard-month-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .month-profit-lines {
+    gap: 8px;
+  }
+
+  .month-profit-lines b {
+    padding: 11px 10px;
+    border-radius: 12px;
   }
 
   .dashboard-mini-card {
@@ -4901,6 +4980,51 @@ body.theme-light .achievement-card small {
   font-weight: 650;
 }
 
+body.theme-light .dashboard-month-card {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(31, 64, 53, 0.10);
+  color: var(--ink-2);
+  background:
+    radial-gradient(circle at 96% 0%, rgba(255, 216, 107, 0.20), transparent 24%),
+    linear-gradient(180deg, #ffffff 0%, #eefaf1 100%);
+  box-shadow:
+    var(--shadow),
+    0 18px 46px rgba(30, 58, 45, 0.08);
+}
+
+body.theme-light .dashboard-month-card span {
+  color: #51665d;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+body.theme-light .dashboard-month-card > div:first-child > strong {
+  color: #0f7a4f;
+  font-size: clamp(30px, 6.8vw, 44px);
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+body.theme-light .dashboard-month-card small {
+  color: #566a62;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+body.theme-light .month-profit-lines b {
+  border: 1px solid rgba(31, 64, 53, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+body.theme-light .month-profit-lines b strong {
+  color: #111816;
+  font-size: clamp(17px, 4.1vw, 22px);
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
 body.theme-light .dashboard-mini-card:nth-child(4),
 body.theme-light .achievement-card:nth-child(1) {
   background: linear-gradient(180deg, #ffffff 0%, var(--soft-mint) 100%);
@@ -4939,6 +5063,22 @@ body.theme-light .achievement-card:nth-child(4) {
 body.theme-light .dashboard-mini-card:nth-child(7) strong,
 body.theme-light .achievement-card:nth-child(4) strong {
   color: var(--money-violet);
+}
+
+body.theme-light .dashboard-mini-card.after-rental {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-mint) 100%);
+}
+
+body.theme-light .dashboard-mini-card.after-rental strong {
+  color: var(--money-green);
+}
+
+body.theme-light .dashboard-mini-card.after-rental-petrol {
+  background: linear-gradient(180deg, #ffffff 0%, var(--soft-blue) 100%);
+}
+
+body.theme-light .dashboard-mini-card.after-rental-petrol strong {
+  color: var(--money-blue);
 }
 
 body.theme-light .workspace-panel,

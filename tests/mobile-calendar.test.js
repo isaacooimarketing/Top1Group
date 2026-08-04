@@ -145,6 +145,12 @@ test("driver dashboard shows a clean weekly operations overview", () => {
   assert.doesNotMatch(dashboardBlock, /Online Hours/);
   assert.doesNotMatch(dashboardBlock, /Total Cost/);
   assert.doesNotMatch(dashboardBlock, /Cost Ratio/);
+  assert.match(dashboardBlock, /This Month Net Profit/);
+  assert.match(dashboardBlock, /const monthLabel = monthFmt\.format\(parseDate\(`\$\{monthKey\}-01`\)\);/);
+  assert.match(dashboardBlock, /netAfterRentalAndPetrol/);
+  assert.match(dashboardBlock, /Month Net/);
+  assert.match(dashboardBlock, /Rental/);
+  assert.match(dashboardBlock, /Petrol/);
 });
 
 test("bottom navigation classifies the driver workspace", () => {
@@ -229,7 +235,7 @@ test("commercial dashboard polish calms KPI typography and aligns date inputs", 
 
   assert.match(css, /Friendly commercial polish/);
   assert.match(css, /--money-teal:\s*#0f7c76;/);
-  assert.match(css, /body\.theme-light \.dashboard-mini-card:nth-child\(5\),[\s\S]*?background:\s*linear-gradient\(180deg,\s*#ffffff 0%,\s*var\(--soft-blue\) 100%\)/);
+  assert.match(css, /body\.theme-light \.dashboard-mini-card\.after-rental-petrol\s*\{[^}]*background:\s*linear-gradient\(180deg,\s*#ffffff 0%,\s*var\(--soft-blue\) 100%\)/);
   assert.match(css, /body\.theme-light \.dashboard-mini-card strong,\s*body\.theme-light \.achievement-card strong\s*\{[^}]*overflow-wrap:\s*anywhere;/s);
   assert.match(css, /body\.theme-light input\[type="date"\],[\s\S]*?inline-size:\s*100%;[\s\S]*?max-inline-size:\s*100%;/s);
   assert.match(css, /@media \(max-width:\s*620px\)\s*\{[\s\S]*?body\.theme-light \.dashboard-net-card strong\s*\{[^}]*font-size:\s*clamp\(38px,\s*10\.4vw,\s*48px\)/s);
@@ -408,9 +414,11 @@ test("dashboard hero uses weekly metrics and moves monthly metrics lower", () =>
   assert.match(dashboardBlock, /<span>All-Time Net Profit<\/span>/);
   assert.match(dashboardBlock, /<span>After Car Rental<\/span>/);
   assert.match(dashboardBlock, /<span>After Rental \+ Petrol<\/span>/);
+  assert.match(dashboardBlock, /<span>This Month Net Profit<\/span>/);
+  assert.match(dashboardBlock, /<b><span>Month Net<\/span><strong>\$\{money\.format\(month\.net\)\}<\/strong><\/b>/);
   assert.match(dashboardBlock, /netAfterRentalAndPetrol/);
   assert.doesNotMatch(dashboardBlock, /bank\.month - dueRental/);
-  assert.doesNotMatch(dashboardBlock, /<span>Month Net<\/span>/);
+  assert.doesNotMatch(dashboardBlock, /<article class="dashboard-net-card">[\s\S]*?<span>Month Net<\/span>/);
   assert.doesNotMatch(dashboardBlock, /<small>This month<\/small>/);
   assert.match(statsBlock, /Monthly Overview/);
   assert.match(statsBlock, /<h2>This Month<\/h2>/);
@@ -542,8 +550,8 @@ test("static assets are versioned so mobile browsers do not reuse old cash code"
   const html = fs.readFileSync(path.join(root, "public", "index.html"), "utf8");
   const vercelJson = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
-  assert.match(html, /app\.js\?v=20260803-week-correct/);
-  assert.match(html, /styles\.css\?v=20260803-week-correct/);
+  assert.match(html, /app\.js\?v=20260804-month-profit/);
+  assert.match(html, /styles\.css\?v=20260804-month-profit/);
   assert.match(vercelJson, /"Cache-Control"/);
   assert.match(vercelJson, /"no-store"/);
 });

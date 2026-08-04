@@ -2027,6 +2027,7 @@ function renderDriverDashboard() {
   const targetProgress = weeklyTarget ? Math.min(100, Math.max(0, (week.net / weeklyTarget) * 100)) : 0;
   const remaining = Math.max(0, weeklyTarget - week.net);
   const monthKey = selectedMonthKey();
+  const monthLabel = monthFmt.format(parseDate(`${monthKey}-01`));
   const cutoffDate = dashboardMonthCutoff(monthKey);
   const month = totalsForRecords(monthRecords(monthKey));
   const allTime = allTimeFinancialSummary();
@@ -2039,6 +2040,18 @@ function renderDriverDashboard() {
       <span>All-Time Net Profit</span>
       <strong>${money.format(allTime.net)}</strong>
       <small>${money.format(allTime.income)} income - ${money.format(allTime.cost)} costing${allTime.refund ? ` · ${money.format(allTime.refund)} refund included` : ""}${allTime.adjustmentLoss ? ` · ${money.format(allTime.adjustmentLoss)} adjustment loss` : ""}</small>
+    </article>
+    <article class="dashboard-month-card">
+      <div>
+        <span>This Month Net Profit</span>
+        <strong>${money.format(netAfterRentalAndPetrol)}</strong>
+        <small>${monthLabel} - ${money.format(month.net)} month net - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small>
+      </div>
+      <div class="month-profit-lines">
+        <b><span>Month Net</span><strong>${money.format(month.net)}</strong></b>
+        <b><span>Rental</span><strong>${money.format(dueRental)}</strong></b>
+        <b><span>Petrol</span><strong>${money.format(duePetrol)}</strong></b>
+      </div>
     </article>
     <article class="dashboard-target-card">
       <div class="dashboard-card-head"><span>Weekly income target</span><strong>${targetProgress.toFixed(1)}%</strong></div>
@@ -2054,8 +2067,8 @@ function renderDriverDashboard() {
       <small>${activeDays} active days - ${week.trips} trips</small>
       <div class="dashboard-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     </article>
-    <article class="dashboard-mini-card"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental</small></article>
-    <article class="dashboard-mini-card"><span>After Rental + Petrol</span><strong>${money.format(netAfterRentalAndPetrol)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
+    <article class="dashboard-mini-card after-rental"><span>After Car Rental</span><strong>${money.format(netAfterRental)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental</small></article>
+    <article class="dashboard-mini-card after-rental-petrol"><span>After Rental + Petrol</span><strong>${money.format(netAfterRentalAndPetrol)}</strong><small>${money.format(month.net)} - ${money.format(dueRental)} rental - ${money.format(duePetrol)} petrol</small></article>
   `;
 }
 
